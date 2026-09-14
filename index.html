@@ -513,52 +513,119 @@
     <sc-if value="{{ isMine }}" hint-placeholder-val="{{ false }}">
       <section style="padding-top:32px">
         <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--color-line);padding-bottom:14px;margin-bottom:18px">
-          <h1 style="font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-0.02em;margin:0">{{ t.myJobs }}</h1>
-          <button class="btn btn-primary" onClick="{{ goWizard }}" style="min-height:40px;font-size:13.5px">{{ btnSubmitNew }}</button>
-        </div>
-        <sc-if value="{{ hasNoMyCards }}" hint-placeholder-val="{{ false }}">
-          <div style="border:1px dashed var(--color-line);background:var(--color-band);padding:48px 20px;text-align:center;margin-bottom:24px">
-            <div style="font-size:36px;margin-bottom:10px">📥</div>
-            <div style="font-size:17px;font-weight:800;color:var(--color-text)">{{ emptyMineTitle }}</div>
-            <div style="font-size:13.5px;color:var(--color-neutral-700);margin:6px auto 18px;max-width:48ch;line-height:1.6">{{ emptyMineSub }}</div>
-            <button class="btn btn-primary" onClick="{{ goWizard }}" style="min-height:44px;font-size:14px">{{ btnSubmitNew }}</button>
+          <div>
+            <h1 style="font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-0.02em;margin:0">{{ t.myJobs }}</h1>
+            <div style="font-size:13px;color:var(--color-neutral-700);margin-top:4px">{{ mineEmailSubTitle }}</div>
           </div>
-        </sc-if>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px">
-          <sc-for list="{{ myCards }}" as="j" hint-placeholder-count="5">
-            <div style="display:flex;flex-direction:column;background:#fff;border:1px solid var(--color-line);border-radius:22px;box-shadow:0 2px 4px rgba(16,24,40,.05),0 16px 34px -22px rgba(16,24,40,.28);overflow:hidden">
-              <div style="min-height:96px;background:{{ j.mediaBg }};display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 18px">
-                <div style="width:46px;height:46px;border-radius:16px;background:#fff;display:grid;place-items:center;color:{{ j.hue }};flex:none">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8" rx="1"></rect></svg>
-                </div>
-                <span style="padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;background:#fff;color:{{ j.hue }};text-align:right;line-height:1.4">{{ j.statusLabel }}</span>
-              </div>
-              <div style="padding:16px 18px 4px">
-                <div style="font-size:10.5px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:{{ j.hue }}">{{ t.jobNo }}</div>
-                <div style="font-size:19px;font-weight:800;letter-spacing:-0.01em;margin-top:5px;line-height:1.2">{{ j.no }}</div>
-                <div style="font-size:14.5px;color:var(--color-neutral-800);margin-top:4px;line-height:1.35">{{ j.service }}</div>
-              </div>
-              <div style="padding:12px 18px 0;display:flex;flex-direction:column;gap:7px">
-                <div style="display:flex;justify-content:space-between;gap:14px;font-size:13.5px;line-height:1.5">
-                  <span style="color:var(--color-neutral-700);white-space:nowrap">{{ t.status }}</span>
-                  <span style="font-weight:700;text-align:right">{{ j.statusLabel }}</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;gap:14px;font-size:13.5px;line-height:1.5">
-                  <span style="color:var(--color-neutral-700);white-space:nowrap">{{ t.sent }}</span>
-                  <span style="font-weight:700;white-space:nowrap">{{ j.sent }}</span>
-                </div>
-              </div>
-              <div style="display:flex;align-items:center;gap:8px;padding:16px 18px 0;font-size:12px;line-height:1.5;flex-wrap:wrap;color:var(--color-neutral-600)">
-                <span style="width:22px;height:22px;border-radius:999px;background:{{ j.mediaBg }};color:{{ j.hue }};display:grid;place-items:center;font-size:10px;font-weight:800">{{ j.initials }}</span>
-                <span>{{ viewedLabel }}</span>
-                <time style="font-weight:600">{{ viewedDate }}</time>
-              </div>
-              <div style="margin-top:14px;padding:14px 18px;border-top:1px solid var(--color-line)">
-                <button type="button" onClick="{{ j.open }}" style="width:100%;min-height:44px;border:0;border-radius:999px;background:{{ j.hue }};color:#fff;font-size:14px;font-weight:700;font-family:inherit">{{ t.tabTrack }}</button>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <button type="button" class="btn btn-ghost" onClick="{{ refreshJobs }}" disabled="{{ jobsLoading }}" style="min-height:40px;font-size:13px">{{ refreshLabel }}</button>
+            <button type="button" class="btn btn-primary" onClick="{{ goWizard }}" style="min-height:40px;font-size:13.5px">{{ btnSubmitNew }}</button>
+          </div>
+        </div>
+
+        <!-- กล่องค้นหาและเลือกอีเมลจาก Google Sheet (Zero LocalStorage) -->
+        <div style="background:var(--color-band);border:1px solid var(--color-line);border-radius:14px;padding:16px 18px;margin-bottom:22px">
+          <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between">
+            <div style="display:flex;gap:10px;align-items:center;flex:1;min-width:280px;flex-wrap:wrap">
+              <span style="font-size:13.5px;font-weight:700;color:var(--color-text);white-space:nowrap">🔍 {{ mineFilterLabel }}</span>
+              <sc-if value="{{ hasRequesterEmailOptions }}" hint-placeholder-val="{{ false }}">
+                <select class="input" value="{{ mineSelectedEmail }}" onChange="{{ onSelectMineEmail }}" style="min-height:40px;font-size:13.5px;max-width:320px;background:#fff">
+                  <option value="">{{ mineEmailSelectPlaceholder }}</option>
+                  <sc-for list="{{ requesterEmailOptions }}" as="opt">
+                    <option value="{{ opt.email }}">{{ opt.label }}</option>
+                  </sc-for>
+                </select>
+              </sc-if>
+              <div style="display:flex;gap:6px;align-items:center">
+                <input class="input" value="{{ mineEmailInput }}" onChange="{{ setMineEmailInput }}" onKeyDown="{{ onMineEmailKeyDown }}" placeholder="พิมพ์อีเมล @spu.ac.th" style="min-height:40px;font-size:13.5px;width:210px;background:#fff">
+                <button type="button" class="btn btn-secondary" onClick="{{ applyMineEmailSearch }}" style="min-height:40px;font-size:13px;padding:0 14px">{{ t.searchBtn }}</button>
               </div>
             </div>
-          </sc-for>
+            <sc-if value="{{ hasSelectedMineEmail }}" hint-placeholder-val="{{ false }}">
+              <button type="button" class="btn btn-ghost" onClick="{{ clearMineEmail }}" style="min-height:36px;font-size:12.5px;color:var(--color-accent-700)">✕ {{ clearFilterLabel }}</button>
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ hasSelectedMineEmail }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--color-line);font-size:13px">
+              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#0f7a4c"></span>
+              <span style="color:var(--color-text)">กำลังแสดงประวัติคำขอของ: <strong>{{ activeMineEmail }}</strong></span>
+              <span style="color:var(--color-neutral-600)">({{ mineCountFoundText }})</span>
+            </div>
+          </sc-if>
         </div>
+
+        <!-- กรณีที่ยังไม่ได้เลือกอีเมล: แสดงคำแนะนำและรายชื่ออีเมลในระบบ -->
+        <sc-if value="{{ hasNoSelectedEmail }}" hint-placeholder-val="{{ true }}">
+          <div style="border:1px dashed var(--color-line);background:#fff;border-radius:16px;padding:44px 20px;text-align:center;margin-bottom:24px">
+            <div style="font-size:40px;margin-bottom:12px">👤</div>
+            <div style="font-size:18px;font-weight:800;color:var(--color-text)">{{ mineSelectPromptTitle }}</div>
+            <div style="font-size:13.5px;color:var(--color-neutral-700);margin:8px auto 20px;max-width:54ch;line-height:1.6">{{ mineSelectPromptSub }}</div>
+            <sc-if value="{{ hasRequesterEmailOptions }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:12.5px;font-weight:700;color:var(--color-neutral-600);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em">อีเมลที่มีประวัติคำขอใน Google Sheet:</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:640px;margin:0 auto">
+                <sc-for list="{{ requesterEmailOptions }}" as="opt">
+                  <button type="button" onClick="{{ opt.selectMe }}" style="padding:7px 16px;border-radius:999px;border:1px solid var(--color-line);background:var(--color-band);color:var(--color-text);font-size:13px;font-weight:600;cursor:pointer">
+                    📧 {{ opt.label }}
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ hasNoRequesterEmails }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:13px;color:var(--color-neutral-600);margin-bottom:16px">{{ noRequestsInSheetSub }}</div>
+              <button type="button" class="btn btn-primary" onClick="{{ goWizard }}" style="min-height:44px;font-size:14px">{{ btnSubmitNew }}</button>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- กรณีเลือกอีเมลแล้ว แต่ไม่พบประวัติในระบบ -->
+        <sc-if value="{{ hasSelectedEmailNoJobs }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px dashed var(--color-line);background:#fff;border-radius:16px;padding:44px 20px;text-align:center;margin-bottom:24px">
+            <div style="font-size:36px;margin-bottom:10px">📥</div>
+            <div style="font-size:17px;font-weight:800;color:var(--color-text)">{{ notFoundMineTitle }}</div>
+            <div style="font-size:13.5px;color:var(--color-neutral-700);margin:6px auto 18px;max-width:48ch;line-height:1.6">{{ notFoundMineSub }}</div>
+            <button type="button" class="btn btn-primary" onClick="{{ goWizard }}" style="min-height:44px;font-size:14px">{{ btnSubmitNew }}</button>
+          </div>
+        </sc-if>
+
+        <!-- แสดงการ์ดงานของอีเมลที่เลือก -->
+        <sc-if value="{{ hasSelectedMineEmail }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px">
+            <sc-for list="{{ myCards }}" as="j" hint-placeholder-count="5">
+              <div style="display:flex;flex-direction:column;background:#fff;border:1px solid var(--color-line);border-radius:22px;box-shadow:0 2px 4px rgba(16,24,40,.05),0 16px 34px -22px rgba(16,24,40,.28);overflow:hidden">
+                <div style="min-height:96px;background:{{ j.mediaBg }};display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 18px">
+                  <div style="width:46px;height:46px;border-radius:16px;background:#fff;display:grid;place-items:center;color:{{ j.hue }};flex:none">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8" rx="1"></rect></svg>
+                  </div>
+                  <span style="padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;background:#fff;color:{{ j.hue }};text-align:right;line-height:1.4">{{ j.statusLabel }}</span>
+                </div>
+                <div style="padding:16px 18px 4px">
+                  <div style="font-size:10.5px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:{{ j.hue }}">{{ t.jobNo }}</div>
+                  <div style="font-size:19px;font-weight:800;letter-spacing:-0.01em;margin-top:5px;line-height:1.2">{{ j.no }}</div>
+                  <div style="font-size:14.5px;color:var(--color-neutral-800);margin-top:4px;line-height:1.35">{{ j.service }}</div>
+                </div>
+                <div style="padding:12px 18px 0;display:flex;flex-direction:column;gap:7px">
+                  <div style="display:flex;justify-content:space-between;gap:14px;font-size:13.5px;line-height:1.5">
+                    <span style="color:var(--color-neutral-700);white-space:nowrap">{{ t.status }}</span>
+                    <span style="font-weight:700;text-align:right">{{ j.statusLabel }}</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;gap:14px;font-size:13.5px;line-height:1.5">
+                    <span style="color:var(--color-neutral-700);white-space:nowrap">{{ t.sent }}</span>
+                    <span style="font-weight:700;white-space:nowrap">{{ j.sent }}</span>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:16px 18px 0;font-size:12px;line-height:1.5;flex-wrap:wrap;color:var(--color-neutral-600)">
+                  <span style="width:22px;height:22px;border-radius:999px;background:{{ j.mediaBg }};color:{{ j.hue }};display:grid;place-items:center;font-size:10px;font-weight:800">{{ j.initials }}</span>
+                  <span>{{ viewedLabel }}</span>
+                  <time style="font-weight:600">{{ viewedDate }}</time>
+                </div>
+                <div style="margin-top:14px;padding:14px 18px;border-top:1px solid var(--color-line)">
+                  <button type="button" onClick="{{ j.open }}" style="width:100%;min-height:44px;border:0;border-radius:999px;background:{{ j.hue }};color:#fff;font-size:14px;font-weight:700;font-family:inherit">{{ t.tabTrack }}</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
         <div style="font-size:13px;color:var(--color-neutral-700);margin-top:12px">{{ t.mineNote }}</div>
       </section>
     </sc-if>
@@ -1287,6 +1354,7 @@ class Component extends DCLogic {
     folderId:"1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L",
     liveJobs:[], jobsLoaded:false, jobsLoading:false, liveSyncError:null,
     uploadedFiles:[], uploadProgressText:"", isDragOver:false, fileWarnMsg:"", lastUploadedCount:0,
+    mineEmailInput:"", mineSelectedEmail:"",
     connResults:{
       sheet:{ ok:true, name:"SPU-Printing-Service-DB", at:new Date().toISOString() },
       drive:{ ok:true, name:"Printing-Service", at:new Date().toISOString() },
@@ -1575,7 +1643,7 @@ class Component extends DCLogic {
   B(n){ return this.N(n)+(this.state.lang==="th"?" บาท":" THB"); }
   svc(id){ const d=this.state.d; for(const c of d.CATS){ const f=c.items.find(i=>i.id===id); if(f) return {...f, cat:c}; } return null; }
   sname(s){ return this.state.lang==="th"?s.th:s.en; }
-  status(code){ const st=this.state.d.ST[code]; return this.state.lang==="th"?st.th:st.en; }
+  status(code){ const st=this.state.d.ST[code]||this.state.d.ST[String(code||"").toUpperCase()]||{ th:code||"—", en:code||"—" }; return this.state.lang==="th"?st.th:st.en; }
   statusPalette(){
     return {
       RECEIVED:     { fg:"#2f56c6", bg:"#e7edff", grad:"linear-gradient(135deg,#e7edff 0%,#eef5ff 100%)" },
@@ -1618,9 +1686,9 @@ class Component extends DCLogic {
       const prof=d.SAMPLE_USERS[email];
       if(prof){ this.setState({ form:{ name:S.lang==="th"?prof.nameTh:prof.nameEn, pos:S.lang==="th"?prof.posTh:prof.posEn,
         unit:S.lang==="th"?prof.unitTh:prof.unitEn, phone:prof.phone, needBy:"", purpose:"", note:"" },
-        page:"wizard", gateOpen:false, gateErr:false }); }
+        page:"wizard", gateOpen:false, gateErr:false, mineSelectedEmail:email, mineEmailInput:email }); }
       else { this.setState({ form:{ name:"", pos:"", unit:"", phone:"", needBy:"", purpose:"", note:"" },
-        page:"wizard", gateOpen:false, gateErr:false }); }
+        page:"wizard", gateOpen:false, gateErr:false, mineSelectedEmail:email, mineEmailInput:email }); }
     };
 
     // — wizard: service group + item selection —
@@ -1735,7 +1803,7 @@ class Component extends DCLogic {
       const next = nextIdx >= 0 && nextIdx < d.FLOW.length - 1 ? d.FLOW[nextIdx + 1] : null;
       const serviceName = j.purpose || (j.svc ? this.sname(this.svc(j.svc)) : (S.lang === "th" ? "งานพิมพ์ทั่วไป" : "General printing"));
       return {
-        raw: j, no: j.no, requester: this.L(j, "req") || j.reqTh || "—", unit: this.L(j, "unit") || j.unitTh || "—",
+        raw: j, no: j.no, email: j.email || "", requester: this.L(j, "req") || j.reqTh || "—", unit: this.L(j, "unit") || j.unitTh || "—",
         service: serviceName, sent: j.sent || "—", need: j.need || "—",
         est: j.est ? this.N(j.est) : (S.lang === "th" ? "รอประเมิน" : "pending"),
         conf: j.conf ? this.N(j.conf) : "—", statusLabel: this.status(code), code, tagBg, tagFg,
@@ -1750,10 +1818,39 @@ class Component extends DCLogic {
     const filteredJobs = qq ? jobsAll.filter(j => (j.no + j.requester + j.unit + j.service).toLowerCase().includes(qq)) : jobsAll;
 
     const PAL = this.statusPalette();
-    const myCards = jobsAll.filter(j => j.code !== "SERVICE_DONE").map(j => {
+    const activeMineEmail = (S.mineSelectedEmail || S.gateEmail || "").trim().toLowerCase();
+    const hasSelectedMineEmail = !!activeMineEmail;
+
+    // รวบรวมเฉพาะอีเมลที่เคยยื่นคำขอใน Google Sheet (JOBS)
+    const emailCounts = {};
+    jobsAll.forEach(j => {
+      const em = (j.email || (j.raw && j.raw.email) || "").trim().toLowerCase();
+      if (em) emailCounts[em] = (emailCounts[em] || 0) + 1;
+    });
+    const uniqueRequesterEmails = Object.keys(emailCounts).sort();
+    const requesterEmailOptions = uniqueRequesterEmails.map(em => ({
+      email: em,
+      label: em + " (" + emailCounts[em] + (S.lang === "th" ? " รายการ)" : " requests)"),
+      selectMe: () => this.setState({ mineSelectedEmail: em, mineEmailInput: em })
+    }));
+    const hasRequesterEmailOptions = requesterEmailOptions.length > 0;
+    const hasNoRequesterEmails = requesterEmailOptions.length === 0;
+
+    // กรองแสดงเฉพาะงานของอีเมลที่เลือก
+    const userMatchedJobs = hasSelectedMineEmail
+      ? jobsAll.filter(j => {
+          const em = (j.email || (j.raw && j.raw.email) || "").trim().toLowerCase();
+          return em === activeMineEmail;
+        })
+      : [];
+
+    const myCards = userMatchedJobs.map(j => {
       const p = PAL[j.code] || PAL.RECEIVED;
       return { ...j, hue: p.fg, mediaBg: p.grad, initials: (j.requester || "").trim().slice(0, 1) || "P" };
     });
+
+    const hasNoSelectedEmail = !hasSelectedMineEmail;
+    const hasSelectedEmailNoJobs = hasSelectedMineEmail && myCards.length === 0;
 
     const mqSrc = jobsAll.filter(j => j.code !== "SERVICE_DONE");
     const mqItems = [...mqSrc, ...mqSrc].map(j => ({
@@ -2187,7 +2284,9 @@ class Component extends DCLogic {
         }
         this.setState({
           submitBusy:false, submitted:true, newJobNo:jobNo, submitError:null,
-          uploadedFiles:[], uploadProgressText:"", lastUploadedCount:uploadedCount
+          uploadedFiles:[], uploadProgressText:"", lastUploadedCount:uploadedCount,
+          mineSelectedEmail:(S.gateEmail||"").trim().toLowerCase(),
+          mineEmailInput:(S.gateEmail||"").trim().toLowerCase()
         });
         this._loadLiveJobs();
       }
@@ -2237,6 +2336,41 @@ class Component extends DCLogic {
       pdpaConsent:S.pdpaConsent, togglePdpaConsent:e=>this.setState({ pdpaConsent:e.target.checked }),
       submitDisabled:!S.pdpaConsent||S.submitBusy,
       submitJob:doSubmitJob, submitLabel, submitError:S.submitError, submitted:S.submitted, newJobNo:S.newJobNo,
+      activeMineEmail, hasSelectedMineEmail, hasNoSelectedEmail, hasSelectedEmailNoJobs,
+      requesterEmailOptions, hasRequesterEmailOptions, hasNoRequesterEmails,
+      mineEmailInput:S.mineEmailInput,
+      setMineEmailInput:e=>this.setState({ mineEmailInput:e.target.value }),
+      onMineEmailKeyDown:e=>{
+        if(e.key==="Enter"){
+          const em=(this.state.mineEmailInput||"").trim().toLowerCase();
+          if(em) this.setState({ mineSelectedEmail:em, mineEmailInput:em });
+        }
+      },
+      applyMineEmailSearch:()=>{
+        const em=(this.state.mineEmailInput||"").trim().toLowerCase();
+        if(em) this.setState({ mineSelectedEmail:em, mineEmailInput:em });
+      },
+      onSelectMineEmail:e=>{
+        const em=(e.target.value||"").trim().toLowerCase();
+        this.setState({ mineSelectedEmail:em, mineEmailInput:em });
+      },
+      clearMineEmail:()=>this.setState({ mineSelectedEmail:"", mineEmailInput:"" }),
+      mineEmailSubTitle:S.lang==="th"?"ดึงประวัติคำขอจริงจาก Google Sheet ตามอีเมลผู้ขอรับบริการ":"Live request history from Google Sheet filtered by requester email",
+      mineFilterLabel:S.lang==="th"?"ค้นหาประวัติคำขอ:":"Search request history:",
+      mineEmailSelectPlaceholder:S.lang==="th"
+        ?("-- เลือกอีเมลที่มีประวัติในระบบ ("+uniqueRequesterEmails.length+" อีเมล) --")
+        :("-- Select an email ("+uniqueRequesterEmails.length+") --"),
+      clearFilterLabel:S.lang==="th"?"สลับ / ล้างการค้นหา":"Clear / Switch email",
+      mineCountFoundText:S.lang==="th"
+        ?("พบ "+myCards.length+" รายการในระบบ Google Sheet")
+        :(myCards.length+" requests found in Google Sheet"),
+      mineSelectPromptTitle:S.lang==="th"?"ระบุหรือเลือกอีเมลเพื่อเปิดดูประวัติคำขอของคุณ":"Enter or select an email to view your request history",
+      mineSelectPromptSub:S.lang==="th"
+        ?"ระบบจะดึงประวัติคำขอของอีเมลนั้นจาก Google Sheet มาแสดงทันที โดยไม่มีการบันทึกข้อมูลค้างไว้ในเครื่องคอมพิวเตอร์"
+        :"Fetches request history directly from Google Sheet with zero data stored on this device",
+      noRequestsInSheetSub:S.lang==="th"?"ยังไม่มีประวัติคำขอใดๆ ในระบบ Google Sheet เลย เมื่อมีการยื่นคำขอแรก ข้อมูลจะปรากฏที่นี่":"No requests exist in Google Sheet yet. When requests are submitted, they will appear here.",
+      notFoundMineTitle:S.lang==="th"?("ไม่พบประวัติคำขอสำหรับ "+activeMineEmail):("No requests found for "+activeMineEmail),
+      notFoundMineSub:S.lang==="th"?"อีเมลนี้ยังไม่มีการบันทึกคำขอในชีต JOBS สามารถกดยื่นคำขอรับบริการพิมพ์งานได้ทันที":"This email has no requests in the JOBS sheet yet. You can submit a new printing request now.",
       myJobs:jobsAll.slice(0,5), myCards:myCards, filteredJobs, queueKpis,
       viewedLabel:S.lang==="th"?"เปิดดูเมื่อ":"Viewed", viewedDate:this._fmt(this._today()),
       q:S.q, setQ:e=>this.setState({ q:e.target.value }),
