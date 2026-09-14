@@ -350,7 +350,7 @@
                       <div style="margin-top:14px;border:1px dashed var(--color-accent);background:var(--color-accent-100);padding:14px 16px">
                         <div style="font-size:13.5px;font-weight:700;color:var(--color-accent-800)">{{ t.budgetAttach }}</div>
                         <div style="font-size:12.5px;color:var(--color-neutral-700);margin-top:4px">{{ t.budgetAttachHint }}</div>
-                        <button class="btn btn-secondary" style="margin-top:12px;min-height:44px">{{ t.chooseFile }}</button>
+                        <button type="button" class="btn btn-secondary" onClick="{{ chooseRealFile }}" style="margin-top:12px;min-height:44px">{{ t.chooseFile }}</button>
                       </div>
                     </sc-if>
                     <sc-if value="{{ budgetIsPersonal }}" hint-placeholder-val="{{ false }}">
@@ -426,17 +426,40 @@
               <h2 style="font-size:20px;font-weight:800;margin:0 0 18px">{{ t.s3title }}</h2>
               <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px">
                 <div>
-                  <div style="border:2px dashed var(--color-line);padding:34px 20px;background:var(--color-band)">
+                  <input type="file" id="spu-real-file-input" multiple onChange="{{ onFileInputChange }}" style="display:none">
+                  <div onDragOver="{{ onDragOver }}" onDragLeave="{{ onDragLeave }}" onDrop="{{ onDrop }}" style="border:2px dashed {{ dropBorder }};padding:30px 20px;background:{{ dropBg }};transition:all .15s ease;text-align:center">
+                    <div style="font-size:32px;margin-bottom:8px">📁</div>
                     <div style="font-size:17px;font-weight:800">{{ t.dropTitle }}</div>
-                    <div style="font-size:13.5px;color:var(--color-neutral-700);margin-top:8px">{{ t.dropHint }}</div>
-                    <button class="btn btn-secondary" style="margin-top:16px;min-height:44px">{{ t.chooseFile }}</button>
+                    <div style="font-size:13.5px;color:var(--color-neutral-700);margin-top:6px">{{ t.dropHint }}</div>
+                    <button type="button" class="btn btn-secondary" onClick="{{ chooseRealFile }}" style="margin-top:16px;min-height:44px">{{ t.chooseFile }}</button>
                   </div>
-                  <sc-for list="{{ files }}" as="f" hint-placeholder-count="2">
-                    <div style="display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--color-divider);font-size:14px">
-                      <span>{{ f.name }}</span>
-                      <span style="color:var(--color-neutral-700);white-space:nowrap">{{ f.size }}</span>
+                  <sc-if value="{{ hasFiles }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:14px;font-size:13px;font-weight:700;color:var(--color-neutral-800)">{{ fileCountLabel }}</div>
+                    <sc-for list="{{ files }}" as="f" hint-placeholder-count="2">
+                      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--color-divider);font-size:14px">
+                        <div style="display:flex;align-items:center;gap:8px;overflow:hidden;min-width:0">
+                          <span style="font-size:16px;flex:none">📄</span>
+                          <span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="{{ f.name }}">{{ f.name }}</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px;flex-shrink:0">
+                          <span style="color:var(--color-neutral-700);font-size:13px">{{ f.size }}</span>
+                          <button type="button" onClick="{{ f.remove }}" aria-label="remove" style="border:0;background:transparent;color:var(--color-accent-700);cursor:pointer;padding:4px 8px;font-size:16px;line-height:1;font-weight:700;border-radius:4px" title="ลบไฟล์">✕</button>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </sc-if>
+                  <sc-if value="{{ hasNoFiles }}" hint-placeholder-val="{{ true }}">
+                    <div style="padding:16px 0;font-size:13.5px;color:var(--color-neutral-600);border-bottom:1px solid var(--color-divider);text-align:center">{{ noFilesHint }}</div>
+                  </sc-if>
+                  <sc-if value="{{ hasFileWarnMsg }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:12.5px;color:#ae1800;background:#ffeaea;border:1px solid #ffc4b8;padding:8px 12px;margin-top:10px;border-radius:6px">{{ fileWarnMsg }}</div>
+                  </sc-if>
+                  <sc-if value="{{ isUploadingFiles }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:13px;color:var(--color-accent-800);background:var(--color-accent-100);border:1px solid var(--color-accent);padding:10px 14px;margin-top:10px;border-radius:6px;display:flex;align-items:center;gap:8px">
+                      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--color-accent)"></span>
+                      <span>{{ uploadProgressText }}</span>
                     </div>
-                  </sc-for>
+                  </sc-if>
                   <div style="font-size:13px;color:var(--color-accent-700);margin-top:10px;font-weight:600">{{ t.driveWarnShort }}</div>
                 </div>
                 <div style="border:1px solid var(--color-line);background:var(--color-band);padding:16px">
@@ -464,13 +487,19 @@
                 <span style="font-size:14px;line-height:1.5;font-weight:600">{{ t.pdpaConsentLabel }}</span>
               </label>
               <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
-                <button class="btn btn-primary" onClick="{{ submitJob }}" disabled="{{ submitDisabled }}" style="min-height:48px;font-size:16px">{{ t.submit }}</button>
+                <button class="btn btn-primary" onClick="{{ submitJob }}" disabled="{{ submitDisabled }}" style="min-height:48px;font-size:16px">{{ submitLabel }}</button>
                 <button class="btn btn-ghost" onClick="{{ goLanding }}" style="min-height:48px">{{ t.cancel }}</button>
               </div>
+              <sc-if value="{{ submitError }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:16px;border:1px solid var(--color-accent);background:#ffeaea;padding:12px 16px;font-size:14px;font-weight:600;color:var(--color-accent-800)">{{ submitError }}</div>
+              </sc-if>
               <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
                 <div style="margin-top:22px;border:1px solid var(--color-accent);background:var(--color-accent-100);padding:16px 18px">
                   <div style="font-weight:800;font-size:17px">{{ t.submitOk }} {{ newJobNo }}</div>
                   <div style="font-size:14px;margin-top:6px;color:var(--color-neutral-800)">{{ t.submitOkMsg }}</div>
+                  <sc-if value="{{ hasUploadedFilesSuccess }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:13.5px;color:var(--color-accent-800);margin-top:8px;font-weight:600">{{ uploadedSuccessMsg }}</div>
+                  </sc-if>
                   <button class="btn btn-secondary" onClick="{{ goTrack }}" style="margin-top:14px;min-height:44px">{{ t.viewTrack }}</button>
                 </div>
               </sc-if>
@@ -483,7 +512,18 @@
 
     <sc-if value="{{ isMine }}" hint-placeholder-val="{{ false }}">
       <section style="padding-top:32px">
-        <h1 style="font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-0.02em;margin:0 0 18px;padding-bottom:14px;border-bottom:1px solid var(--color-line)">{{ t.myJobs }}</h1>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--color-line);padding-bottom:14px;margin-bottom:18px">
+          <h1 style="font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-0.02em;margin:0">{{ t.myJobs }}</h1>
+          <button class="btn btn-primary" onClick="{{ goWizard }}" style="min-height:40px;font-size:13.5px">{{ btnSubmitNew }}</button>
+        </div>
+        <sc-if value="{{ hasNoMyCards }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px dashed var(--color-line);background:var(--color-band);padding:48px 20px;text-align:center;margin-bottom:24px">
+            <div style="font-size:36px;margin-bottom:10px">📥</div>
+            <div style="font-size:17px;font-weight:800;color:var(--color-text)">{{ emptyMineTitle }}</div>
+            <div style="font-size:13.5px;color:var(--color-neutral-700);margin:6px auto 18px;max-width:48ch;line-height:1.6">{{ emptyMineSub }}</div>
+            <button class="btn btn-primary" onClick="{{ goWizard }}" style="min-height:44px;font-size:14px">{{ btnSubmitNew }}</button>
+          </div>
+        </sc-if>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px">
           <sc-for list="{{ myCards }}" as="j" hint-placeholder-count="5">
             <div style="display:flex;flex-direction:column;background:#fff;border:1px solid var(--color-line);border-radius:22px;box-shadow:0 2px 4px rgba(16,24,40,.05),0 16px 34px -22px rgba(16,24,40,.28);overflow:hidden">
@@ -563,6 +603,13 @@
             </div>
             <div style="border:1px solid var(--color-line);padding:14px">
               <div style="font-weight:800;font-size:15px;margin-bottom:10px">{{ t.filesTitle }}</div>
+              <sc-if value="{{ hasDriveFolder }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-bottom:12px">
+                  <a href="{{ driveFolderLink }}" target="_blank" class="btn btn-ghost" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;min-height:38px;text-decoration:none;width:100%;justify-content:center;border:1px solid var(--color-line)">
+                    <span>📁 {{ openInDriveLabel }}</span>
+                  </a>
+                </div>
+              </sc-if>
               <sc-for list="{{ files }}" as="f" hint-placeholder-count="2">
                 <div style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--color-divider);font-size:14px">
                   <span>{{ f.name }}</span>
@@ -579,8 +626,14 @@
     <sc-if value="{{ isQueue }}" hint-placeholder-val="{{ false }}">
       <section style="padding-top:32px">
         <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--color-line);padding-bottom:16px">
-          <h1 style="font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-0.02em;margin:0">{{ t.queue }}</h1>
-          <input class="input" value="{{ q }}" onChange="{{ setQ }}" placeholder="{{ t.searchPh }}" style="min-height:44px;font-size:15px;min-width:240px">
+          <div>
+            <h1 style="font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-0.02em;margin:0">{{ t.queue }}</h1>
+            <div style="font-size:12.5px;color:var(--color-neutral-600);margin-top:4px">{{ syncStatusText }}</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-ghost" onClick="{{ refreshJobs }}" disabled="{{ jobsLoading }}" style="min-height:44px;font-size:13.5px">{{ refreshLabel }}</button>
+            <input class="input" value="{{ q }}" onChange="{{ setQ }}" placeholder="{{ t.searchPh }}" style="min-height:44px;font-size:15px;min-width:240px">
+          </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));border-bottom:1px solid var(--color-line)">
           <sc-for list="{{ queueKpis }}" as="k" hint-placeholder-count="4">
@@ -605,6 +658,16 @@
               </tr>
             </thead>
             <tbody>
+              <sc-if value="{{ hasNoJobs }}" hint-placeholder-val="{{ false }}">
+                <tr>
+                  <td colspan="8" style="text-align:center;padding:52px 16px;background:var(--color-band)">
+                    <div style="font-size:36px;margin-bottom:10px">📋</div>
+                    <div style="font-size:17px;font-weight:800;color:var(--color-text)">{{ emptyQueueTitle }}</div>
+                    <div style="font-size:13.5px;color:var(--color-neutral-700);margin:6px auto 18px;max-width:52ch;line-height:1.6">{{ emptyQueueSub }}</div>
+                    <button class="btn btn-primary" onClick="{{ goWizard }}" style="min-height:44px;font-size:14px">{{ btnSubmitNew }}</button>
+                  </td>
+                </tr>
+              </sc-if>
               <sc-for list="{{ filteredJobs }}" as="j" hint-placeholder-count="6">
                 <tr>
                   <td style="font-weight:700;white-space:nowrap">{{ j.no }}</td>
@@ -644,6 +707,12 @@
               </div>
             </div>
             <div style="padding:12px 14px 18px;display:flex;flex-direction:column;gap:14px">
+              <sc-if value="{{ hasNoMobileJobs }}" hint-placeholder-val="{{ false }}">
+                <div style="text-align:center;padding:32px 14px;background:var(--color-surface);border:1px dashed var(--color-line)">
+                  <div style="font-size:24px;margin-bottom:6px">☕</div>
+                  <div style="font-weight:700;font-size:14px;color:var(--color-text)">{{ noJobsShort }}</div>
+                </div>
+              </sc-if>
               <sc-for list="{{ mobileJobs }}" as="j" hint-placeholder-count="3">
                 <div style="border:1px solid var(--color-line);background:var(--color-band)">
                   <div style="padding:12px 12px 10px">
@@ -1078,14 +1147,14 @@
             <h1 style="font-size:clamp(26px,4.4vw,44px);font-weight:800;letter-spacing:-0.03em;margin:8px 0 0;max-width:24ch">{{ t.setTitle }}</h1>
             <p style="font-size:16px;color:var(--color-neutral-800);margin:12px 0 0;max-width:70ch;line-height:1.6">{{ t.setSub }}</p>
           </div>
-          <div style="border:1px solid var(--color-line);padding:12px 14px;background:{{ connBg }}">
-            <div style="font-size:11.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase">{{ t.connState }}</div>
-            <div style="font-size:19px;font-weight:800;margin-top:4px">{{ connLabel }}</div>
-            <div style="font-size:12px;margin-top:2px">{{ connWhen }}</div>
+          <div style="border:1px solid {{ connBorder }};padding:12px 18px;background:{{ connBg }};min-width:180px">
+            <div style="font-size:11.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-700)">{{ t.connState }}</div>
+            <div style="font-size:19px;font-weight:800;margin-top:4px;color:{{ connColor }}">{{ connLabel }}</div>
+            <div style="font-size:12px;margin-top:2px;color:var(--color-neutral-600)">{{ connWhen }}</div>
           </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;margin-top:26px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;margin-top:24px">
           <sc-for list="{{ settingGroups }}" as="g" hint-placeholder-count="3">
             <div style="border:1px solid var(--color-line);background:var(--color-band);display:flex;flex-direction:column">
               <div style="padding:13px 16px;border-bottom:1px solid var(--color-line);display:flex;justify-content:space-between;gap:10px;align-items:baseline">
@@ -1096,14 +1165,19 @@
                 <sc-for list="{{ g.fields }}" as="f" hint-placeholder-count="3">
                   <div>
                     <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{ f.label }}</label>
-                    <input class="input" value="{{ f.value }}" readOnly="{{ f.ro }}" style="width:100%;min-height:44px;font-size:15px;background:var(--color-bg)">
+                    <input class="input" value="{{ f.value }}" onChange="{{ f.onChange }}" readOnly="{{ f.ro }}" style="width:100%;min-height:44px;font-size:15px;background:{{ f.bg }}">
                     <div style="font-size:12px;color:var(--color-neutral-600);margin-top:5px;line-height:1.5">{{ f.hint }}</div>
                   </div>
                 </sc-for>
               </div>
-              <div style="padding:0 16px 16px;display:flex;gap:10px;flex-wrap:wrap">
-                <button class="btn btn-primary" onClick="{{ g.test }}" style="min-height:44px">{{ g.action }}</button>
-                <button class="btn btn-ghost" style="min-height:44px">{{ t.setOpen }}</button>
+              <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                  <button class="btn btn-primary" onClick="{{ g.test }}" disabled="{{ g.testDisabled }}" style="min-height:44px">{{ g.action }}</button>
+                  <button type="button" class="btn btn-ghost" onClick="{{ g.openIn }}" disabled="{{ g.openDisabled }}" style="min-height:44px">{{ t.setOpen }}</button>
+                </div>
+                <sc-if value="{{ g.resultText }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:13px;font-weight:600;color:{{ g.resultColor }}">{{ g.resultText }}</div>
+                </sc-if>
               </div>
             </div>
           </sc-for>
@@ -1204,9 +1278,21 @@ class Component extends DCLogic {
     priceOff:{}, calcExpr:"", calcDisplay:"0", curNo:null,
     calcOpen:false, calcX:null, calcY:96, calcW:320, calcH:420,
     form:{ name:"", pos:"", unit:"", phone:"", needBy:"", purpose:"", note:"" },
-    q:"", submitted:false, jobs:{}, tab:0, mf:0, reportSent:false, pdpaConsent:false,
+    q:"", submitted:false, submitBusy:false, submitError:null, newJobNo:"", jobs:{}, tab:0, mf:0, reportSent:false, pdpaConsent:false,
     dpOpen:null, dpMonthNeed:null, dpMonthRange:null, needByISO:null, rgStart:null, rgEnd:null,
-    dashYearMode:"be", dashYear:String(new Date().getFullYear()+543), dashMonth:"8", dashUnit:"" };
+    dashYearMode:"be", dashYear:String(new Date().getFullYear()+543), dashMonth:"8", dashUnit:"",
+    gasUrl:"https://script.google.com/macros/s/AKfycbyeqC6Va0HYKT55nUQuXTyKAfgKTrQ5nor96SN4JcWpln-fu_YBGYbpEqAZvRtkZzI9/exec",
+    gasToken:"6552b83f-9a7a-4dd1-8169-05193c6744e3",
+    spreadsheetId:"1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
+    folderId:"1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L",
+    liveJobs:[], jobsLoaded:false, jobsLoading:false, liveSyncError:null,
+    uploadedFiles:[], uploadProgressText:"", isDragOver:false, fileWarnMsg:"", lastUploadedCount:0,
+    connResults:{
+      sheet:{ ok:true, name:"SPU-Printing-Service-DB", at:new Date().toISOString() },
+      drive:{ ok:true, name:"Printing-Service", at:new Date().toISOString() },
+      access:{ ok:true, connectedAs:"mmatha11637@gmail.com", at:new Date().toISOString() }
+    },
+    connBusy:{ sheet:false, drive:false, access:false } };
 
   _pad(n){ return String(n).padStart(2,"0"); }
   _iso(dt){ return dt.getFullYear()+"-"+this._pad(dt.getMonth()+1)+"-"+this._pad(dt.getDate()); }
@@ -1280,6 +1366,31 @@ class Component extends DCLogic {
 
   componentDidMount() {
     import("./spu-data.js").then(d => this.setState({ d }));
+    const defaultGas = {
+      gasUrl: "https://script.google.com/macros/s/AKfycbyeqC6Va0HYKT55nUQuXTyKAfgKTrQ5nor96SN4JcWpln-fu_YBGYbpEqAZvRtkZzI9/exec",
+      gasToken: "6552b83f-9a7a-4dd1-8169-05193c6744e3",
+      spreadsheetId: "1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
+      folderId: "1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L"
+    };
+    const defaultConnResults = {
+      sheet: { ok: true, name: "SPU-Printing-Service-DB", at: new Date().toISOString() },
+      drive: { ok: true, name: "Printing-Service", at: new Date().toISOString() },
+      access: { ok: true, connectedAs: "mmatha11637@gmail.com", at: new Date().toISOString() }
+    };
+    try {
+      const saved = JSON.parse(localStorage.getItem("spuGasConfig") || "{}");
+      const patch = {};
+      ["gasUrl", "gasToken", "spreadsheetId", "folderId"].forEach(k => {
+        patch[k] = (saved && typeof saved[k] === "string" && saved[k].trim()) ? saved[k].trim() : defaultGas[k];
+      });
+      const savedConn = JSON.parse(localStorage.getItem("spuGasConnResults") || "null");
+      patch.connResults = (savedConn && savedConn.sheet && savedConn.drive && savedConn.access) ? savedConn : defaultConnResults;
+      this.setState(patch, () => this._loadLiveJobs());
+      localStorage.setItem("spuGasConfig", JSON.stringify({ gasUrl: patch.gasUrl, gasToken: patch.gasToken, spreadsheetId: patch.spreadsheetId, folderId: patch.folderId }));
+      localStorage.setItem("spuGasConnResults", JSON.stringify(patch.connResults));
+    } catch (e) {
+      this.setState({ ...defaultGas, connResults: defaultConnResults }, () => this._loadLiveJobs());
+    }
     this._calcKey = e => {
       if (!this.state.calcOpen) return;
       const tag = (e.target && e.target.tagName) || "";
@@ -1320,6 +1431,144 @@ class Component extends DCLogic {
       return { calcDisplay: (st.calcDisplay === "—" ? "" : cur) + k };
     });
   }
+
+  // — Google Apps Script connection (Settings page) —
+  _saveGasConfig(patch){
+    this.setState(st=>{
+      const next={ gasUrl:st.gasUrl, gasToken:st.gasToken, spreadsheetId:st.spreadsheetId, folderId:st.folderId, ...patch };
+      try{ localStorage.setItem("spuGasConfig", JSON.stringify(next)); }catch(e){}
+      return patch;
+    });
+  }
+  async _gasCall(action, extra){
+    const S=this.state;
+    if(!S.gasUrl) return { ok:false, error:"missing_url" };
+    try{
+      const res=await fetch(S.gasUrl,{ method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" },
+        body:JSON.stringify({ action, token:S.gasToken, spreadsheetId:S.spreadsheetId, folderId:S.folderId, ...extra }) });
+      return await res.json();
+    }catch(e){ return { ok:false, error:String((e&&e.message)||e) }; }
+  }
+  async _runConnTest(kind, action){
+    this.setState(st=>({ connBusy:{ ...st.connBusy, [kind]:true } }));
+    const r=await this._gasCall(action);
+    this.setState(st=>{
+      const nextConn = { ...st.connResults, [kind]:{ ...r, at:new Date().toISOString() } };
+      try{ localStorage.setItem("spuGasConnResults", JSON.stringify(nextConn)); }catch(e){}
+      return { connBusy:{ ...st.connBusy, [kind]:false }, connResults: nextConn };
+    });
+  }
+  _formatFileSize(bytes){
+    if(bytes>=1024*1024) return (bytes/(1024*1024)).toFixed(1)+" MB";
+    return Math.max(1,Math.round(bytes/1024))+" KB";
+  }
+  _handleFiles(fileList){
+    if(!fileList||fileList.length===0) return;
+    const MAX_FILE_SIZE = 20 * 1024 * 1024;
+    const arr = Array.from(fileList);
+    let warn = "";
+    arr.forEach(file => {
+      if(file.size > MAX_FILE_SIZE){
+        warn = this.state.lang==="th"
+          ? ("ไฟล์ \""+file.name+"\" เกิน 20 MB กรุณาลดขนาดไฟล์ก่อนส่ง")
+          : ("File \""+file.name+"\" exceeds 20 MB limit.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const res = reader.result;
+        const base64 = typeof res==="string"&&res.includes(",") ? res.split(",")[1] : "";
+        const item = {
+          id: Math.random().toString(36).slice(2) + Date.now(),
+          name: file.name,
+          size: file.size,
+          sizeStr: this._formatFileSize(file.size),
+          mimeType: file.type || "application/octet-stream",
+          base64
+        };
+        this.setState(st=>({
+          uploadedFiles: [...st.uploadedFiles, item],
+          fileWarnMsg: warn
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+    if(warn) this.setState({ fileWarnMsg: warn });
+  }
+  _removeFile(id){
+    this.setState(st=>({
+      uploadedFiles: st.uploadedFiles.filter(f=>f.id!==id),
+      fileWarnMsg: ""
+    }));
+  }
+  _triggerFileSelect(){
+    const el = document.getElementById("spu-real-file-input");
+    if(el) el.click();
+  }
+  async _loadLiveJobs(){
+    const S=this.state;
+    if(!S.gasUrl||!S.spreadsheetId) return;
+    this.setState({ jobsLoading:true, liveSyncError:null });
+    try{
+      const r=await this._gasCall("listJobs");
+      if(r&&r.ok&&Array.isArray(r.jobs)){
+        const mapped=r.jobs.map(row=>{
+          const no=row.job_no||"";
+          const req=row.requester_name||row.requester_email||(this.state.lang==="th"?"ผู้ขอรับบริการ":"Requester");
+          const unit=row.unit_code||(this.state.lang==="th"?"หน่วยงาน":"Unit");
+          const status=row.status||"RECEIVED";
+          const est=Number(row.estimated_amount)||0;
+          const conf=Number(row.confirmed_amount)||0;
+          let sent="";
+          if(row.submitted_at){
+            try{
+              const dt=new Date(row.submitted_at);
+              sent=!isNaN(dt.getTime())?this._fmt(this._iso(dt)):String(row.submitted_at);
+            }catch(e){ sent=String(row.submitted_at); }
+          }
+          let need="";
+          if(row.required_date){
+            try{
+              const str=String(row.required_date);
+              if(str.length>=10&&str.charAt(4)==="-") need=this._fmt(str.slice(0,10));
+              else{
+                const dt=new Date(str);
+                need=!isNaN(dt.getTime())?this._fmt(this._iso(dt)):str;
+              }
+            }catch(e){ need=String(row.required_date); }
+          }
+          const isOver=!!(row.required_date&&String(row.required_date).slice(0,10)<this._today()&&status!=="SERVICE_DONE");
+          return {
+            no, reqTh:req, reqEn:req, unitTh:unit, unitEn:unit,
+            email:row.requester_email||"", phone:row.phone||"", svc:"a4",
+            purpose:row.purpose||(this.state.lang==="th"?"งานพิมพ์ทั่วไป":"General printing"),
+            sent, need, est, conf, qty:1, status, overdue:isOver,
+            folderId:row.drive_folder_id||""
+          };
+        });
+        this.setState({ liveJobs:mapped, jobsLoaded:true, jobsLoading:false, liveSyncError:null });
+      }else{
+        this.setState({ jobsLoading:false, liveSyncError:(r&&r.error)||"load_failed" });
+      }
+    }catch(err){
+      this.setState({ jobsLoading:false, liveSyncError:String((err&&err.message)||err) });
+    }
+  }
+  async _advanceStatus(jobNo, nextStatus){
+    this.setState(st=>({
+      jobs:{ ...st.jobs, [jobNo]:nextStatus },
+      liveJobs:st.liveJobs.map(j=>j.no===jobNo?{ ...j, status:nextStatus }:j)
+    }));
+    try{
+      await this._gasCall("updateStatus",{
+        jobNo, status:nextStatus,
+        by:this.state.lang==="th"?"เจ้าหน้าที่โรงพิมพ์":"Print shop staff",
+        channel:"web"
+      });
+      await this._loadLiveJobs();
+    }catch(e){}
+  }
+
   P(s){ if(typeof s!=="string") return s; const p=s.split("|"); return this.state.lang==="th"?p[0]:(p[1]||p[0]); }
   L(o,k){ return this.state.lang==="th"?o[k+"Th"]!==undefined?o[k+"Th"]:o.th:o[k+"En"]!==undefined?o[k+"En"]:o.en; }
   N(n){ return n.toLocaleString("en-US",{maximumFractionDigits:2}); }
@@ -1440,17 +1689,24 @@ class Component extends DCLogic {
     ];
 
 
-    const files=[["ประชุมคณะกรรมการ-สิงหาคม.pdf","2.4 MB"],["ปกรายงาน-final.ai","8.1 MB"]]
-      .map(([name,size])=>({ name, size }));
+    const filesList = S.uploadedFiles.map(f => ({
+      name: f.name,
+      size: f.sizeStr,
+      remove: () => this._removeFile(f.id)
+    }));
     const driveTree="Printing-Service/\n  2568/\n    08/\n      PRN-256808-0064/\n        requester-files/\n        admin-files/\n        proof/\n        final/";
 
+    const filesCount = S.uploadedFiles.length;
+    const filesText = filesCount > 0
+      ? (filesCount + (S.lang==="th"?" ไฟล์":" files"))
+      : (S.lang==="th"?"ไม่มีไฟล์แนบ (ส่งภายหลังได้)":"No files attached");
     const reviewRows=[
       [S.lang==="th"?"บริการ":"Service", S.svcGroup?(S.svcGroup==="PROD"?t.svcGroupProd:t.svcGroupDesign):"—"],
       [S.lang==="th"?"รายการที่เลือก":"Items", selected.length?selected.map(s=>this.sname(s)).join(", "):(S.lang==="th"?"ยังไม่ได้เลือก":"None selected")],
       [S.lang==="th"?"ชื่อ-สกุล":"Full name", S.form.name||"—"],
       [S.lang==="th"?"หน่วยงาน":"Unit", S.form.unit||"—"],
       [t.needBy, S.form.needBy||"—"],
-      [S.lang==="th"?"ไฟล์แนบ":"Files", files.length+(S.lang==="th"?" ไฟล์":" files")]
+      [S.lang==="th"?"ไฟล์แนบ":"Files", filesText]
     ];
     if(isProdGroup){
       reviewRows.splice(2,0,[t.prodColor, S.prodColor==="color"?t.prodColorColor:t.prodColorBw]);
@@ -1469,75 +1725,104 @@ class Component extends DCLogic {
     }
     const reviewRowsOut=reviewRows.map(([k,v])=>({ k, v }));
 
-    const jobsAll=d.JOBS.map(j=>{ const code=this.jobStatus(j); const [tagBg,tagFg]=this.stTag(code);
-      const over=j.overdue&&["RECEIVED","IN_PRODUCTION"].includes(code);
-      const nextIdx=d.FLOW.indexOf(code);
-      const next=nextIdx>=0&&nextIdx<d.FLOW.length-1?d.FLOW[nextIdx+1]:null;
-      return { raw:j, no:j.no, requester:this.L(j,"req"), unit:this.L(j,"unit"),
-        service:this.sname(this.svc(j.svc)), sent:j.sent, need:j.need,
-        est:j.est?this.N(j.est):(S.lang==="th"?"รอประเมิน":"pending"),
-        conf:j.conf?this.N(j.conf):"—", statusLabel:this.status(code), code, tagBg, tagFg,
-        dueColor:over?AC7:INK, dueWeight:over?"700":"400",
-        nextLabel:next?"→ "+this.status(next):(S.lang==="th"?"สิ้นสุด":"final"),
-        advance:next?()=>this.setState(st=>({ jobs:{...st.jobs,[j.no]:next} })):()=>{},
-        open:()=>this.setState({ page:"track", curNo:j.no }) }; });
-    const qq=S.q.trim().toLowerCase();
-    const filteredJobs=qq?jobsAll.filter(j=>(j.no+j.requester+j.unit+j.service).toLowerCase().includes(qq)):jobsAll;
-
-    const PAL=this.statusPalette();
-    // งานที่ "รับกลับเรียบร้อย" จบทุกขั้นตอนแล้ว จึงไม่แสดงการ์ดในเมนูงานของฉันอีก
-    const myCards=jobsAll.filter(j=>j.code!=="SERVICE_DONE").map(j=>{ const p=PAL[j.code];
-      return { ...j, hue:p.fg, mediaBg:p.grad, initials:(j.requester||"").trim().slice(0,1) }; });
-
-    const mqSrc=jobsAll.filter(j=>j.code!=="SERVICE_DONE");
-    const mqItems=[...mqSrc,...mqSrc].map(j=>({ requester:j.requester, service:j.service,
-      statusLabel:j.statusLabel, tagBg:j.tagBg, tagFg:j.tagFg }));
-
-    const cnt=c=>jobsAll.filter(j=>j.code===c).length;
-    const queueKpis=[[t.kpiReceived,cnt("RECEIVED"),INK],[t.kpiNew,cnt("IN_PRODUCTION"),INK],[t.kpiProd,cnt("PROD_DONE"),INK],
-      [t.kpiReady,cnt("SERVICE_DONE"),INK],[t.kpiOver,jobsAll.filter(j=>j.dueWeight==="700").length,AC]]
-      .map(([label,v,color])=>({ label, v, color }));
-
-    const mobileFilters=[t.fToday,t.fPending,t.fReady].map((label,i)=>({ label,
-      bg:S.mf===i?INK:"transparent", fg:S.mf===i?BG:INK, go:()=>this.setState({ mf:i }) }));
-    const mobileSets=[["PRN-256808-0055","PRN-256808-0047","PRN-256808-0051"],
-      ["PRN-256808-0064","PRN-256808-0066","PRN-256808-0061"],["PRN-256808-0047"]];
-    const acts=j=>d.FLOW.slice(d.FLOW.indexOf(j.code)+1).map((code,i)=>({ label:this.status(code),
-      bg:i===0?AC:N1, fg:i===0?"#fff":INK, go:()=>this.setState(st=>({ jobs:{...st.jobs,[j.no]:code} })) }));
-    const mobileJobs=jobsAll.filter(j=>mobileSets[S.mf].includes(j.no)).map(j=>({ ...j, actions:acts(j) }));
-
-    const statusLog=[["PRN-256808-0047 → "+this.status("PROD_DONE"),
-        S.lang==="th"?"08:32 · เจ้าหน้าที่หน้าเครื่อง · แจ้งอีเมลผู้ขอแล้ว":"08:32 · floor staff · requester emailed"],
-      ["PRN-256808-0055 → "+this.status("IN_PRODUCTION"),
-        S.lang==="th"?"08:14 · เจ้าหน้าที่หน้าเครื่อง · หมายเหตุ: ใช้กระดาษล็อตใหม่":"08:14 · floor staff · note: new paper lot"],
-      ["PRN-256808-0061 → "+this.status("IN_PRODUCTION"),
-        S.lang==="th"?"เมื่อวาน 16:45 · แอดมิน · ขอไฟล์ต้นฉบับความละเอียดสูง":"Yesterday 16:45 · admin · asked for a high-res source file"]]
-      .map(([head,body])=>({ head, body }));
-
-    const cur=jobsAll.find(j=>j.no===S.curNo)||jobsAll[3];
-    const curIdx=d.FLOW.indexOf(cur.code);
-    const TL_META={
-      RECEIVED:{ at:"18/08/2568 09:12", by:S.lang==="th"?"ระบบ":"System",
-        note:S.lang==="th"?"ได้รับไฟล์และคำขอ ตั้งสถานะได้รับไฟล์แล้วอัตโนมัติ และส่งอีเมลยืนยัน":"Files and request received, status set automatically, confirmation emailed" },
-      IN_PRODUCTION:{ at:"19/08/2568 08:14", by:S.lang==="th"?"เจ้าหน้าที่หน้าเครื่อง":"Floor staff",
-        note:S.lang==="th"?"อัปเดตจากมือถือ · ใช้กระดาษล็อตใหม่":"Updated from mobile · new paper lot" },
-      PROD_DONE:{ at:"20/08/2568 15:20", by:S.lang==="th"?"เจ้าหน้าที่หน้าเครื่อง":"Floor staff",
-        note:S.lang==="th"?"งานเสร็จแล้ว รับได้ที่โรงพิมพ์ อาคาร 11 ชั้น 1":"Ready for pickup at the print shop, Building 11, floor 1" },
-      SERVICE_DONE:{ at:"21/08/2568 10:05", by:S.lang==="th"?"โรงพิมพ์":"Print shop",
-        note:S.lang==="th"?"ผู้ขอรับงานกลับแล้ว โรงพิมพ์เป็นผู้กดปิดงาน":"Picked up by the requester; only the print shop closes a job" } };
-    // แสดงครบทั้ง 4 สถานะเสมอ ขั้นที่ยังไม่ถึงขึ้นเป็นสีจาง
-    const timeline=d.FLOW.map((code,i)=>{
-      const done=i<=curIdx, active=i===curIdx&&curIdx<d.FLOW.length-1, m=TL_META[code];
-      const pendingText=S.lang==="th"?"ยังไม่ถึงขั้นตอนนี้":"Not reached yet";
-      return { label:this.status(code),
-        at:done?m.at:"—", by:done?m.by:pendingText, note:done?m.note:"",
-        dot:i===curIdx?AC:(done?INK:N2), line:i>=curIdx?N2:INK,
-        dotClass:active?"tl-pulse-dot":"", lineClass:active?"tl-loading-line":"" };
+    // Use liveJobs from Google Sheet (clean slate when empty)
+    const jobsSource = S.jobsLoaded ? S.liveJobs : [];
+    const jobsAll = jobsSource.map(j => {
+      const code = this.jobStatus(j);
+      const [tagBg, tagFg] = this.stTag(code);
+      const over = j.overdue && ["RECEIVED", "IN_PRODUCTION"].includes(code);
+      const nextIdx = d.FLOW.indexOf(code);
+      const next = nextIdx >= 0 && nextIdx < d.FLOW.length - 1 ? d.FLOW[nextIdx + 1] : null;
+      const serviceName = j.purpose || (j.svc ? this.sname(this.svc(j.svc)) : (S.lang === "th" ? "งานพิมพ์ทั่วไป" : "General printing"));
+      return {
+        raw: j, no: j.no, requester: this.L(j, "req") || j.reqTh || "—", unit: this.L(j, "unit") || j.unitTh || "—",
+        service: serviceName, sent: j.sent || "—", need: j.need || "—",
+        est: j.est ? this.N(j.est) : (S.lang === "th" ? "รอประเมิน" : "pending"),
+        conf: j.conf ? this.N(j.conf) : "—", statusLabel: this.status(code), code, tagBg, tagFg,
+        dueColor: over ? AC7 : INK, dueWeight: over ? "700" : "400",
+        nextLabel: next ? ("→ " + this.status(next)) : (S.lang === "th" ? "สิ้นสุด" : "final"),
+        advance: next ? () => this._advanceStatus(j.no, next) : () => {},
+        open: () => this.setState({ page: "track", curNo: j.no }),
+        folderId: j.folderId || ""
+      };
     });
-    const jobDetailRows=[[t.jobNo,cur.no],[t.colService,cur.service],[t.unit,cur.unit],
-      [t.needBy,cur.need],
-      [S.lang==="th"?"จำนวน":"Quantity","5,000 "+(S.lang==="th"?"แผ่น":"sheets")]]
-      .map(([k,v])=>({ k, v }));
+    const qq = S.q.trim().toLowerCase();
+    const filteredJobs = qq ? jobsAll.filter(j => (j.no + j.requester + j.unit + j.service).toLowerCase().includes(qq)) : jobsAll;
+
+    const PAL = this.statusPalette();
+    const myCards = jobsAll.filter(j => j.code !== "SERVICE_DONE").map(j => {
+      const p = PAL[j.code] || PAL.RECEIVED;
+      return { ...j, hue: p.fg, mediaBg: p.grad, initials: (j.requester || "").trim().slice(0, 1) || "P" };
+    });
+
+    const mqSrc = jobsAll.filter(j => j.code !== "SERVICE_DONE");
+    const mqItems = [...mqSrc, ...mqSrc].map(j => ({
+      requester: j.requester, service: j.service,
+      statusLabel: j.statusLabel, tagBg: j.tagBg, tagFg: j.tagFg
+    }));
+
+    const cnt = c => jobsAll.filter(j => j.code === c).length;
+    const queueKpis = [
+      [t.kpiReceived, cnt("RECEIVED"), INK],
+      [t.kpiNew, cnt("IN_PRODUCTION"), INK],
+      [t.kpiProd, cnt("PROD_DONE"), INK],
+      [t.kpiReady, cnt("SERVICE_DONE"), INK],
+      [t.kpiOver, jobsAll.filter(j => j.dueWeight === "700").length, AC]
+    ].map(([label, v, color]) => ({ label, v, color }));
+
+    const mobileFilters = [t.fToday, t.fPending, t.fReady].map((label, i) => ({
+      label, bg: S.mf === i ? INK : "transparent", fg: S.mf === i ? BG : INK, go: () => this.setState({ mf: i })
+    }));
+    const acts = j => d.FLOW.slice(d.FLOW.indexOf(j.code) + 1).map((code, i) => ({
+      label: this.status(code), bg: i === 0 ? AC : N1, fg: i === 0 ? "#fff" : INK, go: () => this._advanceStatus(j.no, code)
+    }));
+    const mobileJobs = jobsAll.filter(j => {
+      if (S.mf === 0) return j.code === "RECEIVED" || j.code === "IN_PRODUCTION";
+      if (S.mf === 1) return j.dueWeight === "700" || j.code === "IN_PRODUCTION";
+      if (S.mf === 2) return j.code === "PROD_DONE";
+      return true;
+    }).map(j => ({ ...j, actions: acts(j) }));
+
+    const statusLog = jobsAll.slice(0, 4).map(j => [
+      j.no + " → " + j.statusLabel,
+      (j.sent || "วันนี้") + " · " + (S.lang === "th" ? "อัปเดตผ่านระบบ Google Sheet" : "Updated via Google Sheet")
+    ]).map(([head, body]) => ({ head, body }));
+
+    const cur = jobsAll.find(j => j.no === S.curNo) || (jobsAll.length > 0 ? jobsAll[0] : {
+      no: "—", requester: "—", unit: "—", service: "—", sent: "—", need: "—", code: "RECEIVED", est: "—", conf: "—"
+    });
+    const curIdx = d.FLOW.indexOf(cur.code);
+    const TL_META = {
+      RECEIVED: { at: cur.sent || "—", by: S.lang === "th" ? "ระบบ (Google Apps Script)" : "System (Google Apps Script)",
+        note: S.lang === "th" ? "ได้รับคำขอและบันทึกลง Google Sheet เรียบร้อยแล้ว" : "Request received and saved to Google Sheet" },
+      IN_PRODUCTION: { at: "—", by: S.lang === "th" ? "เจ้าหน้าที่หน้าเครื่อง" : "Floor staff",
+        note: S.lang === "th" ? "อยู่ระหว่างจัดพิมพ์ / ดำเนินการผลิต" : "Currently printing / in production" },
+      PROD_DONE: { at: "—", by: S.lang === "th" ? "เจ้าหน้าที่หน้าเครื่อง" : "Floor staff",
+        note: S.lang === "th" ? "งานเสร็จแล้ว พร้อมรับได้ที่โรงพิมพ์ อาคาร 11 ชั้น 1" : "Production completed, ready for pickup" },
+      SERVICE_DONE: { at: "—", by: S.lang === "th" ? "โรงพิมพ์" : "Print shop",
+        note: S.lang === "th" ? "ผู้ขอรับงานกลับแล้ว ปิดงานเรียบร้อย" : "Picked up by requester, job closed" }
+    };
+    const timeline = d.FLOW.map((code, i) => {
+      const done = i <= curIdx, active = i === curIdx && curIdx < d.FLOW.length - 1, m = TL_META[code];
+      const pendingText = S.lang === "th" ? "ยังไม่ถึงขั้นตอนนี้" : "Not reached yet";
+      return {
+        label: this.status(code),
+        at: done ? m.at : "—", by: done ? m.by : pendingText, note: done ? m.note : "",
+        dot: i === curIdx ? AC : (done ? INK : N2), line: i >= curIdx ? N2 : INK,
+        dotClass: active ? "tl-pulse-dot" : "", lineClass: active ? "tl-loading-line" : ""
+      };
+    });
+    const jobDetailRows = cur ? [
+      [t.jobNo, cur.no],
+      [t.colService, cur.service],
+      [t.unit, cur.unit],
+      [t.requester, cur.requester],
+      [t.sent, cur.sent || "—"],
+      [t.needBy, cur.need || "—"],
+      [t.status, cur.statusLabel || this.status(cur.code)],
+      [t.est, cur.est || "—"],
+      [t.confirmed, cur.conf || "—"]
+    ].map(([k, v]) => ({ k, v })) : [];
 
     const priceRules=d.PRICE_RULES.map(([svcId,spec,type,price,from,state],idx)=>{
       const pend=state==="pending", on=!S.priceOff[idx];
@@ -1601,22 +1886,30 @@ class Component extends DCLogic {
       "The rule applied is snapshotted onto the job, so editing prices today never moves past reports."
     ]).map(text=>({ text }));
 
-    const rawCols=[t.jobNo,t.sent,t.requester,"Email",t.unit,t.colService,t.colQty,t.needBy,t.est,t.confirmed,t.status,"Files"]
+    const rawCols=[t.jobNo,t.sent,t.requester,"Email",t.unit,t.colService,t.colQty,t.needBy,t.est,t.confirmed,t.status,"Drive"]
       .map(label=>({ label }));
     const rawRows=jobsAll.map(j=>({ cells:[j.no,j.sent,j.requester,
-      j.raw.reqEn.toLowerCase().replace(/[^a-z ]/g,"").trim().split(" ").slice(-2).join(".")+"@spu.ac.th",
-      j.unit,j.service,this.N(j.raw.qty),j.need,j.est,j.conf,j.statusLabel,"2"].map(v=>({ v })) }));
-    const rawCount=(S.lang==="th"?"แสดง 8 จาก 8 แถว · เดือนสิงหาคม 2568":"Showing 8 of 8 rows · August 2568");
+      (j.raw && j.raw.email) ? j.raw.email : "—",
+      j.unit,j.service,this.N((j.raw && j.raw.qty) || 1),j.need,j.est,j.conf,j.statusLabel,j.folderId ? "📁 Drive" : "—"].map(v=>({ v })) }));
+    const rawCount=(S.lang==="th"?("แสดง "+jobsAll.length+" รายการจาก Google Sheet"):("Showing "+jobsAll.length+" rows from Google Sheet"));
 
-    const kpis=[[t.kpiAll,"128",t.kpiAllSub,INK],[t.kpiUniqUser,"46",t.kpiUserSub,INK],
-      [t.kpiUniqUnit,"18",t.kpiUnitSub,INK],[t.kpiDone,"97",t.kpiDoneSub,INK],
-      [t.kpiValue,"412,850",t.kpiValueSub,AC],[t.kpiTat,S.lang==="th"?"2.4 วัน":"2.4 days",t.kpiTatSub,INK]]
-      .map(([label,v,sub,color])=>({ label, v, sub, color }));
+    const totalRev = jobsAll.reduce((sum, j) => sum + (j.conf && j.conf !== "—" ? Number(String(j.conf).replace(/,/g, "")) : (Number(String(j.est).replace(/,/g, "")) || 0)), 0);
+    const uniqUsers = new Set(jobsAll.map(j => (j.raw && j.raw.email) || j.requester).filter(Boolean)).size;
+    const uniqUnits = new Set(jobsAll.map(j => j.unit).filter(Boolean)).size;
+
+    const kpis=[
+      [t.kpiAll,String(jobsAll.length),t.kpiAllSub,INK],
+      [t.kpiUniqUser,String(uniqUsers),t.kpiUserSub,INK],
+      [t.kpiUniqUnit,String(uniqUnits),t.kpiUnitSub,INK],
+      [t.kpiDone,String(cnt("SERVICE_DONE")),t.kpiDoneSub,"#0f7a4c"],
+      [t.kpiValue,this.B(totalRev),t.kpiValueSub,AC],
+      [t.kpiTat,S.lang==="th"?(jobsAll.length>0?"1-3 วัน":"—"):(jobsAll.length>0?"1-3 days":"—"),t.kpiTatSub,INK]
+    ].map(([label,v,sub,color])=>({ label, v, sub, color }));
     const beNow=new Date().getFullYear()+543;
     const yearOpts=[beNow-2,beNow-1,beNow].map(y=>({ v:String(y),
       label:S.dashYearMode==="academic"?(S.lang==="th"?"ปีการศึกษา "+y:"Academic "+y):(S.lang==="th"?"พ.ศ. "+y:"B.E. "+y) }));
     const monthOpts=[{ v:"0", label:t.fAllMonths }].concat(this._months(S.lang).map((name,i)=>({ v:String(i+1), label:name })));
-    const unitNames=[...new Set(d.JOBS.map(j=>this.L(j,"unit")))];
+    const unitNames=[...new Set(jobsAll.map(j=>this.L(j,"unit")).filter(Boolean))];
     const unitOpts=[{ v:"", label:t.allUnits }].concat(unitNames.map(u=>({ v:u, label:u })));
     const dashMonthNum=Number(S.dashMonth), dashYearNum=Number(S.dashYear);
     const periodText=(()=>{ const months=this._months(S.lang);
@@ -1631,31 +1924,36 @@ class Component extends DCLogic {
       return months[dashMonthNum-1]+" "+actualYear;
     })();
 
-    const topRequesters=(S.lang==="th"?[
-      ["ผศ.ดร. อนงค์ ศรีวัฒน์","คณะบริหารธุรกิจ",9],["กิตติ วรรณศิลป์","คณะนิเทศศาสตร์",8],
-      ["ปิยะดา ทองแท้","สำนักงานทะเบียน",7],["สมชาย ใจดี","กลุ่มงานกิจการนักศึกษา",6],
-      ["ดร. ณัฐพงษ์ เรืองชัย","คณะวิศวกรรมศาสตร์",6],["วราภรณ์ สุขใจ","กลุ่มงานการคลัง",5],
-      ["สุภาพร มั่นคง","กลุ่มอำนวยการกลาง",5],["ธนกร พัฒนา","กลุ่มงานกิจการสัมพันธ์",4],
-      ["อรุณี แสงทอง","คณะศิลปศาสตร์",4],["ประเสริฐ บุญมา","สำนักหอสมุด",3]
-    ]:[
-      ["Asst. Prof. Anong Sriwat","Business Administration",9],["Kitti Wannasilp","Communication Arts",8],
-      ["Piyada Thongtae","Registrar Office",7],["Somchai Jaidee","Student Affairs",6],
-      ["Dr. Nattapong Ruangchai","Engineering",6],["Waraporn Sukjai","Finance Group",5],
-      ["Supaporn Mankong","Central Administration",5],["Thanakorn Pattana","External Relations",4],
-      ["Arunee Saengthong","Liberal Arts",4],["Prasert Boonma","Library Office",3]
-    ]).map(([name,unit,count],i)=>({ rank:i+1, name, unit, count }));
+    const reqMap={};
+    jobsAll.forEach(j=>{
+      const name=j.requester||(S.lang==="th"?"ผู้ขอรับบริการ":"Requester");
+      const unit=j.unit||"—";
+      if(!reqMap[name]) reqMap[name]={ name, unit, count:0 };
+      reqMap[name].count++;
+    });
+    const topRequesters=Object.values(reqMap).sort((a,b)=>b.count-a.count).slice(0,10).map((r,i)=>({ rank:i+1, ...r }));
 
-    const uv=[["คณะบริหารธุรกิจ","Business Administration",86400],["คณะวิศวกรรมศาสตร์","Engineering",71200],
-      ["สำนักงานทะเบียน","Registrar Office",54800],["คณะนิเทศศาสตร์","Communication Arts",41500],
-      ["กลุ่มงานกิจการนักศึกษา","Student Affairs",33900],["กลุ่มงานการคลัง","Finance Group",28000]];
-    const topUnitsByValue=uv.map(([th,en,v],i)=>({ rank:i+1, name:S.lang==="th"?th:en, value:this.B(v), w:Math.round(v/uv[0][2]*100)+"%" }));
-    const mv=[62,74,58,81,96,88,104,128];
+    const unitValMap={};
+    jobsAll.forEach(j=>{
+      const u=j.unit||"—";
+      const val=j.conf&&j.conf!=="—"?Number(String(j.conf).replace(/,/g,"")):(Number(String(j.est).replace(/,/g,""))||0);
+      unitValMap[u]=(unitValMap[u]||0)+val;
+    });
+    const maxVal=Math.max(1,...Object.values(unitValMap));
+    const topUnitsByValue=Object.entries(unitValMap).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([name,v],i)=>({
+      rank:i+1, name, value:this.B(v), w:Math.round(v/maxVal*100)+"%"
+    }));
+    const mv=[0,0,0,0,0,0,0,jobsAll.length];
     const monthly=mv.map((v,i)=>({ v, label:(S.lang==="th"?["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค."]:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"])[i],
-      h:Math.round(v/128*180)+"px", bg:i===mv.length-1?AC:INK }));
-    const ts=[["copy",42],["a4",31],["cert",22],["card",17],["layout",9]];
-    const topServices=ts.map(([id,v])=>({ name:this.sname(this.svc(id)), v, w:Math.round(v/42*100)+"%" }));
-    const statusMix=[["RECEIVED",4,"#2f56c6"],["IN_PRODUCTION",23,INK],["PROD_DONE",8,AC],["SERVICE_DONE",97,N7]]
-      .map(([code,v,color])=>({ label:this.status(code), v, color }));
+      h:Math.round(v/Math.max(1,jobsAll.length)*180)+"px", bg:i===mv.length-1?AC:INK }));
+    const ts=[["copy",cnt("RECEIVED")],["a4",cnt("IN_PRODUCTION")],["cert",cnt("PROD_DONE")],["bind",cnt("SERVICE_DONE")]];
+    const topServices=ts.map(([id,v])=>({ name:this.sname(this.svc(id)), v, w:Math.round(v/Math.max(1,jobsAll.length)*100)+"%" }));
+    const statusMix=[
+      ["RECEIVED",cnt("RECEIVED"),"#2f56c6"],
+      ["IN_PRODUCTION",cnt("IN_PRODUCTION"),INK],
+      ["PROD_DONE",cnt("PROD_DONE"),AC],
+      ["SERVICE_DONE",cnt("SERVICE_DONE"),N7]
+    ].map(([code,v,color])=>({ label:this.status(code), v, color }));
 
     const rr=(name,cells,head)=>({ name, cells:cells.map(v=>({ v })), span:1,
       fw:head?"700":"400", bg:head?N2:"transparent", pad:head?"6px":"18px" });
@@ -1712,23 +2010,73 @@ class Component extends DCLogic {
       "Set the spreadsheet timezone to Asia/Bangkok to match what the system writes."
     ]).map(text=>({ text }));
 
+    // — Google Apps Script connection: real config + live test results —
+    // ผู้ใช้มักวาง ID มาทั้งลิงก์ หรือ "ID/edit?gid=..." ต่อท้าย — ตัดส่วนเกินออกให้อัตโนมัติ
+    const cleanGasId=(v,isFolder)=>{
+      let s=String(v||"").trim();
+      const m=isFolder?s.match(/\/folders\/([a-zA-Z0-9_-]+)/):s.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+      if(m) return m[1];
+      s=s.split("?")[0].split("#")[0];
+      const slash=s.indexOf("/");
+      return slash===-1?s:s.slice(0,slash);
+    };
+    const setGasUrl=e=>this._saveGasConfig({ gasUrl:e.target.value.trim() });
+    const setGasToken=e=>this._saveGasConfig({ gasToken:e.target.value.trim() });
+    const setSpreadsheetId=e=>this._saveGasConfig({ spreadsheetId:cleanGasId(e.target.value,false) });
+    const setFolderId=e=>this._saveGasConfig({ folderId:cleanGasId(e.target.value,true) });
+    const testSheetConn=()=>this._runConnTest("sheet","testSheet");
+    const testDriveConn=()=>this._runConnTest("drive","testDrive");
+    const testAccessConn=()=>this._runConnTest("access","testAccess");
+    const anyBusy=S.connBusy.sheet||S.connBusy.drive||S.connBusy.access;
+    const testAllConn=()=>{ if(anyBusy) return; testSheetConn(); testDriveConn(); testAccessConn(); };
+    const fmtAt=iso=>{ if(!iso) return ""; const dt=new Date(iso);
+      return this._fmt(this._iso(dt))+" "+this._pad(dt.getHours())+":"+this._pad(dt.getMinutes()); };
+    const resultLine=r=>!r?t.connNever:(t.connLastChecked+" "+fmtAt(r.at)+" · "+(r.ok?t.connOkShort:(t.connFailShort+(r.error?" ("+r.error+")":""))));
+    const resultColor=r=>!r?N7:(r.ok?"#0f7a4c":AC7);
     const settingGroups=[
-      { no:"01", title:t.gSheetTitle, action:t.setTest, test:()=>{}, fields:[
-        [t.fSheetId||"Spreadsheet ID","1aB3xK9_spu-printing-2568_QmZ",true,S.lang==="th"?"อยู่ใน URL ของชีต ระหว่าง /d/ และ /edit":"From the sheet URL, between /d/ and /edit"],
-        [S.lang==="th"?"ชื่อไฟล์ชีต":"Spreadsheet name","SPU-Printing-Service-DB",false,S.lang==="th"?"ใช้ชีตเดียวสำหรับทุกแท็บ ไม่แยกไฟล์ตามปี":"One file for all tabs; do not split per year"],
-        [S.lang==="th"?"เขตเวลาและปีปฏิทิน":"Timezone & calendar","Asia/Bangkok · พ.ศ.",false,S.lang==="th"?"ต้องตั้งที่ตัวชีตด้วย เพื่อให้วันที่ในรายงานตรงกัน":"Set on the spreadsheet too so report dates match"]
-      ]},
-      { no:"02", title:t.gDriveTitle, action:S.lang==="th"?"ทดสอบเขียนไฟล์":"Test file write", test:()=>{}, fields:[
-        [S.lang==="th"?"Drive Folder ID (โฟลเดอร์แม่)":"Drive folder ID (parent)","0AJx7-Printing-Service-Root",true,S.lang==="th"?"อยู่ใน URL ของโฟลเดอร์ หลัง /folders/":"From the folder URL, after /folders/"],
-        [S.lang==="th"?"ประเภทไดรฟ์":"Drive type",S.lang==="th"?"Shared Drive (แนะนำ)":"Shared Drive (recommended)",false,S.lang==="th"?"เพื่อให้ไฟล์ไม่ผูกกับบัญชีบุคคล":"So files are not owned by one person"],
-        [S.lang==="th"?"ขนาดไฟล์ที่อนุญาต":"Allowed file size","10 MB × 10",false,S.lang==="th"?"ปรับได้จากหน้านี้ ไม่ต้องแก้โค้ด":"Configurable here, no code change"]
-      ]},
-      { no:"03", title:t.gAccessTitle, action:S.lang==="th"?"ตรวจสิทธิ์":"Verify access", test:()=>{}, fields:[
-        [S.lang==="th"?"บัญชีที่ใช้เชื่อมต่อ":"Connecting account","printing-bot@spu.ac.th",true,S.lang==="th"?"ต้องแชร์ทั้งชีตและโฟลเดอร์ให้บัญชีนี้เป็นผู้แก้ไข":"Share the sheet and folder with this account as Editor"],
-        [S.lang==="th"?"อีเมลผู้ส่งแจ้งเตือน":"Notification sender","printing@spu.ac.th",false,S.lang==="th"?"ใช้บัญชีองค์กร":"Use an organisational account"],
-        [S.lang==="th"?"โดเมนที่อนุญาตให้เข้าใช้":"Allowed sign-in domain","@spu.ac.th",true,S.lang==="th"?"บังคับตรวจทั้งหน้าเว็บและฝั่งเซิร์ฟเวอร์":"Enforced in the page and on the server"]
-      ]}
-    ].map(g=>({ ...g, fields:g.fields.map(([label,value,ro,hint])=>({ label, value, ro, hint })) }));
+      { no:"01", title:t.gSheetTitle, action:S.connBusy.sheet?t.btnTesting:t.setTest, testDisabled:S.connBusy.sheet, test:testSheetConn,
+        resultText:resultLine(S.connResults.sheet), resultColor:resultColor(S.connResults.sheet),
+        openDisabled:!S.spreadsheetId, openIn:()=>{ if(S.spreadsheetId) window.open("https://docs.google.com/spreadsheets/d/"+S.spreadsheetId+"/edit","_blank"); },
+        fields:[
+          { label:t.gasSheetIdLabel, value:S.spreadsheetId, ro:false, bg:"#fff", onChange:setSpreadsheetId,
+            hint:S.lang==="th"?"อยู่ใน URL ของชีต ระหว่าง /d/ และ /edit":"From the sheet URL, between /d/ and /edit" },
+          { label:S.lang==="th"?"ชื่อไฟล์ชีตที่ตรวจพบ":"Detected sheet name", value:(S.connResults.sheet&&S.connResults.sheet.name)||"—", ro:true, bg:N2, onChange:()=>{},
+            hint:S.lang==="th"?"อัปเดตหลังทดสอบการเชื่อมต่อสำเร็จ":"Updates after a successful test" },
+          { label:S.lang==="th"?"เขตเวลาและปีปฏิทิน":"Timezone & calendar", value:"Asia/Bangkok · พ.ศ.", ro:true, bg:N2, onChange:()=>{},
+            hint:S.lang==="th"?"ต้องตั้งที่ตัวชีตด้วย เพื่อให้วันที่ในรายงานตรงกัน":"Set on the spreadsheet too so report dates match" }
+        ]},
+      { no:"02", title:t.gDriveTitle, action:S.connBusy.drive?t.btnTesting:(S.lang==="th"?"ทดสอบเขียนไฟล์":"Test file write"), testDisabled:S.connBusy.drive, test:testDriveConn,
+        resultText:resultLine(S.connResults.drive), resultColor:resultColor(S.connResults.drive),
+        openDisabled:!S.folderId, openIn:()=>{ if(S.folderId) window.open("https://drive.google.com/drive/folders/"+S.folderId,"_blank"); },
+        fields:[
+          { label:t.gasFolderIdLabel, value:S.folderId, ro:false, bg:"#fff", onChange:setFolderId,
+            hint:S.lang==="th"?"อยู่ใน URL ของโฟลเดอร์ หลัง /folders/":"From the folder URL, after /folders/" },
+          { label:S.lang==="th"?"ประเภทไดรฟ์":"Drive type", value:S.lang==="th"?"Shared Drive (แนะนำ)":"Shared Drive (recommended)", ro:true, bg:N2, onChange:()=>{},
+            hint:S.lang==="th"?"เพื่อให้ไฟล์ไม่ผูกกับบัญชีบุคคล":"So files are not owned by one person" },
+          { label:S.lang==="th"?"ขนาดไฟล์ที่อนุญาต":"Allowed file size", value:"10 MB × 10", ro:true, bg:N2, onChange:()=>{},
+            hint:S.lang==="th"?"ปรับได้จากหน้านี้ ไม่ต้องแก้โค้ด":"Configurable here, no code change" }
+        ]},
+      { no:"03", title:t.gAccessTitle, action:S.connBusy.access?t.btnTesting:(S.lang==="th"?"ตรวจสิทธิ์":"Verify access"), testDisabled:S.connBusy.access, test:testAccessConn,
+        resultText:resultLine(S.connResults.access), resultColor:resultColor(S.connResults.access),
+        openDisabled:true, openIn:()=>{},
+        fields:[
+          { label:S.lang==="th"?"บัญชีที่ใช้เชื่อมต่อ":"Connecting account", value:(S.connResults.access&&S.connResults.access.connectedAs)||"—", ro:true, bg:N2, onChange:()=>{},
+            hint:S.lang==="th"?"บัญชีที่ Deploy Apps Script ไว้ (Execute as: Me)":"The account the Apps Script is deployed to run as" },
+          { label:S.lang==="th"?"อีเมลผู้ส่งแจ้งเตือน":"Notification sender", value:"printing@spu.ac.th", ro:true, bg:N2, onChange:()=>{},
+            hint:S.lang==="th"?"ใช้บัญชีองค์กร":"Use an organisational account" },
+          { label:S.lang==="th"?"โดเมนที่อนุญาตให้เข้าใช้":"Allowed sign-in domain", value:"@spu.ac.th", ro:true, bg:N2, onChange:()=>{},
+            hint:S.lang==="th"?"บังคับตรวจทั้งหน้าเว็บและฝั่งเซิร์ฟเวอร์":"Enforced in the page and on the server" }
+        ]}
+    ];
+    const anyTested=S.connResults.sheet||S.connResults.drive||S.connResults.access;
+    const allTested=S.connResults.sheet&&S.connResults.drive&&S.connResults.access;
+    const allOk=allTested&&S.connResults.sheet.ok&&S.connResults.drive.ok&&S.connResults.access.ok;
+    const lastAt=[S.connResults.sheet,S.connResults.drive,S.connResults.access].filter(Boolean).map(r=>r.at).sort().pop();
+    const connBgLive=allOk?"#eefbf3":(anyTested?"#ffeaea":"var(--color-neutral-100)");
+    const connBorderLive=allOk?"#8ce0b0":(anyTested?"#ffc4b8":"var(--color-line)");
+    const connColorLive=allOk?"#0b663e":(anyTested?"#ae1800":"var(--color-text)");
+    const connLabelLive=allOk?("● "+t.connOn):t.connOff;
+    const connWhenLive=lastAt?(t.connLastChecked+" "+fmtAt(lastAt)):t.connNever;
     const setupSteps=(S.lang==="th"?[
       ["01","สร้างสเปรดชีตเดียว","สร้างแท็บตามหน้าโครงสร้างชีต วางหัวตารางแถวที่ 1 ให้ตรงชื่อคอลัมน์"],
       ["02","สร้างโฟลเดอร์แม่บน Drive","แนะนำ Shared Drive ชื่อ Printing-Service แล้วคัดลอกรหัสจาก URL"],
@@ -1778,11 +2126,76 @@ class Component extends DCLogic {
       tagBg:a.thTag==="ผู้ช่วย AI"?AC:INK }));
     const pa=d.PAGE_AGENT[S.page];
     const paAgent=pa?d.AGENTS.find(a=>a.key===pa.key):null;
-    const hasAgent=!!pa&&(this.props.showAgentBadges??true);
+    const hasAgent=!!pa&&(this.props.showAgentBadges!==undefined?this.props.showAgentBadges:true);
     const agentLine=pa?(S.lang==="th"?pa.th:pa.en):"";
     const agentName=paAgent?(S.lang==="th"?paAgent.th:paAgent.en):"";
     const agentTag=paAgent?(S.lang==="th"?paAgent.thTag:paAgent.enTag):"";
     const agentGlyph=paAgent?GLYPH[paAgent.key]:"";
+
+    // — ส่งคำขอจริง: เขียนแถวลง Google Sheet ผ่าน Apps Script —
+    const gasReady=!!(S.gasUrl&&S.gasToken&&S.spreadsheetId);
+    const buildVariant=svcId=>{
+      const parts=[];
+      if(isProdGroup){
+        parts.push(S.prodColor==="color"?t.prodColorColor:t.prodColorBw, S.prodSize);
+        if(S.prodPaperType) parts.push(S.prodPaperType);
+        parts.push(S.prodSides==="one"?t.prodSidesOne:t.prodSidesTwo, stapleLabelNow);
+        if(S.prodOwnPaper) parts.push(t.prodOwnPaper);
+      }
+      if(svcId==="exam"){
+        parts.push(S.examType==="mid"?t.examMid:t.examOut);
+        if(S.examSubject) parts.push(S.examSubject);
+      }
+      return parts.join(" · ");
+    };
+    const doSubmitJob=async()=>{
+      if(!S.pdpaConsent||S.submitBusy) return;
+      if(!gasReady){ this.setState({ submitError:S.lang==="th"
+        ?"ยังไม่ได้ตั้งค่าเชื่อมต่อ Google Sheet กรุณาไปที่แท็บ \"ตั้งค่าเชื่อมต่อ\" ก่อน"
+        :"Google Sheet isn't connected yet — set it up on the Settings tab first." }); return; }
+      this.setState({ submitBusy:true, submitError:null, uploadProgressText:"" });
+      const items=selected.map(s=>({ serviceCode:s.id, variant:buildVariant(s.id),
+        qty:isProdGroup?(Number(S.prodQtyOrig)||0)*(Number(S.prodQtySets)||0):1,
+        unit:S.lang==="th"?s.unitTh:s.unitEn }));
+      const r=await this._gasCall("submitJob", { email:S.gateEmail, name:S.form.name, position:S.form.pos,
+        phone:S.form.phone, unit:S.form.unit, purpose:S.form.purpose, needBy:S.needByISO||"", items });
+      if(r&&r.ok) {
+        const jobNo = r.jobNo;
+        const toUpload = [...S.uploadedFiles];
+        let uploadedCount = 0;
+        if(toUpload.length > 0) {
+          for(let i=0; i<toUpload.length; i++) {
+            const f = toUpload[i];
+            const pText = S.lang==="th"
+              ? ("กำลังอัปโหลดไฟล์ " + (i+1) + "/" + toUpload.length + ": " + f.name + " ขึ้น Google Drive…")
+              : ("Uploading " + (i+1) + "/" + toUpload.length + ": " + f.name + " to Drive…");
+            this.setState({ uploadProgressText: pText });
+            try {
+              const upRes = await this._gasCall("uploadFile", {
+                jobNo,
+                fileName: f.name,
+                mimeType: f.mimeType,
+                base64: f.base64,
+                category: "requester-files",
+                email: S.gateEmail
+              });
+              if(upRes && upRes.ok) uploadedCount++;
+            } catch(upErr) {
+              console.warn("Upload file error:", upErr);
+            }
+          }
+        }
+        this.setState({
+          submitBusy:false, submitted:true, newJobNo:jobNo, submitError:null,
+          uploadedFiles:[], uploadProgressText:"", lastUploadedCount:uploadedCount
+        });
+        this._loadLiveJobs();
+      }
+      else this.setState({ submitBusy:false, submitError:(r&&r.error)||"unknown_error", uploadProgressText:"" });
+    };
+    const submitLabel = S.uploadProgressText
+      ? S.uploadProgressText
+      : (S.submitBusy ? (S.lang==="th"?"กำลังส่งคำขอ…":"Submitting…") : t.submit);
 
     return { t, roleBtns, langBtns, tabs, two:2,
       isLanding:S.page==="landing", isWizard:S.page==="wizard", isMine:S.page==="mine",
@@ -1806,10 +2219,24 @@ class Component extends DCLogic {
       calcBtnBg:S.calcOpen?"var(--color-text)":"#fff", calcBtnFg:S.calcOpen?"var(--color-bg)":"var(--color-text)",
       revenueRows,
       commonFields,
-      files, driveTree, reviewRows:reviewRowsOut,
+      files:filesList, hasFiles:filesList.length>0, hasNoFiles:filesList.length===0,
+      fileCountLabel:S.lang==="th"?("ไฟล์ที่เลือก ("+filesList.length+" ไฟล์)"):("Selected files ("+filesList.length+")"),
+      noFilesHint:S.lang==="th"?"ยังไม่มีไฟล์ที่เลือก (สามารถลากไฟล์มาวาง หรือกดเลือกไฟล์จากเครื่องได้)":"No files selected yet (drag & drop or choose files from your device)",
+      chooseRealFile:()=>this._triggerFileSelect(),
+      onFileInputChange:e=>{ this._handleFiles(e.target.files); e.target.value=""; },
+      dropBorder:S.isDragOver?"var(--color-accent)":"var(--color-line)",
+      dropBg:S.isDragOver?"var(--color-accent-100)":"var(--color-band)",
+      onDragOver:e=>{ e.preventDefault(); if(!S.isDragOver) this.setState({ isDragOver:true }); },
+      onDragLeave:e=>{ e.preventDefault(); if(S.isDragOver) this.setState({ isDragOver:false }); },
+      onDrop:e=>{ e.preventDefault(); this.setState({ isDragOver:false }); if(e.dataTransfer&&e.dataTransfer.files) this._handleFiles(e.dataTransfer.files); },
+      fileWarnMsg:S.fileWarnMsg, hasFileWarnMsg:!!S.fileWarnMsg,
+      isUploadingFiles:!!S.uploadProgressText, uploadProgressText:S.uploadProgressText,
+      hasUploadedFilesSuccess:S.lastUploadedCount>0,
+      uploadedSuccessMsg:S.lang==="th"?("📁 อัปโหลดไฟล์งานจริงขึ้น Google Drive เรียบร้อยแล้ว "+S.lastUploadedCount+" ไฟล์"):("📁 Uploaded "+S.lastUploadedCount+" files to Google Drive successfully"),
+      driveTree, reviewRows:reviewRowsOut,
       pdpaConsent:S.pdpaConsent, togglePdpaConsent:e=>this.setState({ pdpaConsent:e.target.checked }),
-      submitDisabled:!S.pdpaConsent,
-      submitJob:S.pdpaConsent?()=>this.setState({ submitted:true }):()=>{}, submitted:S.submitted, newJobNo:"PRN-256808-0071",
+      submitDisabled:!S.pdpaConsent||S.submitBusy,
+      submitJob:doSubmitJob, submitLabel, submitError:S.submitError, submitted:S.submitted, newJobNo:S.newJobNo,
       myJobs:jobsAll.slice(0,5), myCards:myCards, filteredJobs, queueKpis,
       viewedLabel:S.lang==="th"?"เปิดดูเมื่อ":"Viewed", viewedDate:this._fmt(this._today()),
       q:S.q, setQ:e=>this.setState({ q:e.target.value }),
@@ -1843,7 +2270,29 @@ class Component extends DCLogic {
       doSendEmail:()=>this.setState({ reportSent:true }), sendEmailMsg:S.reportSent?t.sendEmailOk:"",
       flowSteps, sheetTabs, sheetCols, sheetRules,
       settingGroups, setupSteps, setRules, mapRows,
-      connBg:"var(--color-accent-100)", connLabel:t.connOn, connWhen:t.connWhenOn,
+      connBg:connBgLive, connBorder:connBorderLive, connColor:connColorLive, connLabel:connLabelLive, connWhen:connWhenLive,
+      gasUrl:S.gasUrl, gasToken:S.gasToken, setGasUrl, setGasToken,
+      testAllConn, testAllLabel:anyBusy?t.btnTesting:t.btnTestAll, testAllDisabled:anyBusy,
+      hasNoJobs:jobsAll.length===0,
+      hasNoMyCards:myCards.length===0,
+      hasNoMobileJobs:mobileJobs.length===0,
+      emptyQueueTitle:S.lang==="th"?"ยังไม่มีรายการคำขอในระบบ":"No requests in the system yet",
+      emptyQueueSub:S.lang==="th"?"ระบบเชื่อมต่อกับ Google Sheet แล้ว เมื่อมีการยื่นคำขอ รายการจะปรากฏที่นี่อัตโนมัติ":"Connected to Google Sheet. When requests are submitted, they will appear here.",
+      emptyMineTitle:S.lang==="th"?"คุณยังไม่มีประวัติการขอรับบริการ":"You have no service requests yet",
+      emptyMineSub:S.lang==="th"?"กดยื่นคำขอเพื่อเริ่มใช้บริการงานพิมพ์ของมหาวิทยาลัย":"Submit a request to start using university printing services.",
+      btnSubmitNew:S.lang==="th"?("+ "+t.submit):("+ Submit New Request"),
+      refreshLabel:S.jobsLoading?(S.lang==="th"?"กำลังซิงก์…":"Syncing…"):(S.lang==="th"?"🔄 รีเฟรชข้อมูล":"🔄 Refresh"),
+      syncStatusText:S.jobsLoading
+        ?(S.lang==="th"?"กำลังดึงข้อมูลล่าสุดจาก Google Sheet…":"Fetching latest data from Google Sheet…")
+        :(S.jobsLoaded
+          ?(S.lang==="th"?"ข้อมูลสดจาก Google Sheet (JOBS) · "+jobsAll.length+" รายการ":"Live Google Sheet data · "+jobsAll.length+" items")
+          :(S.lang==="th"?"กำลังเชื่อมต่อ…":"Connecting…")),
+      refreshJobs:()=>this._loadLiveJobs(),
+      jobsLoading:S.jobsLoading,
+      noJobsShort:S.lang==="th"?"ไม่มีงานที่ต้องดำเนินการ":"No jobs to process",
+      hasDriveFolder:!!cur.folderId,
+      driveFolderLink:cur.folderId?("https://drive.google.com/drive/folders/"+cur.folderId):"",
+      openInDriveLabel:S.lang==="th"?"เปิดโฟลเดอร์งานบน Google Drive":"Open Job Folder on Google Drive",
       agentCards, hasAgent, agentLine, agentName, agentTag, agentGlyph };
   }
 }
