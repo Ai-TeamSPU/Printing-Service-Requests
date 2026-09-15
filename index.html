@@ -100,11 +100,31 @@
         </div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <div style="display:flex;border:1px solid var(--color-line)">
-          <sc-for list="{{ roleBtns }}" as="r" hint-placeholder-count="3">
-            <button onClick="{{ r.go }}" style="padding:8px 12px;border:0;border-right:{{ r.br }};background:{{ r.bg }};color:{{ r.fg }};font-size:13px;font-weight:600;min-height:40px">{{ r.label }}</button>
-          </sc-for>
-        </div>
+        <!-- Normal User: Show Admin Login button -->
+        <sc-if value="{{ isNormalUser }}" hint-placeholder-val="{{ true }}">
+          <button type="button" onClick="{{ openAdminLogin }}" class="btn btn-ghost" style="display:flex;align-items:center;gap:7px;padding:0 14px;min-height:40px;border:1px solid var(--color-line);background:#fff;font-size:13px;font-weight:700;cursor:pointer">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>{{ adminLoginBtnLabel }}</span>
+          </button>
+        </sc-if>
+
+        <!-- Admin User: Show active badge, role switchers, and logout button -->
+        <sc-if value="{{ isAdminLoggedIn }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:12px;font-weight:700;color:#0f7a4c;background:#dcf6e9;padding:6px 12px;border-radius:999px;white-space:nowrap;display:flex;align-items:center;gap:6px">
+            <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#0f7a4c"></span>
+            <span>{{ adminActiveBadgeLabel }}</span>
+          </span>
+          <div style="display:flex;border:1px solid var(--color-line)">
+            <sc-for list="{{ roleBtns }}" as="r" hint-placeholder-count="3">
+              <button onClick="{{ r.go }}" style="padding:8px 12px;border:0;border-right:{{ r.br }};background:{{ r.bg }};color:{{ r.fg }};font-size:13px;font-weight:600;min-height:40px">{{ r.label }}</button>
+            </sc-for>
+          </div>
+          <button type="button" onClick="{{ adminLogout }}" class="btn btn-ghost" style="display:flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border:1px solid var(--color-line);background:#fff;font-size:12.5px;font-weight:700;color:var(--color-accent-700);cursor:pointer">
+            <span>🚪</span>
+            <span>{{ adminLogoutBtnLabel }}</span>
+          </button>
+        </sc-if>
+
         <button type="button" onClick="{{ toggleCalc }}" aria-label="{{ t.calcTitle }}" title="{{ t.calcTitle }}" style="display:flex;align-items:center;gap:8px;padding:8px 12px;min-height:40px;border:1px solid var(--color-line);background:{{ calcBtnBg }};color:{{ calcBtnFg }};font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="2" width="16" height="20"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="8" y1="11" x2="8" y2="11"></line><line x1="12" y1="11" x2="12" y2="11"></line><line x1="16" y1="11" x2="16" y2="11"></line><line x1="8" y1="15" x2="8" y2="15"></line><line x1="12" y1="15" x2="12" y2="15"></line><line x1="16" y1="15" x2="16" y2="19"></line><line x1="8" y1="19" x2="12" y2="19"></line></svg>
           <span>{{ t.calcTitle }}</span>
@@ -538,7 +558,7 @@
               </sc-if>
               <div style="display:flex;gap:6px;align-items:center">
                 <input class="input" value="{{ mineEmailInput }}" onChange="{{ setMineEmailInput }}" onKeyDown="{{ onMineEmailKeyDown }}" placeholder="พิมพ์อีเมล @spu.ac.th" style="min-height:40px;font-size:13.5px;width:210px;background:#fff">
-                <button type="button" class="btn btn-secondary" onClick="{{ applyMineEmailSearch }}" style="min-height:40px;font-size:13px;padding:0 14px">{{ t.searchBtn }}</button>
+                <button type="button" class="btn btn-secondary" onClick="{{ applyMineEmailSearch }}" style="min-height:40px;font-size:13px;padding:0 14px;white-space:nowrap">{{ mineSearchBtn }}</button>
               </div>
             </div>
             <sc-if value="{{ hasSelectedMineEmail }}" hint-placeholder-val="{{ false }}">
@@ -638,7 +658,20 @@
             <h1 style="font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-0.03em;margin:8px 0 0">{{ curJobNo }}</h1>
             <div style="font-size:15px;color:var(--color-neutral-800);margin-top:6px">{{ curJobService }} · {{ curJobUnit }}</div>
           </div>
+          <sc-if value="{{ hasTrackJobs }}" hint-placeholder-val="{{ true }}">
+            <div style="min-width:240px">
+              <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{ t.trackSelectLabel }}</label>
+              <select class="input" value="{{ curNoSelected }}" onChange="{{ setTrackJob }}" style="width:100%;min-height:44px;font-size:15px">
+                <sc-for list="{{ trackJobOptions }}" as="o" hint-placeholder-count="3">
+                  <option value="{{ o.v }}">{{ o.label }}</option>
+                </sc-for>
+              </select>
+            </div>
+          </sc-if>
         </div>
+        <sc-if value="{{ !hasTrackJobs }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:20px;border:1px solid var(--color-line);background:var(--color-band);padding:16px 18px;font-size:14px">{{ t.trackNoJobs }}</div>
+        </sc-if>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px;margin-top:26px">
           <div>
             <h2 style="font-size:17px;font-weight:800;margin:0 0 14px">{{ t.timeline }}</h2>
@@ -1080,6 +1113,9 @@
               </div>
               </sc-if>
             </div>
+            <button type="button" class="btn btn-secondary" onClick="{{ toggleReportMode }}" style="min-height:44px;display:flex;align-items:center;gap:6px;font-weight:700">
+              <span>{{ reportModeLabel }}</span>
+            </button>
             <button class="btn btn-secondary" onClick="{{ doSendEmail }}" style="min-height:44px">{{ t.sendEmail }}</button>
             <button class="btn btn-primary" onClick="{{ doPrint }}" style="min-height:44px">{{ t.printPdf }}</button>
           </div>
@@ -1099,11 +1135,19 @@
               </div>
               <div style="font-size:11.5px;text-align:right;line-height:1.6">
                 <div>{{ t.docNo }} ผพ. 0068/2568</div>
-                <div>{{ t.docDate }} 31 {{ t.monthAug }} 2568</div>
+                <div>{{ t.docDate }} {{ a4DocDate }}</div>
               </div>
             </div>
             <h2 style="font-size:19px;font-weight:800;text-align:center;margin:22px 0 4px">{{ t.a4Head }}</h2>
-            <div style="font-size:13px;text-align:center;margin-bottom:18px">{{ a4PeriodText }}</div>
+            <div style="font-size:13px;text-align:center;margin-bottom:12px">{{ a4PeriodText }}</div>
+            <sc-if value="{{ isLiveReport }}" hint-placeholder-val="{{ true }}">
+              <div class="no-print" style="margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px">
+                <span style="font-size:11.5px;background:#dcf6e9;color:#0f7a4c;padding:3px 12px;border-radius:999px;font-weight:700;display:inline-flex;align-items:center;gap:6px">
+                  <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#0f7a4c"></span>
+                  <span>{{ liveJobReportBadge }}</span>
+                </span>
+              </div>
+            </sc-if>
             <div style="font-size:12.5px;line-height:1.7;margin-bottom:14px">{{ t.a4Intro }}</div>
             <table style="width:100%;border-collapse:collapse;font-size:11.5px">
               <thead>
@@ -1332,13 +1376,50 @@
       <div onMouseDown="{{ calcResizeStart }}" onTouchStart="{{ calcResizeStart }}" style="position:absolute;right:0;bottom:0;width:20px;height:20px;cursor:nwse-resize;touch-action:none;background:linear-gradient(135deg,transparent 50%,var(--color-neutral-400) 50%)"></div>
     </div>
   </sc-if>
+
+  <!-- Admin Login Modal Dialog -->
+  <sc-if value="{{ adminLoginOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="no-print" style="position:fixed;inset:0;z-index:80;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px">
+      <div style="background:#fff;border:1px solid var(--color-line);border-radius:18px;box-shadow:0 24px 60px -12px rgba(16,24,40,0.35);max-width:440px;width:100%;overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--color-line);background:var(--color-band)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:20px">🔐</span>
+            <div style="font-size:16px;font-weight:800;color:var(--color-text)">{{ adminModalTitle }}</div>
+          </div>
+          <button type="button" onClick="{{ closeAdminLogin }}" aria-label="close" style="border:0;background:transparent;color:var(--color-neutral-600);font-size:18px;cursor:pointer;padding:4px 8px;line-height:1">✕</button>
+        </div>
+        <div style="padding:22px">
+          <p style="font-size:13.5px;color:var(--color-neutral-700);margin:0 0 16px;line-height:1.5">{{ adminModalSub }}</p>
+          <div style="margin-bottom:14px">
+            <label style="font-size:13px;font-weight:700;display:block;margin-bottom:6px;color:var(--color-text)">{{ adminEmailLabel }}</label>
+            <input class="input" value="{{ adminEmailInput }}" onChange="{{ setAdminEmailInput }}" onKeyDown="{{ onAdminPassKeyDown }}" placeholder="{{ adminEmailPh }}" style="width:100%;min-height:46px;font-size:15px;background:#fff">
+          </div>
+          <div>
+            <label style="font-size:13px;font-weight:700;display:block;margin-bottom:6px;color:var(--color-text)">{{ adminPassLabel }}</label>
+            <input type="password" class="input" value="{{ adminPassInput }}" onChange="{{ setAdminPassInput }}" onKeyDown="{{ onAdminPassKeyDown }}" placeholder="{{ adminPassPh }}" style="width:100%;min-height:46px;font-size:15px;background:#fff">
+          </div>
+          <sc-if value="{{ hasAdminLoginError }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:13px;color:var(--color-accent-700);margin-top:12px;font-weight:600;display:flex;align-items:center;gap:6px">
+              <span>⚠️</span>
+              <span>{{ adminLoginError }}</span>
+            </div>
+          </sc-if>
+          <div style="display:flex;gap:10px;margin-top:22px;justify-content:flex-end">
+            <button type="button" class="btn btn-ghost" onClick="{{ closeAdminLogin }}" disabled="{{ adminLoginBusy }}" style="min-height:44px;font-size:14px;padding:0 18px">{{ btnCancel }}</button>
+            <button type="button" class="btn btn-primary" onClick="{{ submitAdminLogin }}" disabled="{{ adminLoginBusy }}" style="min-height:44px;font-size:14px;padding:0 22px">{{ adminSubmitBtnText }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
 </div>
 
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;defaultLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;th&quot;,&quot;en&quot;],&quot;default&quot;:&quot;th&quot;,&quot;tsType&quot;:&quot;'th'|'en'&quot;,&quot;section&quot;:&quot;ภาษา&quot;},&quot;showAgentBadges&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;ผู้ช่วย AI&quot;}}">
 class Component extends DCLogic {
   state = { d:null, lang:this.props.defaultLang==="en"?"en":"th", role:"REQ", page:"landing",
-    gateOpen:false, gateEmail:"", gateErr:false, gateMsg:"",
+    isAdminLoggedIn:false, adminLoginOpen:false, adminEmailInput:"", adminPassInput:"", adminLoginBusy:false, adminLoginError:"", adminUserObj:null,
+    gateOpen:false, gateEmail:"", gateErr:false, gateMsg:"", gateVerified:false,
     svcGroup:null, sel:{}, prodColor:"bw", prodSize:"A4", prodPaperType:"", prodSides:"two", prodOwnPaper:false,
     prodQtyOrig:1, prodQtySets:1, staple:"corner",
     examType:"mid", examSubject:"", budget:"has", budgetAcct:"",
@@ -1348,11 +1429,11 @@ class Component extends DCLogic {
     q:"", submitted:false, submitBusy:false, submitError:null, newJobNo:"", jobs:{}, tab:0, mf:0, reportSent:false, pdpaConsent:false,
     dpOpen:null, dpMonthNeed:null, dpMonthRange:null, needByISO:null, rgStart:null, rgEnd:null,
     dashYearMode:"be", dashYear:String(new Date().getFullYear()+543), dashMonth:"8", dashUnit:"",
-    gasUrl:"https://script.google.com/macros/s/AKfycbyeqC6Va0HYKT55nUQuXTyKAfgKTrQ5nor96SN4JcWpln-fu_YBGYbpEqAZvRtkZzI9/exec",
+    gasUrl:"https://script.google.com/macros/s/AKfycbzoIU9FbYarbjLSniSxSxOM6ii0i38mtg3uDzZnTYqqGQSqjVfIamhjyI1yMExD-fb7/exec",
     gasToken:"6552b83f-9a7a-4dd1-8169-05193c6744e3",
     spreadsheetId:"1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
     folderId:"1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L",
-    liveJobs:[], jobsLoaded:false, jobsLoading:false, liveSyncError:null,
+    liveJobs:[], liveItems:[], reportMode:"live", jobsLoaded:false, jobsLoading:false, liveSyncError:null,
     uploadedFiles:[], uploadProgressText:"", isDragOver:false, fileWarnMsg:"", lastUploadedCount:0,
     mineEmailInput:"", mineSelectedEmail:"",
     connResults:{
@@ -1435,7 +1516,7 @@ class Component extends DCLogic {
   componentDidMount() {
     import("./spu-data.js").then(d => this.setState({ d }));
     const defaultGas = {
-      gasUrl: "https://script.google.com/macros/s/AKfycbyeqC6Va0HYKT55nUQuXTyKAfgKTrQ5nor96SN4JcWpln-fu_YBGYbpEqAZvRtkZzI9/exec",
+      gasUrl: "https://script.google.com/macros/s/AKfycbzoIU9FbYarbjLSniSxSxOM6ii0i38mtg3uDzZnTYqqGQSqjVfIamhjyI1yMExD-fb7/exec",
       gasToken: "6552b83f-9a7a-4dd1-8169-05193c6744e3",
       spreadsheetId: "1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
       folderId: "1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L"
@@ -1451,6 +1532,8 @@ class Component extends DCLogic {
       ["gasUrl", "gasToken", "spreadsheetId", "folderId"].forEach(k => {
         patch[k] = (saved && typeof saved[k] === "string" && saved[k].trim()) ? saved[k].trim() : defaultGas[k];
       });
+      // Always enforce the latest active Apps Script Web App URL
+      patch.gasUrl = defaultGas.gasUrl;
       const savedConn = JSON.parse(localStorage.getItem("spuGasConnResults") || "null");
       patch.connResults = (savedConn && savedConn.sheet && savedConn.drive && savedConn.access) ? savedConn : defaultConnResults;
       this.setState(patch, () => this._loadLiveJobs());
@@ -1611,10 +1694,13 @@ class Component extends DCLogic {
             email:row.requester_email||"", phone:row.phone||"", svc:"a4",
             purpose:row.purpose||(this.state.lang==="th"?"งานพิมพ์ทั่วไป":"General printing"),
             sent, need, est, conf, qty:1, status, overdue:isOver,
-            folderId:row.drive_folder_id||""
+            folderId:row.drive_folder_id||"",
+            budgetSource:row.budget_source||"", budgetAcct:row.budget_acct||"",
+            rawSubmittedAt:row.submitted_at||""
           };
         });
-        this.setState({ liveJobs:mapped, jobsLoaded:true, jobsLoading:false, liveSyncError:null });
+        const rawItems = Array.isArray(r.items) ? r.items : [];
+        this.setState({ liveJobs:mapped, liveItems:rawItems, jobsLoaded:true, jobsLoading:false, liveSyncError:null });
       }else{
         this.setState({ jobsLoading:false, liveSyncError:(r&&r.error)||"load_failed" });
       }
@@ -1654,7 +1740,21 @@ class Component extends DCLogic {
   }
   stTag(code){ const p=this.statusPalette()[code]; return p?[p.bg,p.fg]:["var(--color-neutral-100)","var(--color-neutral-700)"]; }
   jobStatus(j){ return this.state.jobs[j.no]||j.status; }
-  go(page){ return () => this.setState({ page }); }
+  go(page){
+    return () => {
+      const isExecUser = this.state.adminUserObj && this.state.adminUserObj.role === "EXECUTIVE";
+      const adminOnlyPages = ["queue", "mobile", "price", "sheet", "settings"];
+      if (isExecUser && adminOnlyPages.includes(page)) {
+        return;
+      }
+      const adminPages = ["queue", "mobile", "price", "raw", "sheet", "report", "settings", "dash"];
+      if (adminPages.includes(page) && !this.state.isAdminLoggedIn) {
+        this.setState({ adminLoginOpen: true, adminPassInput: "", adminLoginError: "" });
+        return;
+      }
+      this.setState({ page });
+    };
+  }
 
   renderVals(){
     const d=this.state.d; if(!d) return {};
@@ -1663,19 +1763,149 @@ class Component extends DCLogic {
       INK="var(--color-text)", BG="var(--color-bg)", N1="var(--color-neutral-100)",
       N2="var(--color-neutral-200)", N7="var(--color-neutral-700)";
 
-    const roleBtns=[["REQ",t.roleReq],["ADMIN",t.roleAdmin],["EXEC",t.roleExec]].map(([k,label],i)=>({
-      label, br:i<2?"1px solid var(--color-line)":"0", bg:S.role===k?AC:"transparent", fg:S.role===k?"#fff":INK,
-      go:()=>this.setState({ role:k, page:k==="REQ"?"landing":k==="ADMIN"?"queue":"dash" })
+    // Admin Auth & Role Management (Option 1: Linked to Google Sheet USERS tab)
+    const openAdminLogin = () => this.setState({ adminLoginOpen: true, adminEmailInput: "", adminPassInput: "", adminLoginError: "", adminLoginBusy: false });
+    const closeAdminLogin = () => this.setState({ adminLoginOpen: false, adminEmailInput: "", adminPassInput: "", adminLoginError: "", adminLoginBusy: false });
+    const setAdminEmailInput = e => this.setState({ adminEmailInput: e.target.value, adminLoginError: "" });
+    const setAdminPassInput = e => this.setState({ adminPassInput: e.target.value, adminLoginError: "" });
+    
+    const submitAdminLogin = async () => {
+      if (this.state.adminLoginBusy) return;
+      const email = (this.state.adminEmailInput || "").trim().toLowerCase();
+      const pass = (this.state.adminPassInput || "").trim();
+
+      if (!email) {
+        this.setState({ adminLoginError: S.lang === "th" ? "กรุณากรอกอีเมลเจ้าหน้าที่" : "Please enter staff email." });
+        return;
+      }
+      if (!email.endsWith("@spu.ac.th")) {
+        this.setState({ adminLoginError: S.lang === "th" ? "อีเมลต้องลงท้ายด้วย @spu.ac.th เท่านั้น" : "Email must end with @spu.ac.th" });
+        return;
+      }
+      if (!pass) {
+        this.setState({ adminLoginError: S.lang === "th" ? "กรุณากรอกรหัสผ่าน" : "Please enter password." });
+        return;
+      }
+
+      this.setState({ adminLoginBusy: true, adminLoginError: "" });
+
+      try {
+        let r = await this._gasCall("checkAdminUser", { email, password: pass });
+        // Fallback: If unknown_action occurs, it means the browser contacted an older deployment URL.
+        // Force retry directly using the updated active Web App URL:
+        const activeUrl = "https://script.google.com/macros/s/AKfycbzoIU9FbYarbjLSniSxSxOM6ii0i38mtg3uDzZnTYqqGQSqjVfIamhjyI1yMExD-fb7/exec";
+        if (r && (r.error === "unknown_action" || r.error === "missing_url")) {
+          this.setState({ gasUrl: activeUrl });
+          try {
+            const conf = JSON.parse(localStorage.getItem("spuGasConfig") || "{}");
+            conf.gasUrl = activeUrl;
+            localStorage.setItem("spuGasConfig", JSON.stringify(conf));
+          } catch(e){}
+          const res = await fetch(activeUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "checkAdminUser",
+              token: S.gasToken || "6552b83f-9a7a-4dd1-8169-05193c6744e3",
+              spreadsheetId: S.spreadsheetId || "1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
+              folderId: S.folderId || "1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L",
+              email,
+              password: pass
+            })
+          });
+          r = await res.json();
+        }
+
+        if (r && r.ok && r.isAdmin) {
+          const userRole = r.role || "ADMIN";
+          const isExec = userRole === "EXECUTIVE";
+          this.setState({
+            isAdminLoggedIn: true,
+            adminLoginOpen: false,
+            adminLoginBusy: false,
+            adminEmailInput: "",
+            adminPassInput: "",
+            adminLoginError: "",
+            adminUserObj: { name: r.name || email, email: r.email || email, role: userRole },
+            role: isExec ? "EXEC" : "ADMIN",
+            page: isExec ? "dash" : "queue"
+          });
+          return;
+        } else {
+          let errMsg = (r && r.message) || "";
+          if (r && r.error === "unknown_action") {
+            errMsg = S.lang === "th"
+              ? "URL Apps Script ปัจจุบันยังไม่รองรับระบบตรวจสอบสิทธิ์ (กรุณารีเฟรชหน้าเว็บ หรือนำ Code.gs ไป Deploy เวอร์ชันใหม่)"
+              : "Apps Script lacks checkAdminUser action (Please refresh or deploy a new version in Apps Script).";
+          } else if (!errMsg) {
+            errMsg = (r && r.error) || (S.lang === "th" ? "รหัสผ่านไม่ถูกต้อง หรือไม่พบสิทธิ์แอดมินใน Google Sheet" : "Invalid password or lacks admin role in Google Sheet");
+          }
+          this.setState({ adminLoginBusy: false, adminLoginError: errMsg });
+          return;
+        }
+      } catch (err) {
+        this.setState({
+          adminLoginBusy: false,
+          adminLoginError: S.lang === "th" ? "เกิดข้อผิดพลาดในการเชื่อมต่อกับ Google Sheet กรุณาลองใหม่อีกครั้ง" : "Connection error with Google Sheet. Please try again."
+        });
+      }
+    };
+
+    const adminLogout = () => {
+      this.setState({
+        isAdminLoggedIn: false,
+        adminLoginOpen: false,
+        adminEmailInput: "",
+        adminPassInput: "",
+        adminLoginError: "",
+        adminLoginBusy: false,
+        adminUserObj: null,
+        role: "REQ",
+        page: "landing"
+      });
+    };
+
+    // Role buttons: Only accessible when logged in
+    const isExecUser = S.adminUserObj && S.adminUserObj.role === "EXECUTIVE";
+    const availableRoleDefs = !S.isAdminLoggedIn
+      ? []
+      : isExecUser
+        ? [["REQ", t.roleReq], ["EXEC", t.roleExec]]
+        : [["ADMIN", t.roleAdmin], ["EXEC", t.roleExec], ["REQ", t.roleReq]];
+
+    const roleBtns = availableRoleDefs.map(([k, label], i) => ({
+      label, br: i < availableRoleDefs.length - 1 ? "1px solid var(--color-line)" : "0", bg: S.role === k ? AC : "transparent", fg: S.role === k ? "#fff" : INK,
+      go: () => this.setState({ role: k, page: k === "REQ" ? "landing" : (k === "ADMIN" ? "queue" : "dash") })
     }));
-    const langBtns=[["th","ไทย"],["en","EN"]].map(([k,label],i)=>({
-      label, br:i<1?"1px solid var(--color-line)":"0", bg:S.lang===k?AC:"transparent", fg:S.lang===k?"#fff":INK,
-      go:()=>this.setState({ lang:k })
+
+    const langBtns = [["th", "ไทย"], ["en", "EN"]].map(([k, label], i) => ({
+      label, br: i < 1 ? "1px solid var(--color-line)" : "0", bg: S.lang === k ? AC : "transparent", fg: S.lang === k ? "#fff" : INK,
+      go: () => this.setState({ lang: k })
     }));
-    const tabDefs={ REQ:[["landing",t.tabLanding],["wizard",t.tabWizard],["mine",t.tabMine],["track",t.tabTrack]],
-      ADMIN:[["queue",t.tabQueue],["mobile",t.tabMobile],["price",t.tabPrice],["raw",t.tabRaw],["sheet",t.tabSheet],["report",t.tabReport],["settings",t.tabSettings]],
-      EXEC:[["dash",t.tabDash],["report",t.tabReport],["raw",t.tabRaw]] };
-    const tabs=tabDefs[S.role].map(([k,label])=>({ label, go:this.go(k),
-      bd:S.page===k?AC:"transparent", fg:S.page===k?"var(--color-accent-700)":N7, fw:S.page===k?"700":"500" }));
+
+    // Tabs: Normal user only sees REQ tabs; Admin sees tabs of the active role; Exec only sees REQ or EXEC tabs
+    let effectiveRole = "REQ";
+    if (S.isAdminLoggedIn) {
+      if (isExecUser) {
+        effectiveRole = S.role === "EXEC" ? "EXEC" : "REQ";
+      } else {
+        effectiveRole = S.role;
+      }
+    }
+    // แสดง 3 เมนู แบบฟอร์มบริการ/งานของฉัน/ติดตามสถานะ ก็ต่อเมื่อกด "ขอรับบริการ" ผ่านด้วยอีเมล @spu.ac.th สำเร็จแล้วเท่านั้น
+    // (เช็คจาก flag ที่ตั้งตอนกดปุ่มสำเร็จ ไม่ใช่เช็คจากค่าที่พิมพ์ในช่องอีเมลสด ๆ — กันเมนูโผล่ก่อนกดปุ่ม)
+    const gateVerified = !!S.gateVerified;
+    const tabDefs = {
+      REQ: gateVerified
+        ? [["landing", t.tabLanding], ["wizard", t.tabWizard], ["mine", t.tabMine], ["track", t.tabTrack]]
+        : [["landing", t.tabLanding]],
+      ADMIN: [["queue", t.tabQueue], ["mobile", t.tabMobile], ["price", t.tabPrice], ["raw", t.tabRaw], ["sheet", t.tabSheet], ["report", t.tabReport], ["settings", t.tabSettings]],
+      EXEC: [["dash", t.tabDash], ["report", t.tabReport], ["raw", t.tabRaw]]
+    };
+    const tabs = tabDefs[effectiveRole].map(([k, label]) => ({
+      label, go: this.go(k),
+      bd: S.page === k ? AC : "transparent", fg: S.page === k ? "var(--color-accent-700)" : N7, fw: S.page === k ? "700" : "500"
+    }));
 
     // — email gate (landing) —
     const openGate=()=>this.setState({ gateOpen:true, gateErr:false, gateMsg:"" });
@@ -1686,9 +1916,9 @@ class Component extends DCLogic {
       const prof=d.SAMPLE_USERS[email];
       if(prof){ this.setState({ form:{ name:S.lang==="th"?prof.nameTh:prof.nameEn, pos:S.lang==="th"?prof.posTh:prof.posEn,
         unit:S.lang==="th"?prof.unitTh:prof.unitEn, phone:prof.phone, needBy:"", purpose:"", note:"" },
-        page:"wizard", gateOpen:false, gateErr:false, mineSelectedEmail:email, mineEmailInput:email }); }
+        page:"wizard", gateOpen:false, gateErr:false, gateVerified:true, mineSelectedEmail:email, mineEmailInput:email }); }
       else { this.setState({ form:{ name:"", pos:"", unit:"", phone:"", needBy:"", purpose:"", note:"" },
-        page:"wizard", gateOpen:false, gateErr:false, mineSelectedEmail:email, mineEmailInput:email }); }
+        page:"wizard", gateOpen:false, gateErr:false, gateVerified:true, mineSelectedEmail:email, mineEmailInput:email }); }
     };
 
     // — wizard: service group + item selection —
@@ -1836,12 +2066,12 @@ class Component extends DCLogic {
     const hasRequesterEmailOptions = requesterEmailOptions.length > 0;
     const hasNoRequesterEmails = requesterEmailOptions.length === 0;
 
-    // กรองแสดงเฉพาะงานของอีเมลที่เลือก
+    // กรองแสดงเฉพาะงานของอีเมลที่เลือก แล้วเรียงวันที่ส่งล่าสุดขึ้นก่อน (เลขที่งาน PRN-YYYYMM-NNNN เรียงตามลำดับเวลาส่งอยู่แล้ว)
     const userMatchedJobs = hasSelectedMineEmail
       ? jobsAll.filter(j => {
           const em = (j.email || (j.raw && j.raw.email) || "").trim().toLowerCase();
           return em === activeMineEmail;
-        })
+        }).sort((a, b) => (b.no || "").localeCompare(a.no || ""))
       : [];
 
     const myCards = userMatchedJobs.map(j => {
@@ -1885,9 +2115,17 @@ class Component extends DCLogic {
       (j.sent || "วันนี้") + " · " + (S.lang === "th" ? "อัปเดตผ่านระบบ Google Sheet" : "Updated via Google Sheet")
     ]).map(([head, body]) => ({ head, body }));
 
-    const cur = jobsAll.find(j => j.no === S.curNo) || (jobsAll.length > 0 ? jobsAll[0] : {
+    // เลือกงานที่จะติดตามได้เอง แทนที่จะสุ่มไปทับงานของคนอื่น — จำกัดเฉพาะงานของอีเมลที่ผ่าน gate มา
+    const trackScope = (S.gateEmail || "").trim().toLowerCase();
+    const trackJobs = (trackScope ? jobsAll.filter(j => (j.email || "").trim().toLowerCase() === trackScope) : jobsAll)
+      .slice().sort((a, b) => (b.no || "").localeCompare(a.no || ""));
+    const hasTrackJobs = trackJobs.length > 0;
+    const effectiveCurNo = (S.curNo && trackJobs.some(j => j.no === S.curNo)) ? S.curNo : (hasTrackJobs ? trackJobs[0].no : null);
+    const trackJobOptions = trackJobs.map(j => ({ v: j.no, label: j.no + " · " + j.service }));
+    const setTrackJob = e => this.setState({ curNo: e.target.value });
+    const cur = trackJobs.find(j => j.no === effectiveCurNo) || {
       no: "—", requester: "—", unit: "—", service: "—", sent: "—", need: "—", code: "RECEIVED", est: "—", conf: "—"
-    });
+    };
     const curIdx = d.FLOW.indexOf(cur.code);
     const TL_META = {
       RECEIVED: { at: cur.sent || "—", by: S.lang === "th" ? "ระบบ (Google Apps Script)" : "System (Google Apps Script)",
@@ -2054,7 +2292,12 @@ class Component extends DCLogic {
 
     const rr=(name,cells,head)=>({ name, cells:cells.map(v=>({ v })), span:1,
       fw:head?"700":"400", bg:head?N2:"transparent", pad:head?"6px":"18px" });
-    const reportRows=[
+
+    // --- Live A4 Report Calculation from Google Sheet Data ---
+    const isMockup = S.reportMode === "mockup";
+
+    // 1. Mockup template rows (for previewing the full design layout)
+    const mockupReportRows=[
       rr(S.lang==="th"?"กลุ่มอำนวยการกลาง":"Central Administration",["","","","","","",""],true),
       rr(S.lang==="th"?"สำนักงานอธิการบดี":"President's Office",["2,400","3,120","2","9,000","—","—","12,120"]),
       rr(S.lang==="th"?"สำนักงานทะเบียน":"Registrar Office",["4,150","5,400","1","2,000","300","6,000","13,400"]),
@@ -2069,14 +2312,212 @@ class Component extends DCLogic {
       { name:S.lang==="th"?"รวมทั้งสิ้น":"Grand total",
         cells:["20,030","26,000","18","56,900","950","15,000","97,900"].map(v=>({ v })), span:1, fw:"800", bg:N2, pad:"6px" }
     ];
-    // งานผลิตรายงานเป็น "จำนวนแผ่น" ตามที่ท่านรองฯ ใช้ดูยอด
-    const subHead=[t.sheetsCol,t.amt,t.cnt,t.amt,t.cnt,t.amt].map(label=>({ label }));
-    const revenueRows=[
+    const mockupRevenueRows=[
       [t.revValue,"97,900","800",N2],
       [t.revProject,"58,400","400","transparent"],
       [t.revExternal,"12,300","400","transparent"],
       [t.revInternal,"27,200","400","transparent"]
     ].map(([label,value,fw,bg])=>({ label, value, fw, bg }));
+
+    // 2. Filter live jobs based on selected date range or current active month
+    let liveReportJobs = jobsAll;
+    if (S.rgStart && S.rgEnd) {
+      liveReportJobs = jobsAll.filter(j => {
+        const d = (j.rawSubmittedAt || "").slice(0, 10);
+        return d >= S.rgStart && d <= S.rgEnd;
+      });
+    }
+
+    // Map of live items (from JOB_ITEMS) by job_no
+    const itemsByJob = {};
+    if (Array.isArray(S.liveItems)) {
+      S.liveItems.forEach(it => {
+        const jno = it.job_no || "";
+        if (!itemsByJob[jno]) itemsByJob[jno] = [];
+        itemsByJob[jno].push(it);
+      });
+    }
+
+    // Standard Groups for SPU Report
+    const reportGroups = [
+      {
+        th: "กลุ่มอำนวยการกลาง", en: "Central Administration",
+        units: [
+          { th: "สำนักงานอธิการบดี", en: "President's Office" },
+          { th: "สำนักงานทะเบียน", en: "Registrar Office" },
+          { th: "สำนักงานวิชาการ", en: "Academic Affairs Office" },
+          { th: "สำนักหอสมุด", en: "Library Office" }
+        ]
+      },
+      {
+        th: "กลุ่มงานกิจการนักศึกษา", en: "Student Affairs",
+        units: [
+          { th: "กองกิจการนักศึกษา", en: "Student Affairs Division" },
+          { th: "ศูนย์กีฬา", en: "Sports Center" }
+        ]
+      },
+      {
+        th: "กลุ่มงานการคลัง", en: "Finance Group",
+        units: [
+          { th: "กองการคลัง", en: "Finance Division" },
+          { th: "สำนักงานพัสดุ", en: "Procurement Office" }
+        ]
+      },
+      {
+        th: "คณะต่าง ๆ", en: "Faculties",
+        units: [
+          { th: "คณะบริหารธุรกิจ", en: "Business Administration" },
+          { th: "คณะนิเทศศาสตร์", en: "Communication Arts" },
+          { th: "คณะวิศวกรรมศาสตร์", en: "Engineering" },
+          { th: "คณะเทคโนโลยีสารสนเทศ", en: "Information Technology" },
+          { th: "คณะนิติศาสตร์", en: "Law" },
+          { th: "คณะศิลปศาสตร์", en: "Liberal Arts" },
+          { th: "คณะบัญชี", en: "Accountancy" },
+          { th: "คณะสถาปัตยกรรมศาสตร์", en: "Architecture" }
+        ]
+      }
+    ];
+
+    // Find any extra unit that appears in liveReportJobs but not in standard list
+    const knownUnitSet = new Set();
+    reportGroups.forEach(g => g.units.forEach(u => { knownUnitSet.add(u.th); knownUnitSet.add(u.en); }));
+    const extraUnits = [];
+    liveReportJobs.forEach(j => {
+      const u = j.unitTh || j.unit || "";
+      if (u && !knownUnitSet.has(u) && !extraUnits.some(eu => eu.th === u)) {
+        extraUnits.push({ th: u, en: u });
+      }
+    });
+    if (extraUnits.length > 0) {
+      reportGroups.push({
+        th: "หน่วยงานอื่น ๆ", en: "Other Units",
+        units: extraUnits
+      });
+    }
+
+    // Helper to categorize job or item:
+    // cat: 1 = prod (งานผลิต), 2 = design (งานพิมพ์และออกแบบ), 3 = color (พริ้นท์)
+    const getCat = (svcCode, text) => {
+      const s = String(svcCode || "").toLowerCase();
+      const p = String(text || "").toLowerCase();
+      if (s === "copy" || s === "dup" || s === "exam" || s === "bind" ||
+          p.includes("ผลิต") || p.includes("สำเนา") || p.includes("ข้อสอบ") || p.includes("เข้าเล่ม") || p.includes("ถ่ายเอกสาร")) {
+        return 1;
+      }
+      if (s === "card" || s === "cert" || s === "layout" ||
+          p.includes("ออกแบบ") || p.includes("นามบัตร") || p.includes("วุฒิบัตร") || p.includes("layout") || p.includes("artwork")) {
+        return 2;
+      }
+      return 3;
+    };
+
+    // Aggregate by unit
+    const unitMap = {};
+    // สรุปตามแหล่งงบประมาณจริงที่ผู้ขอเลือกตอนส่งฟอร์ม (budget_source จากแท็บ JOBS)
+    // — "has" (มีงบของหน่วยงานเอง) นับรวมอยู่ใน revValue (ยอดรวมทั้งหมด) อยู่แล้ว จึงไม่แยกเป็นแถวของตัวเอง
+    let totalProjectVal = 0, totalExternalVal = 0, totalInternalVal = 0;
+    liveReportJobs.forEach(j => {
+      const u = j.unitTh || j.unit || (S.lang === "th" ? "สำนักงานอธิการบดี" : "President's Office");
+      if (!unitMap[u]) {
+        unitMap[u] = { prodSheets: 0, prodVal: 0, designCnt: 0, designVal: 0, printCnt: 0, printVal: 0, totalVal: 0 };
+      }
+      const val = Number(j.conf && j.conf !== "—" ? String(j.conf).replace(/,/g, "") : (String(j.est).replace(/,/g, "") || 0)) || 0;
+      const bs = j.budgetSource || "";
+      if (bs === "project") totalProjectVal += val;
+      else if (bs === "personal") totalExternalVal += val;
+      else if (bs === "internal") totalInternalVal += val;
+      const jobItems = itemsByJob[j.no];
+      if (Array.isArray(jobItems) && jobItems.length > 0) {
+        jobItems.forEach(it => {
+          const itCat = getCat(it.service_code, it.service_code);
+          const itQty = Number(it.quantity) || 1;
+          const itVal = Number(it.confirmed_amount || it.estimated_amount || 0) || 0;
+          if (itCat === 1) {
+            unitMap[u].prodSheets += itQty;
+            unitMap[u].prodVal += itVal;
+          } else if (itCat === 2) {
+            unitMap[u].designCnt += itQty;
+            unitMap[u].designVal += itVal;
+          } else {
+            unitMap[u].printCnt += itQty;
+            unitMap[u].printVal += itVal;
+          }
+          unitMap[u].totalVal += itVal;
+        });
+      } else {
+        // Categorize at job level
+        const jCat = getCat(j.svc, j.purpose);
+        const jQty = Number(j.qty) || 1;
+        if (jCat === 1) {
+          unitMap[u].prodSheets += jQty;
+          unitMap[u].prodVal += val;
+        } else if (jCat === 2) {
+          unitMap[u].designCnt += jQty;
+          unitMap[u].designVal += val;
+        } else {
+          unitMap[u].printCnt += jQty;
+          unitMap[u].printVal += val;
+        }
+        unitMap[u].totalVal += val;
+      }
+    });
+
+    // Generate liveReportRows
+    let totalProdSheets = 0, totalProdVal = 0, totalDesignCnt = 0, totalDesignVal = 0, totalPrintCnt = 0, totalPrintVal = 0, totalGrand = 0;
+
+    const liveReportRows = [];
+    reportGroups.forEach(g => {
+      liveReportRows.push(rr(S.lang === "th" ? g.th : g.en, ["", "", "", "", "", "", ""], true));
+      g.units.forEach(u => {
+        const uLabel = S.lang === "th" ? u.th : u.en;
+        const data = unitMap[u.th] || unitMap[u.en] || { prodSheets: 0, prodVal: 0, designCnt: 0, designVal: 0, printCnt: 0, printVal: 0, totalVal: 0 };
+        totalProdSheets += data.prodSheets;
+        totalProdVal += data.prodVal;
+        totalDesignCnt += data.designCnt;
+        totalDesignVal += data.designVal;
+        totalPrintCnt += data.printCnt;
+        totalPrintVal += data.printVal;
+        totalGrand += data.totalVal;
+
+        liveReportRows.push(rr(uLabel, [
+          data.prodSheets > 0 ? data.prodSheets.toLocaleString() : "—",
+          data.prodVal > 0 ? data.prodVal.toLocaleString() : "—",
+          data.designCnt > 0 ? data.designCnt.toLocaleString() : "—",
+          data.designVal > 0 ? data.designVal.toLocaleString() : "—",
+          data.printCnt > 0 ? data.printCnt.toLocaleString() : "—",
+          data.printVal > 0 ? data.printVal.toLocaleString() : "—",
+          data.totalVal > 0 ? data.totalVal.toLocaleString() : "—"
+        ], false));
+      });
+    });
+
+    liveReportRows.push({
+      name: S.lang === "th" ? "รวมทั้งสิ้น" : "Grand total",
+      cells: [
+        totalProdSheets > 0 ? totalProdSheets.toLocaleString() : "0",
+        totalProdVal > 0 ? totalProdVal.toLocaleString() : "0",
+        totalDesignCnt > 0 ? totalDesignCnt.toLocaleString() : "0",
+        totalDesignVal > 0 ? totalDesignVal.toLocaleString() : "0",
+        totalPrintCnt > 0 ? totalPrintCnt.toLocaleString() : "0",
+        totalPrintVal > 0 ? totalPrintVal.toLocaleString() : "0",
+        totalGrand > 0 ? totalGrand.toLocaleString() : "0"
+      ].map(v => ({ v })),
+      span: 1, fw: "800", bg: N2, pad: "6px"
+    });
+
+    // Live revenue rows — แยกตามแหล่งงบประมาณจริงที่บันทึกไว้ต่องาน (budget_source) ไม่ใช่สัดส่วนสมมติ
+    const liveRevenueRows = [
+      [t.revValue, totalGrand > 0 ? totalGrand.toLocaleString() : "0", "800", N2],
+      [t.revProject, totalProjectVal > 0 ? totalProjectVal.toLocaleString() : "0", "400", "transparent"],
+      [t.revExternal, totalExternalVal > 0 ? totalExternalVal.toLocaleString() : "0", "400", "transparent"],
+      [t.revInternal, totalInternalVal > 0 ? totalInternalVal.toLocaleString() : "0", "400", "transparent"]
+    ].map(([label, value, fw, bg]) => ({ label, value, fw, bg }));
+
+    const reportRows = isMockup ? mockupReportRows : liveReportRows;
+    const revenueRows = isMockup ? mockupRevenueRows : liveRevenueRows;
+
+    // งานผลิตรายงานเป็น "จำนวนแผ่น" ตามที่ท่านรองฯ ใช้ดูยอด
+    const subHead=[t.sheetsCol,t.amt,t.cnt,t.amt,t.cnt,t.amt].map(label=>({ label }));
 
     const flowSteps=(S.lang==="th"?[
       ["01","ผู้ใช้ส่งคำขอ","เขียนหนึ่งแถวลงแท็บ JOBS และหนึ่งแถวต่อรายการบริการลง JOB_ITEMS"],
@@ -2254,8 +2695,10 @@ class Component extends DCLogic {
       const items=selected.map(s=>({ serviceCode:s.id, variant:buildVariant(s.id),
         qty:isProdGroup?(Number(S.prodQtyOrig)||0)*(Number(S.prodQtySets)||0):1,
         unit:S.lang==="th"?s.unitTh:s.unitEn }));
+      const budgetSource=budgetSkipped?"internal":(budgetNeeded?S.budget:"");
       const r=await this._gasCall("submitJob", { email:S.gateEmail, name:S.form.name, position:S.form.pos,
-        phone:S.form.phone, unit:S.form.unit, purpose:S.form.purpose, needBy:S.needByISO||"", items });
+        phone:S.form.phone, unit:S.form.unit, purpose:S.form.purpose, needBy:S.needByISO||"", items,
+        budgetSource, budgetAcct:(budgetNeeded&&S.budget==="personal")?S.budgetAcct:"" });
       if(r&&r.ok) {
         const jobNo = r.jobNo;
         const toUpload = [...S.uploadedFiles];
@@ -2355,12 +2798,41 @@ class Component extends DCLogic {
         this.setState({ mineSelectedEmail:em, mineEmailInput:em });
       },
       clearMineEmail:()=>this.setState({ mineSelectedEmail:"", mineEmailInput:"" }),
+      isAdminLoggedIn:S.isAdminLoggedIn,
+      isNormalUser:!S.isAdminLoggedIn,
+      adminLoginOpen:S.adminLoginOpen,
+      adminEmailInput:S.adminEmailInput,
+      setAdminEmailInput,
+      adminPassInput:S.adminPassInput,
+      setAdminPassInput,
+      adminLoginBusy:S.adminLoginBusy,
+      adminLoginError:S.adminLoginError,
+      hasAdminLoginError:!!S.adminLoginError,
+      openAdminLogin, closeAdminLogin, submitAdminLogin, adminLogout,
+      onAdminPassKeyDown:e=>{ if(e.key==="Enter") submitAdminLogin(); },
+      adminLoginBtnLabel:S.lang==="th"?"Admin & Executive":"Admin & Executive",
+      adminLogoutBtnLabel:S.lang==="th"?"ออกจากระบบ":"Sign Out",
+      adminActiveBadgeLabel:isExecUser
+        ?(S.lang==="th"?"ผู้บริหาร SPU":"Executive")
+        :(S.lang==="th"?"แอดมินโรงพิมพ์":"Staff Active"),
+      adminStaffName:(S.adminUserObj&&S.adminUserObj.name)||(isExecUser?(S.lang==="th"?"ผู้บริหาร":"Executive"):(S.lang==="th"?"เจ้าหน้าที่โรงพิมพ์":"Staff")),
+      adminModalTitle:S.lang==="th"?"เข้าสู่ระบบเจ้าหน้าที่ & ผู้บริหาร":"Staff & Executive Sign-In",
+      adminModalSub:S.lang==="th"?"กรุณากรอกอีเมลและรหัสผ่าน เพื่อเข้าถึงข้อมูลตามสิทธิ์การใช้งาน":"Enter email and password to access authorized views.",
+      adminEmailLabel:S.lang==="th"?"อีเมล (@spu.ac.th):":"Email (@spu.ac.th):",
+      adminEmailPh:S.lang==="th"?"ระบุอีเมล @spu.ac.th":"Enter staff @spu.ac.th email",
+      adminPassLabel:S.lang==="th"?"รหัสผ่าน:":"Password:",
+      adminPassPh:S.lang==="th"?"กรอกรหัสผ่าน":"Enter password",
+      adminSubmitBtnText:S.adminLoginBusy
+        ?(S.lang==="th"?"กำลังตรวจสอบสิทธิ์…":"Verifying…")
+        :(S.lang==="th"?"เข้าสู่ระบบ":"Sign In"),
+      btnCancel:S.lang==="th"?"ยกเลิก":"Cancel",
       mineEmailSubTitle:S.lang==="th"?"ดึงประวัติคำขอจริงจาก Google Sheet ตามอีเมลผู้ขอรับบริการ":"Live request history from Google Sheet filtered by requester email",
       mineFilterLabel:S.lang==="th"?"ค้นหาประวัติคำขอ:":"Search request history:",
       mineEmailSelectPlaceholder:S.lang==="th"
         ?("-- เลือกอีเมลที่มีประวัติในระบบ ("+uniqueRequesterEmails.length+" อีเมล) --")
         :("-- Select an email ("+uniqueRequesterEmails.length+") --"),
       clearFilterLabel:S.lang==="th"?"สลับ / ล้างการค้นหา":"Clear / Switch email",
+      mineSearchBtn:S.lang==="th"?"ค้นหา":"Search",
       mineCountFoundText:S.lang==="th"
         ?("พบ "+myCards.length+" รายการในระบบ Google Sheet")
         :(myCards.length+" requests found in Google Sheet"),
@@ -2376,6 +2848,7 @@ class Component extends DCLogic {
       q:S.q, setQ:e=>this.setState({ q:e.target.value }),
       mobileFilters, mobileJobs, statusLog,
       curJobNo:cur.no, curJobService:cur.service, curJobUnit:cur.unit,
+      trackJobOptions, setTrackJob, hasTrackJobs, curNoSelected:effectiveCurNo||"",
       timeline, jobDetailRows, priceRules, priceNotes,
       rawCols, rawRows, rawCount, kpis, monthly, topServices, statusMix, yearOpts, monthOpts, unitOpts,
       dashYear:S.dashYear, dashMonth:S.dashMonth, dashUnit:S.dashUnit,
@@ -2402,6 +2875,15 @@ class Component extends DCLogic {
         :t.a4Period,
       reportRows, subHead, doPrint:()=>window.print(),
       doSendEmail:()=>this.setState({ reportSent:true }), sendEmailMsg:S.reportSent?t.sendEmailOk:"",
+      toggleReportMode: () => this.setState(st => ({ reportMode: st.reportMode === "mockup" ? "live" : "mockup" })),
+      isLiveReport: !isMockup,
+      reportModeLabel: isMockup
+        ? (S.lang === "th" ? "📄 ตัวอย่างจำลอง (คลิกดูข้อมูลจริง)" : "📄 Mockup (Click for Live Data)")
+        : (S.lang === "th" ? "🟢 ข้อมูลจริง Google Sheet (" + liveReportJobs.length + " รายการ)" : "🟢 Live Google Sheet (" + liveReportJobs.length + " jobs)"),
+      liveJobReportBadge: S.lang === "th"
+        ? ("คำนวณสดจาก Google Sheet (JOBS) รวม " + liveReportJobs.length + " รายการคำขอ")
+        : ("Live from Google Sheet (JOBS) · " + liveReportJobs.length + " requests"),
+      a4DocDate: this._fmt(this._today()),
       flowSteps, sheetTabs, sheetCols, sheetRules,
       settingGroups, setupSteps, setRules, mapRows,
       connBg:connBgLive, connBorder:connBorderLive, connColor:connColorLive, connLabel:connLabelLive, connWhen:connWhenLive,

@@ -9,11 +9,11 @@
 
 // ---------- โครงสร้างแท็บที่ระบบต้องใช้ (ต้องตรงกับ spu-data.js -> SHEET_TABS) ----------
 var SHEET_SCHEMA = {
-  JOBS: ["job_no","submitted_at","requester_email","requester_name","position_type","phone","unit_code","required_date","purpose","status","estimated_amount","confirmed_amount","completed_at","drive_folder_id"],
+  JOBS: ["job_no","submitted_at","requester_email","requester_name","position_type","phone","unit_code","required_date","purpose","status","estimated_amount","confirmed_amount","completed_at","drive_folder_id","budget_source","budget_acct"],
   JOB_ITEMS: ["item_id","job_no","service_code","variant_snapshot","quantity","unit","unit_price","estimated_amount","confirmed_amount","price_rule_id","price_rule_snapshot","override_reason"],
   PRICE_RULES: ["rule_id","service_code","condition","price_type","price","min_price","max_price","effective_from","effective_to","active","note"],
   UNITS: ["unit_code","unit_name","parent_group","display_order","active"],
-  USERS: ["email","full_name","role","unit_code","phone","active"],
+  USERS: ["email","full_name","role","unit_code","phone","active","password"],
   FILES: ["file_id","job_no","file_name","mime_type","file_size","file_category","uploaded_by","uploaded_at","web_view_link"],
   STATUS_LOG: ["log_id","job_no","old_status","new_status","changed_by","changed_at","note","channel"],
   NOTIFY_LOG: ["notify_id","job_no","template_code","recipient","status","sent_at","error"],
@@ -69,6 +69,8 @@ function handle_(p) {
       case "updateStatus": return json_(updateStatus_(p));
       case "uploadFile": return json_(uploadFile_(p));
       case "listJobs": return json_(listJobs_(p));
+      case "checkAdminUser": return json_(checkAdminUser_(p));
+      case "listUsers": return json_(listUsers_(p));
       default: return json_({ ok: false, error: "unknown_action" });
     }
   } catch (err) {
@@ -175,7 +177,7 @@ function submitJob_(p) {
   jobsSh.appendRow([
     jobNo, new Date(), p.email || "", p.name || "", p.position || "", p.phone || "",
     p.unit || "", p.needBy || "", p.purpose || "", "RECEIVED",
-    p.estimatedAmount || "", "", "", jobFolderId
+    p.estimatedAmount || "", "", "", jobFolderId, p.budgetSource || "", p.budgetAcct || ""
   ]);
   (p.items || []).forEach(function (it, i) {
     itemsSh.appendRow([
@@ -234,5 +236,116 @@ function listJobs_(p) {
     headers.forEach(function (h, i) { o[h] = row[i]; });
     return o;
   });
-  return { ok: true, jobs: jobs };
+
+  var itemsSh = ss.getSheetByName("JOB_ITEMS");
+  var items = [];
+  if (itemsSh && itemsSh.getLastRow() > 1) {
+    var iValues = itemsSh.getDataRange().getValues();
+    var iHeaders = iValues.shift();
+    items = iValues.map(function (row) {
+      var o = {};
+      iHeaders.forEach(function (h, i) { o[h] = row[i]; });
+      return o;
+    });
+  }
+
+  return { ok: true, jobs: jobs, items: items };
+}
+
+function checkAdminUser_(p) {
+  var ss = openSheet_(p);
+  var sh = ss.getSheetByName("USERS");
+  if (!sh) return { ok: false, error: "users_sheet_not_found", message: "ไม่พบแท็บ USERS ใน Google Sheet" };
+  var values = sh.getDataRange().getValues();
+  if (values.length <= 1) return { ok: false, error: "no_users_found", message: "ยังไม่มีข้อมูลในแท็บ USERS (กรุณาเพิ่มอีเมลเจ้าหน้าที่ในแท็บ USERS)" };
+  var headers = values.shift();
+  var emailIdx = headers.indexOf("email");
+  var roleIdx = headers.indexOf("role");
+  var activeIdx = headers.indexOf("active");
+  var nameIdx = headers.indexOf("full_name");
+  var unitIdx = headers.indexOf("unit_code");
+  var passIdx = headers.indexOf("password");
+
+  var targetEmail = String(p.email || "").trim().toLowerCase();
+  var targetPass = String(p.password || "").trim();
+
+  // 1. ค้นหาผู้ใช้ในแท็บ USERS
+  var matchedUser = null;
+  for (var i = 0; i < values.length; i++) {
+    var row = values[i];
+    var em = String(row[emailIdx] || "").trim().toLowerCase();
+    if (em === targetEmail) {
+      matchedUser = row;
+      break;
+    }
+  }
+
+  if (!matchedUser) {
+    return { ok: false, error: "user_not_found", message: "ไม่พบอีเมลนี้ในรายชื่อผู้ใช้ของระบบ (แท็บ USERS)" };
+  }
+
+  // 2. ตรวจสอบสถานะ active
+  var rawActive = matchedUser[activeIdx];
+  var isActive = rawActive === true || String(rawActive).toUpperCase() === "TRUE" || rawActive === 1 || rawActive === "1" || rawActive === "";
+  if (!isActive) {
+    return { ok: false, error: "user_inactive", message: "บัญชีนี้ถูกระงับการใช้งานในระบบ" };
+  }
+
+  // 3. ตรวจสอบบทบาท role
+  var role = String(matchedUser[roleIdx] || "").trim().toUpperCase();
+  if (role !== "ADMIN" && role !== "EXECUTIVE") {
+    return { ok: false, error: "not_admin", message: "อีเมลนี้ไม่มีสิทธิ์ระดับเจ้าหน้าที่โรงพิมพ์ (สิทธิ์ปัจจุบัน: " + role + ")" };
+  }
+
+  // 4. ดึงรหัสผ่านที่ถูกต้องจาก Google Sheet (แท็บ USERS คอลัมน์ password หรือแท็บ SETTINGS คีย์ admin_password)
+  var expectedPass = "";
+  if (passIdx !== -1 && String(matchedUser[passIdx] || "").trim()) {
+    expectedPass = String(matchedUser[passIdx]).trim();
+  } else {
+    var settingsSh = ss.getSheetByName("SETTINGS");
+    if (settingsSh) {
+      var sValues = settingsSh.getDataRange().getValues();
+      for (var s = 1; s < sValues.length; s++) {
+        var sKey = String(sValues[s][0] || "").trim().toLowerCase();
+        if (sKey === "admin_password" || sKey === "admin_pin") {
+          expectedPass = String(sValues[s][1] || "").trim();
+          break;
+        }
+      }
+      // ถ้ายังไม่มีแถว admin_password ใน SETTINGS ให้สร้างแถวเริ่มต้นให้อัตโนมัติ เพื่อให้ผู้ใช้เข้าไปดูและแก้ได้
+      if (!expectedPass) {
+        expectedPass = "admin1234";
+        settingsSh.appendRow(["admin_password", expectedPass, "system", new Date(), "รหัสผ่านสำหรับเข้าสู่ระบบแอดมินโรงพิมพ์ (สามารถเปลี่ยนรหัสได้ที่นี่)"]);
+      }
+    }
+  }
+
+  // 5. ตรวจสอบรหัสผ่านที่ผู้ใช้ส่งมา
+  if (!expectedPass || targetPass !== expectedPass) {
+    return { ok: false, error: "invalid_password", message: "รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง" };
+  }
+
+  return {
+    ok: true,
+    isAdmin: true,
+    role: role,
+    email: targetEmail,
+    name: String(matchedUser[nameIdx] || targetEmail),
+    unit: String(matchedUser[unitIdx] || "")
+  };
+}
+
+function listUsers_(p) {
+  var ss = openSheet_(p);
+  var sh = ss.getSheetByName("USERS");
+  if (!sh) return { ok: false, error: "users_sheet_not_found" };
+  var values = sh.getDataRange().getValues();
+  if (values.length <= 1) return { ok: true, users: [] };
+  var headers = values.shift();
+  var users = values.map(function (row) {
+    var o = {};
+    headers.forEach(function (h, i) { o[h] = row[i]; });
+    return o;
+  });
+  return { ok: true, users: users };
 }
