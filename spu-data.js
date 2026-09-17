@@ -88,6 +88,9 @@ export const TH = {
   driveWarnFull:"เมื่อโรงพิมพ์ดำเนินการเสร็จสิ้นและท่านได้รับชิ้นงานเรียบร้อยแล้ว กรุณายกเลิกการแชร์ลิงก์นี้ เพื่อจำกัดสิทธิ์การเข้าถึงไฟล์งานของท่านจากบุคคลอื่น",
   submitOkMsg:"โรงพิมพ์ได้รับคำขอรับบริการจากท่านแล้ว ในระหว่างให้บริการ ท่านสามารถติดตามการให้บริการได้ที่",
   trackJobNo:"เลขที่งาน", trackService:"บริการ", trackStatus:"สถานะ", sendEmail:"ส่งอีเมล", sendEmailOk:"ส่งรายงานให้ทางอีเมลแล้ว",
+  reportEmailToLabel:"อีเมลปลายทาง (ผู้บริหาร)", reportEmailToPh:"เช่น director@spu.ac.th",
+  reportEmailSend:"ส่งเลย", reportEmailSending:"กำลังส่ง…",
+  reportEmailErrInvalid:"กรุณากรอกอีเมลให้ถูกต้อง", reportEmailErrNoGas:"ยังไม่ได้ตั้งค่าเชื่อมต่อ Google Sheet กรุณาไปที่แท็บ \"ตั้งค่าเชื่อมต่อ\" ก่อน",
   colLetter:"คอลัมน์", colName:"ชื่อคอลัมน์", colType:"ชนิด", colDesc:"คำอธิบาย",
   sheetRulesTitle:"กติกาการเก็บข้อมูลในชีต",
   setKicker:"ตั้งค่าระบบ", setTitle:"ผูก Google Drive กับ Google Sheet",
@@ -223,7 +226,10 @@ export const EN = {
   reviewTitle:"Review before you submit", reviewSub:"Check everything below. The print shop reviews and processes it next.",
   driveWarnShort:"Please stop sharing this link once the job is done", driveWarnFull:"Once the print shop has completed your job, please stop sharing this link to limit others' access to your files.",
   submitOkMsg:"The print shop has received your service request. You can track its progress at any time.",
-  trackJobNo:"Job no.", trackService:"Service", trackStatus:"Status", sendEmail:"Send email", sendEmailOk:"The report has been emailed."
+  trackJobNo:"Job no.", trackService:"Service", trackStatus:"Status", sendEmail:"Send email", sendEmailOk:"The report has been emailed.",
+  reportEmailToLabel:"Recipient email (executive)", reportEmailToPh:"e.g. director@spu.ac.th",
+  reportEmailSend:"Send", reportEmailSending:"Sending…",
+  reportEmailErrInvalid:"Please enter a valid email address.", reportEmailErrNoGas:"Google Sheet isn't connected yet — set it up on the Settings tab first."
 };
 
 export const CATS = [

@@ -71,6 +71,7 @@ function handle_(p) {
       case "listJobs": return json_(listJobs_(p));
       case "checkAdminUser": return json_(checkAdminUser_(p));
       case "listUsers": return json_(listUsers_(p));
+      case "sendReportEmail": return json_(sendReportEmail_(p));
       default: return json_({ ok: false, error: "unknown_action" });
     }
   } catch (err) {
@@ -348,4 +349,70 @@ function listUsers_(p) {
     return o;
   });
   return { ok: true, users: users };
+}
+
+// ---------- ส่งเอกสารสรุปรายงานทางอีเมล (หน้า "เอกสารสรุปรายงาน" ของผู้บริหาร) ----------
+// ผู้ใช้ต้องกรอกอีเมลปลายทางในหน้าเว็บทุกครั้งก่อนกดส่ง ไม่มีอีเมลตายตัวฝังอยู่ในระบบ
+
+/**
+ * รันฟังก์ชันนี้ "ครั้งเดียว" จากตัวแก้ไข Apps Script โดยตรง (เลือก authorizeMailSend จาก dropdown แล้วกด Run)
+ * เพื่อขออนุมัติสิทธิ์ "ส่งอีเมลในนามของคุณ" ให้กับสคริปต์ — ต้องทำครั้งแรกก่อนใช้ปุ่ม "ส่งอีเมล" ในหน้าเว็บ
+ * เพราะการเรียกผ่าน Web App (fetch จากหน้าเว็บ) ไม่สามารถเด้งหน้าต่างขอสิทธิ์ใหม่ให้กดอนุมัติได้เอง
+ * รันแล้วเช็คอีเมลของบัญชีที่ deploy สคริปต์นี้ไว้ ควรได้รับอีเมลทดสอบ 1 ฉบับ
+ * (ตั้งชื่อไม่มีขีดล่างต่อท้าย เพราะ Apps Script จะไม่แสดงฟังก์ชันที่ลงท้ายด้วย "_" ใน dropdown เลือกรัน)
+ */
+function authorizeMailSend() {
+  var me = Session.getEffectiveUser().getEmail();
+  MailApp.sendEmail(me, "ทดสอบสิทธิ์ส่งอีเมล — SPU Printing Service",
+    "ถ้าคุณได้รับอีเมลฉบับนี้ แปลว่า Apps Script มีสิทธิ์ส่งอีเมลเรียบร้อยแล้ว ปุ่ม \"ส่งอีเมล\" ในหน้าเว็บใช้งานได้ตามปกติ");
+  Logger.log("ส่งอีเมลทดสอบไปที่ " + me + " แล้ว — ถ้าไม่มี error แปลว่าสิทธิ์อนุมัติเรียบร้อย");
+}
+
+function sendReportEmail_(p) {
+  var to = String(p.to || "").trim();
+  if (!to) return { ok: false, error: "missing_to", message: "กรุณากรอกอีเมลปลายทาง" };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+    return { ok: false, error: "invalid_email", message: "รูปแบบอีเมลไม่ถูกต้อง" };
+  }
+
+  var periodText = String(p.periodText || "");
+  var subject = "รายงานสรุปการใช้บริการโรงพิมพ์" + (periodText ? " — " + periodText : "");
+  var html = buildReportEmailHtml_(periodText, p.rows, p.revenue);
+
+  MailApp.sendEmail({ to: to, subject: subject, htmlBody: html });
+  return { ok: true, to: to };
+}
+
+function buildReportEmailHtml_(periodText, rows, revenue) {
+  rows = Array.isArray(rows) ? rows : [];
+  revenue = Array.isArray(revenue) ? revenue : [];
+
+  var rowsHtml = rows.map(function (r) {
+    var headStyle = r.head ? "font-weight:700;background:#f2f2f2;" : "";
+    var firstCell = '<td style="border:1px solid #ddd;padding:6px 8px;' + headStyle + '">' + escapeHtml_(r.name || "") + "</td>";
+    var restCells = (r.cells || []).map(function (v) {
+      return '<td style="border:1px solid #ddd;padding:6px 8px;text-align:right;' + headStyle + '">' + escapeHtml_(String(v == null ? "" : v)) + "</td>";
+    }).join("");
+    return "<tr>" + firstCell + restCells + "</tr>";
+  }).join("");
+
+  var revenueHtml = revenue.map(function (r) {
+    return '<tr><td style="padding:5px 8px;border-bottom:1px solid #eee;">' + escapeHtml_(r.label || "") + '</td>'
+      + '<td style="padding:5px 8px;border-bottom:1px solid #eee;text-align:right;font-variant-numeric:tabular-nums;">' + escapeHtml_(r.value || "") + "</td></tr>";
+  }).join("");
+
+  return ""
+    + '<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#111;max-width:720px">'
+    + '<h2 style="margin:0 0 4px">สรุปการขอใช้บริการ โรงพิมพ์</h2>'
+    + '<div style="color:#555;margin-bottom:16px">' + escapeHtml_(periodText) + "</div>"
+    + '<table style="border-collapse:collapse;width:100%;font-size:12.5px">' + rowsHtml + "</table>"
+    + '<h3 style="margin:20px 0 8px">สรุปรายได้</h3>'
+    + '<table style="border-collapse:collapse;width:100%;font-size:13px">' + revenueHtml + "</table>"
+    + '<div style="margin-top:20px;color:#888;font-size:11.5px">อีเมลนี้ส่งจากระบบใช้บริการโรงพิมพ์ มหาวิทยาลัยศรีปทุม โดยอัตโนมัติ ข้อมูลคำนวณจาก Google Sheet ล่าสุด ณ เวลาที่ส่ง</div>'
+    + "</div>";
+}
+
+function escapeHtml_(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
