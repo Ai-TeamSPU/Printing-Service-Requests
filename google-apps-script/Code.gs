@@ -10,7 +10,8 @@
 // ---------- โครงสร้างแท็บที่ระบบต้องใช้ (ต้องตรงกับ spu-data.js -> SHEET_TABS) ----------
 var SHEET_SCHEMA = {
   JOBS: ["job_no","submitted_at","requester_email","requester_name","position_type","phone","unit_code","required_date","purpose","status","estimated_amount","confirmed_amount","completed_at","drive_folder_id","budget_source","budget_acct"],
-  JOB_ITEMS: ["item_id","job_no","service_code","variant_snapshot","quantity","unit","unit_price","estimated_amount","confirmed_amount","price_rule_id","price_rule_snapshot","override_reason"],
+  // variant_snapshot (คอลัมน์ D): เลิกเขียนค่าใหม่แล้ว (ทางเลือก A — เก็บคอลัมน์ไว้ ไม่ลบ ข้อมูลเก่าไม่หาย) ใช้คอลัมน์แยกท้ายแถวแทน
+  JOB_ITEMS: ["item_id","job_no","service_code","variant_snapshot","quantity","unit","unit_price","estimated_amount","confirmed_amount","price_rule_id","price_rule_snapshot","override_reason","color_mode","paper_size","paper_type","sides","staple","own_paper","qty_original","qty_sets","exam_type","exam_subject"],
   PRICE_RULES: ["rule_id","service_code","condition","price_type","price","min_price","max_price","effective_from","effective_to","active","note"],
   UNITS: ["unit_code","unit_name","parent_group","display_order","active"],
   USERS: ["email","full_name","role","unit_code","phone","active","password"],
@@ -39,6 +40,29 @@ function setupSheets() {
     ss.deleteSheet(def);
   }
   Logger.log("สร้างแท็บครบแล้ว: " + Object.keys(SHEET_SCHEMA).join(", "));
+}
+
+// ---------- แท็บ Personnel_Information (ทะเบียนบุคลากร ใช้เติมฟอร์มอัตโนมัติ) ----------
+// แยกออกจาก setupSheets() ข้างบนโดยตั้งใจ: setupSheets() เขียนทับหัวตารางทุกครั้งที่รัน (เพื่อรับ schema ใหม่ของแท็บระบบ)
+// แต่แท็บนี้อาจเป็นทะเบียนบุคลากรจริงที่คุณสร้าง/กรอกไว้เองล่วงหน้าด้วยชื่อคอลัมน์ของคุณเอง จึง "สร้างให้ก็ต่อเมื่อยังไม่มีแท็บนี้อยู่เลย" เท่านั้น ไม่แตะของเดิม
+var PERSONNEL_SHEET_NAME = "Personnel_Information";
+
+/**
+ * รันฟังก์ชันนี้ "ครั้งเดียว" ถ้ายังไม่เคยมีแท็บ Personnel_Information ในชีต — จะสร้างแท็บเปล่าพร้อมหัวตารางให้
+ * ถ้ามีแท็บนี้อยู่แล้ว (ไม่ว่าจะหัวตารางแบบไหน) จะไม่แตะต้องอะไรเลย ปลอดภัยกับข้อมูลที่กรอกไว้แล้ว
+ */
+function setupPersonnelSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(PERSONNEL_SHEET_NAME);
+  if (sh) {
+    Logger.log("มีแท็บ " + PERSONNEL_SHEET_NAME + " อยู่แล้ว ไม่แตะต้องหัวตาราง/ข้อมูลเดิม");
+    return;
+  }
+  sh = ss.insertSheet(PERSONNEL_SHEET_NAME);
+  var headers = ["requester_email", "full_name", "unit_name"];
+  sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+  sh.setFrozenRows(1);
+  Logger.log("สร้างแท็บ " + PERSONNEL_SHEET_NAME + " ใหม่ พร้อมหัวตาราง: " + headers.join(", "));
 }
 
 // ---------- จุดเข้า HTTP ----------
@@ -72,6 +96,7 @@ function handle_(p) {
       case "checkAdminUser": return json_(checkAdminUser_(p));
       case "listUsers": return json_(listUsers_(p));
       case "sendReportEmail": return json_(sendReportEmail_(p));
+      case "lookupPersonnel": return json_(lookupPersonnel_(p));
       default: return json_({ ok: false, error: "unknown_action" });
     }
   } catch (err) {
@@ -182,9 +207,12 @@ function submitJob_(p) {
   ]);
   (p.items || []).forEach(function (it, i) {
     itemsSh.appendRow([
-      jobNo + "-" + (i + 1), jobNo, it.serviceCode || "", it.variant || "",
+      jobNo + "-" + (i + 1), jobNo, it.serviceCode || "", "", // variant_snapshot: เลิกเขียนแล้ว (ทางเลือก A) ใช้คอลัมน์แยกด้านล่างแทน
       it.qty || "", it.unit || "", it.unitPrice || "", it.estimatedAmount || "",
-      "", it.priceRuleId || "", it.priceRuleSnapshot || "", ""
+      "", it.priceRuleId || "", it.priceRuleSnapshot || "", "",
+      it.colorMode || "", it.paperSize || "", it.paperType || "", it.sides || "",
+      it.staple || "", it.ownPaper || "", it.qtyOriginal || "", it.qtySets || "",
+      it.examType || "", it.examSubject || ""
     ]);
   });
   logStatus_(ss, jobNo, "", "RECEIVED", p.email || "system", "web", "ส่งคำขอใหม่ผ่านเว็บ");
@@ -349,6 +377,49 @@ function listUsers_(p) {
     return o;
   });
   return { ok: true, users: users };
+}
+
+// หาคอลัมน์จากรายชื่อหัวตารางที่ยอมรับได้หลายแบบ (รองรับทั้งหัวตารางภาษาอังกฤษและภาษาไทยที่อาจกรอกไว้เอง)
+function findColIdx_(headers, candidates) {
+  for (var i = 0; i < candidates.length; i++) {
+    var idx = headers.indexOf(candidates[i]);
+    if (idx !== -1) return idx;
+  }
+  return -1;
+}
+
+// ---------- ตรวจจับอีเมลผู้ขอกับทะเบียนบุคลากร (หน้า gate ตอน "เริ่มใช้บริการ") ----------
+// เทียบอีเมลที่กรอกกับคอลัมน์ requester_email ในแท็บ Personnel_Information ถ้าพบ ดึงชื่อ-สกุล และหน่วยงาน มาเติมฟอร์มให้อัตโนมัติ
+function lookupPersonnel_(p) {
+  var ss = openSheet_(p);
+  var sh = ss.getSheetByName(PERSONNEL_SHEET_NAME);
+  if (!sh) return { ok: false, error: "personnel_sheet_not_found", message: "ไม่พบแท็บ " + PERSONNEL_SHEET_NAME + " ใน Google Sheet" };
+
+  var values = sh.getDataRange().getValues();
+  if (values.length <= 1) return { ok: true, found: false };
+
+  var headers = values.shift();
+  var emailIdx = findColIdx_(headers, ["requester_email", "email"]);
+  var nameIdx = findColIdx_(headers, ["full_name", "ชื่อ-สกุล", "ชื่อ - สกุล", "name"]);
+  var unitIdx = findColIdx_(headers, ["unit_name", "หน่วยงาน", "unit", "unit_code"]);
+  if (emailIdx === -1) return { ok: false, error: "email_column_not_found", message: "ไม่พบคอลัมน์อีเมลในแท็บ " + PERSONNEL_SHEET_NAME };
+
+  var target = String(p.email || "").trim().toLowerCase();
+  if (!target) return { ok: true, found: false };
+
+  for (var i = 0; i < values.length; i++) {
+    var row = values[i];
+    var em = String(row[emailIdx] || "").trim().toLowerCase();
+    if (em === target) {
+      return {
+        ok: true, found: true,
+        email: String(row[emailIdx] || "").trim(),
+        name: nameIdx !== -1 ? String(row[nameIdx] || "").trim() : "",
+        unit: unitIdx !== -1 ? String(row[unitIdx] || "").trim() : ""
+      };
+    }
+  }
+  return { ok: true, found: false };
 }
 
 // ---------- ส่งเอกสารสรุปรายงานทางอีเมล (หน้า "เอกสารสรุปรายงาน" ของผู้บริหาร) ----------

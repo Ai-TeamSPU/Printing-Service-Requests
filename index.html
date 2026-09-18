@@ -220,14 +220,26 @@
           }
         }
 
+        @page {
+          size: A4;
+          margin: 0;
+        }
+
         @media print {
           .no-print {
             display: none !important;
           }
 
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+
           .a4sheet {
             box-shadow: none !important;
             margin: 0 !important;
+            width: 100% !important;
+            min-height: 0 !important;
           }
         }
       </style>
@@ -399,8 +411,8 @@
                     <div style="font-size:13px;color:var(--color-accent-700);margin-top:8px;font-weight:600">{{
                       t.emailGateErr }}</div>
                   </sc-if>
-                  <button class="btn btn-primary btn-block" onClick="{{ submitGate }}"
-                    style="margin-top:16px;min-height:48px">{{ t.emailGateBtn }}</button>
+                  <button class="btn btn-primary btn-block" onClick="{{ submitGate }}" disabled="{{ gateBusy }}"
+                    style="margin-top:16px;min-height:48px">{{ emailGateBtnLabel }}</button>
                 </div>
               </sc-if>
             </div>
@@ -1713,7 +1725,7 @@
                     </sc-for>
                   </tbody>
                 </table>
-                <div style="margin-top:20px;border:1px solid var(--color-line)">
+                <div style="margin-top:20px;border:1px solid var(--color-line);break-inside:avoid;page-break-inside:avoid">
                   <div
                     style="padding:7px 10px;border-bottom:1px solid var(--color-line);font-size:12.5px;font-weight:800">
                     {{ t.revenueTitle }}</div>
@@ -1726,7 +1738,7 @@
                   </sc-for>
                 </div>
                 <div style="font-size:11px;line-height:1.7;margin-top:16px">{{ t.a4Foot }}</div>
-                <div style="margin-top:44px;font-size:12px;text-align:right;line-height:1.9">
+                <div style="margin-top:44px;font-size:12px;text-align:right;line-height:1.9;break-inside:avoid;page-break-inside:avoid">
                   <div>{{ t.signName }}</div>
                   <div>{{ t.signRole }}</div>
                 </div>
@@ -2033,7 +2045,7 @@
 class Component extends DCLogic {
   state = { d:null, lang:this.props.defaultLang==="en"?"en":"th", role:"REQ", page:"landing",
     isAdminLoggedIn:false, adminLoginOpen:false, adminEmailInput:"", adminPassInput:"", adminLoginBusy:false, adminLoginError:"", adminUserObj:null,
-    gateOpen:false, gateEmail:"", gateErr:false, gateMsg:"", gateVerified:false,
+    gateOpen:false, gateEmail:"", gateErr:false, gateMsg:"", gateVerified:false, gateBusy:false,
     svcGroup:null, sel:{}, prodColor:"bw", prodSize:"A4", prodPaperType:"", prodSides:"two", prodOwnPaper:false,
     prodQtyOrig:1, prodQtySets:1, staple:"corner",
     examType:"mid", examSubject:"", budget:"has", budgetAcct:"",
@@ -2044,7 +2056,7 @@ class Component extends DCLogic {
     reportEmailOpen:false, reportEmailTo:"", reportEmailErr:null, reportEmailBusy:false,
     dpOpen:null, dpMonthNeed:null, dpMonthRange:null, needByISO:null, rgStart:null, rgEnd:null,
     dashYearMode:"be", dashYear:String(new Date().getFullYear()+543), dashMonth:"8", dashUnit:"",
-    gasUrl:"https://script.google.com/macros/s/AKfycbwEz5h_CPcFQxDNr022JFW9bUhxdCuYFzXG_T0x4eLZOoZhgMY6l05iNUuYqEKWj-3Z/exec",
+    gasUrl:"https://script.google.com/macros/s/AKfycbzmjDv2VS9TksC3RQZVSGJDeJIAct5j9rgPT3VFLWSt5QixX0JHFgI2YJJ__ABnFTwJ/exec",
     gasToken:"6552b83f-9a7a-4dd1-8169-05193c6744e3",
     spreadsheetId:"1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
     folderId:"1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L",
@@ -2139,7 +2151,7 @@ class Component extends DCLogic {
   componentDidMount() {
     import("./spu-data.js").then(d => this.setState({ d }));
     const defaultGas = {
-      gasUrl: "https://script.google.com/macros/s/AKfycbwEz5h_CPcFQxDNr022JFW9bUhxdCuYFzXG_T0x4eLZOoZhgMY6l05iNUuYqEKWj-3Z/exec",
+      gasUrl: "https://script.google.com/macros/s/AKfycbzmjDv2VS9TksC3RQZVSGJDeJIAct5j9rgPT3VFLWSt5QixX0JHFgI2YJJ__ABnFTwJ/exec",
       gasToken: "6552b83f-9a7a-4dd1-8169-05193c6744e3",
       spreadsheetId: "1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
       folderId: "1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L"
@@ -2416,7 +2428,7 @@ class Component extends DCLogic {
         let r = await this._gasCall("checkAdminUser", { email, password: pass });
         // Fallback: If unknown_action occurs, it means the browser contacted an older deployment URL.
         // Force retry directly using the updated active Web App URL:
-        const activeUrl = "https://script.google.com/macros/s/AKfycbwEz5h_CPcFQxDNr022JFW9bUhxdCuYFzXG_T0x4eLZOoZhgMY6l05iNUuYqEKWj-3Z/exec";
+        const activeUrl = "https://script.google.com/macros/s/AKfycbzmjDv2VS9TksC3RQZVSGJDeJIAct5j9rgPT3VFLWSt5QixX0JHFgI2YJJ__ABnFTwJ/exec";
         if (r && (r.error === "unknown_action" || r.error === "missing_url")) {
           this.setState({ gasUrl: activeUrl });
           try {
@@ -2533,15 +2545,27 @@ class Component extends DCLogic {
     // — email gate (landing) —
     const openGate=()=>this.setState({ gateOpen:true, gateErr:false, gateMsg:"" });
     const setGateEmail=e=>this.setState({ gateEmail:e.target.value, gateErr:false });
-    const submitGate=()=>{
+    const submitGate=async()=>{
       const email=S.gateEmail.trim().toLowerCase();
       if(!email.endsWith("@spu.ac.th")){ this.setState({ gateErr:true, gateMsg:"" }); return; }
-      const prof=d.SAMPLE_USERS[email];
-      if(prof){ this.setState({ form:{ name:S.lang==="th"?prof.nameTh:prof.nameEn, pos:S.lang==="th"?prof.posTh:prof.posEn,
-        unit:S.lang==="th"?prof.unitTh:prof.unitEn, phone:prof.phone, needBy:"", purpose:"", note:"" },
-        page:"wizard", gateOpen:false, gateErr:false, gateVerified:true, mineSelectedEmail:email, mineEmailInput:email }); }
-      else { this.setState({ form:{ name:"", pos:"", unit:"", phone:"", needBy:"", purpose:"", note:"" },
-        page:"wizard", gateOpen:false, gateErr:false, gateVerified:true, mineSelectedEmail:email, mineEmailInput:email }); }
+      if(S.gateBusy) return;
+      this.setState({ gateBusy:true, gateErr:false, gateMsg:"" });
+
+      // 1) ลองเทียบกับทะเบียนบุคลากรจริงใน Google Sheet (แท็บ Personnel_Information) ก่อน
+      let name="", pos="", unit="", phone="";
+      if(S.gasUrl && S.gasToken && S.spreadsheetId){
+        const r=await this._gasCall("lookupPersonnel", { email });
+        if(r && r.ok && r.found){ name=r.name||""; unit=r.unit||""; }
+      }
+      // 2) ถ้ายังไม่เจอ (หรือยังไม่ได้ตั้งค่าเชื่อมต่อ) ใช้รายชื่อตัวอย่างสำรองไว้ทดสอบ
+      if(!name){
+        const prof=d.SAMPLE_USERS[email];
+        if(prof){ name=S.lang==="th"?prof.nameTh:prof.nameEn; pos=S.lang==="th"?prof.posTh:prof.posEn;
+          unit=S.lang==="th"?prof.unitTh:prof.unitEn; phone=prof.phone; }
+      }
+      this.setState({ form:{ name, pos, unit, phone, needBy:"", purpose:"", note:"" },
+        page:"wizard", gateOpen:false, gateErr:false, gateVerified:true, gateBusy:false,
+        mineSelectedEmail:email, mineEmailInput:email });
     };
 
     // — wizard: service group + item selection —
@@ -3318,20 +3342,43 @@ class Component extends DCLogic {
     const agentGlyph=paAgent?GLYPH[paAgent.key]:"";
 
     // — ส่งคำขอจริง: เขียนแถวลง Google Sheet ผ่าน Apps Script —
+    // (ทางเลือก A: เลิกส่งข้อความสรุปรวม "variant" — ส่งเป็นฟิลด์แยกแต่ละอย่างแทน ให้ตรงกับคอลัมน์แยกใน JOB_ITEMS)
     const gasReady=!!(S.gasUrl&&S.gasToken&&S.spreadsheetId);
-    const buildVariant=svcId=>{
-      const parts=[];
+    const buildItemDetails=svcId=>{
+      const det={ colorMode:"", paperSize:"", paperType:"", sides:"", staple:"", ownPaper:"", qtyOriginal:"", qtySets:"", examType:"", examSubject:"" };
       if(isProdGroup){
-        parts.push(S.prodColor==="color"?t.prodColorColor:t.prodColorBw, S.prodSize);
-        if(S.prodPaperType) parts.push(S.prodPaperType);
-        parts.push(S.prodSides==="one"?t.prodSidesOne:t.prodSidesTwo, stapleLabelNow);
-        if(S.prodOwnPaper) parts.push(t.prodOwnPaper);
+        det.colorMode=S.prodColor==="color"?t.prodColorColor:t.prodColorBw;
+        det.paperSize=S.prodSize;
+        det.paperType=S.prodPaperType||"";
+        det.sides=S.prodSides==="one"?t.prodSidesOne:t.prodSidesTwo;
+        det.staple=stapleLabelNow;
+        det.ownPaper=S.prodOwnPaper?(S.lang==="th"?"ใช่":"Yes"):(S.lang==="th"?"ไม่":"No");
+        det.qtyOriginal=S.prodQtyOrig;
+        det.qtySets=S.prodQtySets;
       }
       if(svcId==="exam"){
-        parts.push(S.examType==="mid"?t.examMid:t.examOut);
-        if(S.examSubject) parts.push(S.examSubject);
+        det.examType=S.examType==="mid"?t.examMid:t.examOut;
+        det.examSubject=S.examSubject||"";
       }
-      return parts.join(" · ");
+      return det;
+    };
+    // คำนวณราคาประมาณการจาก PRICE_RULES — เฉพาะกรณีที่ฟอร์มเก็บข้อมูลพอจะระบุราคาได้แน่ชัดไม่กำกวมเท่านั้น
+    // รายการอื่น (ไม่มีกฎราคาตรงตัว หรือฟอร์มยังไม่เก็บตัวแปรพอจะเลือกกฎที่ถูกต้อง) ปล่อยว่างไว้ให้แอดมินประเมินเอง — ห้ามเดาใส่เป็น 0
+    const computeItemPrice=(svcId,qty)=>{
+      let rate=null;
+      if(svcId==="copy"){
+        if(S.prodSize==="A3") rate=5.00;                                   // A3 ปอนด์ 80 แกรม
+        else if(S.prodSize==="A4") rate=S.prodColor==="color"?2.00:0.50;   // A4 ปอนด์สี 80 แกรม / A4 ปอนด์ 70 แกรม ขาวดำ
+        // A5: ไม่มีกฎราคาในตารางปัจจุบัน -> ปล่อยว่าง (pending)
+      } else if(svcId==="dup"){
+        rate=2.00;  // อัตรา A4 ปอนด์ 70 แกรมพื้นฐาน (ยังไม่รวมส่วนต่างปกชุดสี ถ้ามี — ฟอร์มยังไม่เก็บตัวเลือกนี้)
+      } else if(svcId==="exam"){
+        rate=2.00;  // ข้อสอบ A4 ปอนด์ 70 แกรม
+      }
+      // card, cert, layout, bind, a4, a3, a5: ฟอร์มยังไม่เก็บตัวแปรที่จำเป็น (เช่น ด้าน/ชนิดกระดาษ/จำนวน) พอจะเลือกกฎราคาที่ถูกต้อง -> pending เสมอ
+      if(rate===null) return { unitPrice:"", estimatedAmount:"" };
+      const amt=Math.round(rate*(Number(qty)||0)*100)/100;
+      return { unitPrice:String(rate), estimatedAmount:String(amt) };
     };
     const doSubmitJob=async()=>{
       if(!S.pdpaConsent||S.submitBusy) return;
@@ -3339,12 +3386,23 @@ class Component extends DCLogic {
         ?"ยังไม่ได้ตั้งค่าเชื่อมต่อ Google Sheet กรุณาไปที่แท็บ \"ตั้งค่าเชื่อมต่อ\" ก่อน"
         :"Google Sheet isn't connected yet — set it up on the Settings tab first." }); return; }
       this.setState({ submitBusy:true, submitError:null, uploadProgressText:"" });
-      const items=selected.map(s=>({ serviceCode:s.id, variant:buildVariant(s.id),
-        qty:isProdGroup?(Number(S.prodQtyOrig)||0)*(Number(S.prodQtySets)||0):1,
-        unit:S.lang==="th"?s.unitTh:s.unitEn }));
+      const items=selected.map(s=>{
+        const det=buildItemDetails(s.id);
+        const qty=isProdGroup?(Number(S.prodQtyOrig)||0)*(Number(S.prodQtySets)||0):1;
+        const price=computeItemPrice(s.id,qty);
+        return { serviceCode:s.id, qty, unit:S.lang==="th"?s.unitTh:s.unitEn,
+          unitPrice:price.unitPrice, estimatedAmount:price.estimatedAmount,
+          colorMode:det.colorMode, paperSize:det.paperSize, paperType:det.paperType, sides:det.sides,
+          staple:det.staple, ownPaper:det.ownPaper, qtyOriginal:det.qtyOriginal, qtySets:det.qtySets,
+          examType:det.examType, examSubject:det.examSubject };
+      });
+      // ยอดรวมทั้งงานจะคำนวณให้ก็ต่อเมื่อ "ทุกรายการ" มีราคาแน่ชัดแล้วเท่านั้น — ถ้ามีรายการใดยัง pending อยู่ ปล่อยยอดรวมว่างไว้เช่นกัน กันเข้าใจผิดว่าเป็นยอดเต็ม
+      const allPriced=items.length>0&&items.every(it=>it.estimatedAmount!=="");
+      const jobEstimatedAmount=allPriced?String(Math.round(items.reduce((sum,it)=>sum+Number(it.estimatedAmount||0),0)*100)/100):"";
       const budgetSource=budgetSkipped?"internal":(budgetNeeded?S.budget:"");
       const r=await this._gasCall("submitJob", { email:S.gateEmail, name:S.form.name, position:S.form.pos,
         phone:S.form.phone, unit:S.form.unit, purpose:S.form.purpose, needBy:S.needByISO||"", items,
+        estimatedAmount:jobEstimatedAmount,
         budgetSource, budgetAcct:(budgetNeeded&&S.budget==="personal")?S.budgetAcct:"" });
       if(r&&r.ok) {
         const jobNo = r.jobNo;
@@ -3373,10 +3431,19 @@ class Component extends DCLogic {
           }
         }
         this.setState({
+          // ส่งสำเร็จแล้ว — เคลียร์ฟอร์มกลับไปเป็นค่าเริ่มต้นเหมือนตอนเข้าหน้านี้ครั้งแรก ก่อนกรอกข้อมูลใด ๆ
           submitBusy:false, submitted:true, newJobNo:jobNo, submitError:null,
           uploadedFiles:[], uploadProgressText:"", lastUploadedCount:uploadedCount,
           mineSelectedEmail:(S.gateEmail||"").trim().toLowerCase(),
-          mineEmailInput:(S.gateEmail||"").trim().toLowerCase()
+          mineEmailInput:(S.gateEmail||"").trim().toLowerCase(),
+          svcGroup:null, sel:{},
+          prodColor:"bw", prodSize:"A4", prodPaperType:"", prodSides:"two", prodOwnPaper:false,
+          prodQtyOrig:1, prodQtySets:1, staple:"corner",
+          examType:"mid", examSubject:"",
+          budget:"has", budgetAcct:"",
+          needByISO:null, dpOpen:null,
+          pdpaConsent:false,
+          form:{ ...S.form, needBy:"", purpose:"", note:"" } // เก็บชื่อ-ตำแหน่ง-หน่วยงาน-เบอร์โทรไว้ ส่งคำขอถัดไปสะดวกกว่า
         });
         this._loadLiveJobs();
       }
@@ -3422,7 +3489,8 @@ class Component extends DCLogic {
       isReport:S.page==="report", isSheet:S.page==="sheet", isSettings:S.page==="settings",
       goLanding:this.go("landing"), goWizard:this.go("wizard"), goMine:this.go("mine"), goTrack:this.go("track"),
       gateOpen:S.gateOpen, gateEmail:S.gateEmail, gateErr:S.gateErr, gateMsg:S.gateMsg,
-      openGate, setGateEmail, submitGate,
+      openGate, setGateEmail, submitGate, gateBusy:S.gateBusy,
+      emailGateBtnLabel:S.gateBusy?(S.lang==="th"?"กำลังตรวจสอบ…":"Checking…"):t.emailGateBtn,
       svcGroups, hasGroup, groupItems:groupItemsOut, isProdGroup,
       colorBg, colorFg, setColor, sizeOpts, sidesBg, sidesFg, setSides,
       prodPaperType:S.prodPaperType, setProdPaperType,
