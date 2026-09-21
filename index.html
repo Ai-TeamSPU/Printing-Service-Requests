@@ -230,7 +230,8 @@
             display: none !important;
           }
 
-          html, body {
+          html,
+          body {
             margin: 0 !important;
             padding: 0 !important;
           }
@@ -612,6 +613,185 @@
                         </div>
                       </div>
                     </sc-if>
+                    <sc-if value="{{ isDup }}" hint-placeholder-val="{{ false }}">
+                      <div
+                        style="border:1px solid var(--color-line);background:var(--color-band);padding:18px;margin-top:16px">
+                        <label
+                          style="display:flex;gap:10px;align-items:center;font-size:14px;font-weight:600;cursor:pointer">
+                          <input type="checkbox" checked="{{ dupHasCover }}" onChange="{{ toggleDupCover }}"
+                            style="width:20px;height:20px">
+                          {{ t.dupCoverLabel }}
+                        </label>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ isCard }}" hint-placeholder-val="{{ false }}">
+                      <div
+                        style="border:1px solid var(--color-line);background:var(--color-band);padding:18px;margin-top:16px">
+                        <div style="font-weight:800;font-size:15px;margin-bottom:14px">{{ t.cardTitle }}</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+                          <div>
+                            <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
+                              t.cardSidesLabel }}</label>
+                            <div style="display:flex;border:1px solid var(--color-line)">
+                              <button onClick="{{ setCardSides.one }}"
+                                style="flex:1;padding:10px;border:0;border-right:1px solid var(--color-line);background:{{ cardSidesBg.one }};color:{{ cardSidesFg.one }};font-weight:700;font-size:13px;min-height:44px">{{
+                                t.cardSidesOne }}</button>
+                              <button onClick="{{ setCardSides.two }}"
+                                style="flex:1;padding:10px;border:0;background:{{ cardSidesBg.two }};color:{{ cardSidesFg.two }};font-weight:700;font-size:13px;min-height:44px">{{
+                                t.cardSidesTwo }}</button>
+                            </div>
+                          </div>
+                          <div>
+                            <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
+                              t.cardQtyLabel }}</label>
+                            <input class="input" type="number" value="{{ cardQty }}" onChange="{{ setCardQty }}"
+                              style="width:100%;min-height:44px;font-size:15px">
+                          </div>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ isCert }}" hint-placeholder-val="{{ false }}">
+                      <div
+                        style="border:1px solid var(--color-line);background:var(--color-band);padding:18px;margin-top:16px">
+                        <div style="font-weight:800;font-size:15px;margin-bottom:14px">{{ t.certTitle }}</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+                          <div>
+                            <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
+                              t.certLogoLabel }}</label>
+                            <div style="display:flex;border:1px solid var(--color-line)">
+                              <button onClick="{{ setCertLogo.black }}"
+                                style="flex:1;padding:10px;border:0;border-right:1px solid var(--color-line);background:{{ certLogoBg.black }};color:{{ certLogoFg.black }};font-weight:700;font-size:12.5px;min-height:44px">{{
+                                t.certLogoBlack }}</button>
+                              <button onClick="{{ setCertLogo.color }}"
+                                style="flex:1;padding:10px;border:0;background:{{ certLogoBg.color }};color:{{ certLogoFg.color }};font-weight:700;font-size:12.5px;min-height:44px">{{
+                                t.certLogoColor }}</button>
+                            </div>
+                          </div>
+                          <div>
+                            <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
+                              t.certQtyLabel }}</label>
+                            <input class="input" type="number" value="{{ certQty }}" onChange="{{ setCertQty }}"
+                              style="width:100%;min-height:44px;font-size:15px">
+                          </div>
+                        </div>
+                        <label
+                          style="display:flex;gap:10px;align-items:center;margin-top:18px;font-size:14px;font-weight:600;cursor:pointer">
+                          <input type="checkbox" checked="{{ certTrim }}" onChange="{{ toggleCertTrim }}"
+                            style="width:20px;height:20px">
+                          {{ t.certTrimLabel }}
+                        </label>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ isLayout }}" hint-placeholder-val="{{ false }}">
+                      <div
+                        style="border:1px solid var(--color-line);background:var(--color-band);padding:18px;margin-top:16px">
+                        <div style="font-weight:800;font-size:15px;margin-bottom:14px">{{ t.layoutTitle }}</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+                          <div>
+                            <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
+                              t.layoutColorLabel }}</label>
+                            <div style="display:flex;border:1px solid var(--color-line)">
+                              <button onClick="{{ setLayoutColor.bw }}"
+                                style="flex:1;padding:10px;border:0;border-right:1px solid var(--color-line);background:{{ layoutColorBg.bw }};color:{{ layoutColorFg.bw }};font-weight:700;font-size:13px;min-height:44px">{{
+                                t.prodColorBw }}</button>
+                              <button onClick="{{ setLayoutColor.color }}"
+                                style="flex:1;padding:10px;border:0;background:{{ layoutColorBg.color }};color:{{ layoutColorFg.color }};font-weight:700;font-size:13px;min-height:44px">{{
+                                t.prodColorColor }}</button>
+                            </div>
+                          </div>
+                          <div>
+                            <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
+                              t.layoutPagesLabel }}</label>
+                            <input class="input" type="number" value="{{ layoutPages }}" onChange="{{ setLayoutPages }}"
+                              style="width:100%;min-height:44px;font-size:15px">
+                          </div>
+                        </div>
+                        <sc-if value="{{ isLayoutColorMode }}" hint-placeholder-val="{{ false }}">
+                          <div
+                            style="margin-top:14px;border:1px solid var(--color-accent);background:var(--color-accent-100);padding:10px 14px;font-size:13.5px">
+                            {{ t.layoutRangeWarn }}</div>
+                        </sc-if>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ isA4 }}" hint-placeholder-val="{{ false }}">
+                      <div
+                        style="border:1px solid var(--color-line);background:var(--color-band);padding:18px;margin-top:16px">
+                        <div style="font-weight:800;font-size:15px;margin-bottom:14px">{{ t.a4Title }}</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+                          <div style="grid-column:1/-1">
+                            <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
+                              t.paperTypeLabel }}</label>
+                            <div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-line)">
+                              <sc-for list="{{ a4PaperOpts }}" as="o" hint-placeholder-count="5">
+                                <button onClick="{{ o.go }}"
+                                  style="flex:1;min-width:140px;padding:10px 6px;border:0;border-right:1px solid var(--color-line);background:{{ o.bg }};color:{{ o.fg }};font-weight:700;font-size:12.5px;min-height:44px">{{
+                                  o.label }}</button>
+                              </sc-for>
+                            </div>
+                          </div>
+                          <div>
+                            <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
+                              t.sheetQtyLabel }}</label>
+                            <input class="input" type="number" value="{{ a4Qty }}" onChange="{{ setA4Qty }}"
+                              style="width:100%;min-height:44px;font-size:15px">
+                          </div>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ isA3 }}" hint-placeholder-val="{{ false }}">
+                      <div
+                        style="border:1px solid var(--color-line);background:var(--color-band);padding:18px;margin-top:16px">
+                        <div style="font-weight:800;font-size:15px;margin-bottom:14px">{{ t.a3Title }}</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+                          <div>
+                            <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
+                              t.paperTypeLabel }}</label>
+                            <div style="display:flex;border:1px solid var(--color-line)">
+                              <sc-for list="{{ a3PaperOpts }}" as="o" hint-placeholder-count="2">
+                                <button onClick="{{ o.go }}"
+                                  style="flex:1;padding:10px 6px;border:0;border-right:1px solid var(--color-line);background:{{ o.bg }};color:{{ o.fg }};font-weight:700;font-size:12.5px;min-height:44px">{{
+                                  o.label }}</button>
+                              </sc-for>
+                            </div>
+                          </div>
+                          <div>
+                            <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
+                              t.sheetQtyLabel }}</label>
+                            <input class="input" type="number" value="{{ a3Qty }}" onChange="{{ setA3Qty }}"
+                              style="width:100%;min-height:44px;font-size:15px">
+                          </div>
+                        </div>
+                        <sc-if value="{{ isA3RangeMode }}" hint-placeholder-val="{{ false }}">
+                          <div
+                            style="margin-top:14px;border:1px solid var(--color-accent);background:var(--color-accent-100);padding:10px 14px;font-size:13.5px">
+                            {{ t.a3RangeWarn }}</div>
+                        </sc-if>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ isA5 }}" hint-placeholder-val="{{ false }}">
+                      <div
+                        style="border:1px solid var(--color-line);background:var(--color-band);padding:18px;margin-top:16px">
+                        <div style="font-weight:800;font-size:15px;margin-bottom:6px">{{ t.a5Title }}</div>
+                        <p
+                          style="font-size:13.5px;color:var(--color-neutral-700);margin:0 0 14px;max-width:64ch;line-height:1.55">
+                          {{ t.manualQuoteNote }}</p>
+                        <div style="max-width:200px">
+                          <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
+                            t.sheetQtyLabel }}</label>
+                          <input class="input" type="number" value="{{ a5Qty }}" onChange="{{ setA5Qty }}"
+                            style="width:100%;min-height:44px;font-size:15px">
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ isBind }}" hint-placeholder-val="{{ false }}">
+                      <div
+                        style="border:1px solid var(--color-line);background:var(--color-band);padding:18px;margin-top:16px">
+                        <div style="font-weight:800;font-size:15px;margin-bottom:6px">{{ t.bindTitle }}</div>
+                        <p
+                          style="font-size:13.5px;color:var(--color-neutral-700);margin:0;max-width:64ch;line-height:1.55">
+                          {{ t.manualQuoteNote }}</p>
+                      </div>
+                    </sc-if>
                     <sc-if value="{{ budgetShown }}" hint-placeholder-val="{{ false }}">
                       <div
                         style="border:1px solid var(--color-line);background:var(--color-band);padding:18px;margin-top:16px">
@@ -643,12 +823,58 @@
                             </div>
                           </sc-if>
                           <sc-if value="{{ budgetIsPersonal }}" hint-placeholder-val="{{ false }}">
-                            <div style="margin-top:14px">
-                              <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
-                                t.budgetAcct }}</label>
-                              <input class="input" value="{{ budgetAcct }}" onChange="{{ setBudgetAcct }}"
-                                placeholder="{{ t.budgetAcctPh }}"
-                                style="width:100%;max-width:320px;min-height:44px;font-size:15px">
+                            <div style="margin-top:14px;display:flex;gap:16px;flex-wrap:wrap;align-items:stretch">
+                              <div
+                                style="flex:1;min-width:280px;max-width:420px;border:1px solid var(--color-accent);background:var(--color-accent-100);padding:20px;text-align:center">
+                                <img class="spu-mark" src="assets/spu-logo.jpg" alt="SPU"
+                                  style="height:32px;width:auto;display:block;margin:0 auto 12px">
+                                <div
+                                  style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-700)">
+                                  {{ t.budgetPayTitle }}</div>
+                                <div style="font-size:18px;font-weight:800;margin-top:10px">{{ t.budgetBankName }}</div>
+                                <div
+                                  style="font-size:24px;font-weight:800;letter-spacing:0.02em;margin-top:4px;font-variant-numeric:tabular-nums">
+                                  {{ t.budgetBankAccNo }}</div>
+                                <div style="font-size:15px;color:var(--color-neutral-800);margin-top:4px">{{
+                                  t.budgetBankAccName }}</div>
+                                <div
+                                  style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--color-accent);font-size:14px;font-weight:700;color:var(--color-accent-800)">
+                                  {{ t.budgetSlipNote }}</div>
+                              </div>
+                              <div
+                                style="flex:1;min-width:260px;border:2px dashed var(--color-line);background:var(--color-band);padding:20px;text-align:center">
+                                <input type="file" id="spu-slip-file-input" accept="image/*,.pdf" multiple
+                                  onChange="{{ onSlipFileInputChange }}" style="display:none">
+                                <div style="font-size:28px;margin-bottom:8px">🧾</div>
+                                <div style="font-size:15px;font-weight:800">{{ t.budgetSlipUploadTitle }}</div>
+                                <div style="font-size:13px;color:var(--color-neutral-700);margin-top:6px">{{
+                                  t.budgetSlipUploadHint }}</div>
+                                <button type="button" class="btn btn-secondary" onClick="{{ choosePaymentSlip }}"
+                                  style="margin-top:14px;min-height:44px">{{ t.chooseFile }}</button>
+                                <sc-if value="{{ hasSlipFiles }}" hint-placeholder-val="{{ false }}">
+                                  <div
+                                    style="margin-top:14px;font-size:12.5px;font-weight:700;color:var(--color-neutral-800);text-align:left">
+                                    {{ slipFileCountLabel }}</div>
+                                  <sc-for list="{{ slipFiles }}" as="f" hint-placeholder-count="1">
+                                    <div
+                                      style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--color-divider);font-size:13px;text-align:left">
+                                      <span
+                                        style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+                                        title="{{ f.name }}">{{ f.name }}</span>
+                                      <span style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+                                        <span style="color:var(--color-neutral-700)">{{ f.size }}</span>
+                                        <button type="button" onClick="{{ f.remove }}" aria-label="remove"
+                                          style="border:0;background:transparent;color:var(--color-accent-700);cursor:pointer;padding:2px 6px;font-size:15px;line-height:1;font-weight:700">✕</button>
+                                      </span>
+                                    </div>
+                                  </sc-for>
+                                </sc-if>
+                                <sc-if value="{{ hasSlipWarnMsg }}" hint-placeholder-val="{{ false }}">
+                                  <div
+                                    style="margin-top:10px;font-size:12.5px;color:var(--color-accent-700);font-weight:600;text-align:left">
+                                    {{ slipWarnMsg }}</div>
+                                </sc-if>
+                              </div>
                             </div>
                           </sc-if>
                         </sc-if>
@@ -805,18 +1031,6 @@
                       </sc-if>
                       <div style="font-size:13px;color:var(--color-accent-700);margin-top:10px;font-weight:600">{{
                         t.driveWarnShort }}</div>
-                    </div>
-                    <div style="border:1px solid var(--color-line);background:var(--color-band);padding:16px">
-                      <div
-                        style="font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent-700)">
-                        {{ t.driveTitle }}</div>
-                      <p style="font-size:14px;line-height:1.6;color:var(--color-neutral-800);margin:10px 0 12px">{{
-                        t.driveNote }}</p>
-                      <pre
-                        style="margin:0;font-size:12.5px;line-height:1.7;background:var(--color-bg);border:1px solid var(--color-divider);padding:12px;overflow-x:auto">{{ driveTree }}</pre>
-                      <div
-                        style="font-size:13px;line-height:1.6;color:var(--color-neutral-800);margin-top:12px;border-top:1px solid var(--color-divider);padding-top:12px">
-                        {{ t.driveWarnFull }}</div>
                     </div>
                   </div>
                 </section>
@@ -1195,8 +1409,14 @@
                       <td><span
                           style="display:inline-block;padding:3px 8px;font-size:12.5px;font-weight:700;background:{{ j.tagBg }};color:{{ j.tagFg }};white-space:nowrap">{{
                           j.statusLabel }}</span></td>
-                      <td><button class="btn btn-ghost" onClick="{{ j.advance }}"
-                          style="min-height:40px;font-size:13px;white-space:nowrap">{{ j.nextLabel }}</button></td>
+                      <td style="white-space:nowrap">
+                        <div style="display:flex;gap:6px;flex-wrap:wrap">
+                          <button type="button" class="btn btn-ghost" onClick="{{ j.viewDetail }}"
+                            style="min-height:40px;font-size:13px;white-space:nowrap">{{ t.viewDetailBtn }}</button>
+                          <button class="btn btn-ghost" onClick="{{ j.advance }}"
+                            style="min-height:40px;font-size:13px;white-space:nowrap">{{ j.nextLabel }}</button>
+                        </div>
+                      </td>
                     </tr>
                   </sc-for>
                 </tbody>
@@ -1296,6 +1516,16 @@
               </div>
               <button class="btn btn-primary" style="min-height:44px">{{ t.addRule }}</button>
             </div>
+            <sc-if value="{{ priceRulesNotSeeded }}" hint-placeholder-val="{{ false }}">
+              <div
+                style="margin-top:16px;border:1px solid var(--color-line);background:var(--color-band);padding:14px 16px;font-size:14px">
+                {{ t.priceRulesNotSeeded }}</div>
+            </sc-if>
+            <sc-if value="{{ priceRulesError }}" hint-placeholder-val="{{ false }}">
+              <div
+                style="margin-top:16px;border:1px solid var(--color-accent);background:#ffeaea;padding:14px 16px;font-size:14px;font-weight:600">
+                {{ t.priceRulesLoadError }} ({{ priceRulesError }})</div>
+            </sc-if>
             <div class="price-grid"
               style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;margin-top:20px;align-items:start">
               <div style="overflow-x:auto;border:1px solid var(--color-line)">
@@ -1385,8 +1615,10 @@
               <div style="display:flex;gap:10px;flex-wrap:wrap">
                 <input class="input" value="{{ q }}" onChange="{{ setQ }}" placeholder="{{ t.searchPh }}"
                   style="min-height:44px;font-size:15px;min-width:220px">
-                <button type="button" class="btn btn-secondary" onClick="{{ doExportCsv }}" style="min-height:44px">{{ t.exportCsv }}</button>
-                <button type="button" class="btn btn-secondary" onClick="{{ doExportXlsx }}" style="min-height:44px">{{ t.exportXlsx }}</button>
+                <button type="button" class="btn btn-secondary" onClick="{{ doExportCsv }}" style="min-height:44px">{{
+                  t.exportCsv }}</button>
+                <button type="button" class="btn btn-secondary" onClick="{{ doExportXlsx }}" style="min-height:44px">{{
+                  t.exportXlsx }}</button>
               </div>
             </div>
             <div style="overflow-x:auto;border:1px solid var(--color-line);margin-top:20px">
@@ -1568,6 +1800,30 @@
                 <p style="font-size:15px;color:var(--color-neutral-700);margin:8px 0 0">{{ t.a4Sub }}</p>
               </div>
               <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                <select class="input" aria-label="{{ t.repPeriodLabel }}" value="{{ repMode }}"
+                  onChange="{{ setRepMode }}"
+                  style="min-height:44px;font-size:13.5px;font-weight:600;padding:0 10px">
+                  <sc-for list="{{ repModeOpts }}" as="o" hint-placeholder-count="5">
+                    <option value="{{ o.v }}">{{ o.label }}</option>
+                  </sc-for>
+                </select>
+                <sc-if value="{{ repShowYear }}" hint-placeholder-val="{{ true }}">
+                  <select class="input" aria-label="{{ t.fYear }}" value="{{ repYear }}" onChange="{{ setRepYear }}"
+                    style="min-height:44px;font-size:13.5px;font-weight:600;padding:0 10px">
+                    <sc-for list="{{ repYearOpts }}" as="y" hint-placeholder-count="3">
+                      <option value="{{ y.v }}">{{ y.label }}</option>
+                    </sc-for>
+                  </select>
+                </sc-if>
+                <sc-if value="{{ repShowMonth }}" hint-placeholder-val="{{ true }}">
+                  <select class="input" aria-label="{{ t.fMonth }}" value="{{ repMonth }}" onChange="{{ setRepMonth }}"
+                    style="min-height:44px;font-size:13.5px;font-weight:600;padding:0 10px">
+                    <sc-for list="{{ repMonthOpts }}" as="m" hint-placeholder-count="6">
+                      <option value="{{ m.v }}">{{ m.label }}</option>
+                    </sc-for>
+                  </select>
+                </sc-if>
+                <sc-if value="{{ repShowCal }}" hint-placeholder-val="{{ false }}">
                 <div style="position:relative">
                   <button type="button" onClick="{{ toggleRange }}" aria-expanded="{{ rangeExpanded }}"
                     style="min-height:44px;display:flex;align-items:center;gap:10px;padding:0 16px;border:1px solid var(--color-line);border-radius:999px;background:#fff;font-size:14px;font-weight:600;color:var(--color-text)">
@@ -1628,6 +1884,7 @@
                     </div>
                   </sc-if>
                 </div>
+                </sc-if>
                 <div style="position:relative">
                   <button type="button" class="btn btn-secondary" onClick="{{ toggleReportEmailBox }}"
                     style="min-height:44px">{{ t.sendEmail }}</button>
@@ -1670,7 +1927,7 @@
                     </div>
                   </div>
                   <div style="font-size:11.5px;text-align:right;line-height:1.6">
-                    <div>{{ t.docNo }} ผพ. 0068/2568</div>
+                    <div>{{ t.docNo }} {{ a4DocNo }}</div>
                     <div>{{ t.docDate }} {{ a4DocDate }}</div>
                   </div>
                 </div>
@@ -1694,18 +1951,20 @@
                       <th rowSpan="{{ two }}"
                         style="border:1px solid var(--color-line);padding:6px;text-align:left;vertical-align:bottom">{{
                         t.unit }}</th>
-                      <th colSpan="{{ two }}" style="border:1px solid var(--color-line);padding:6px">{{ t.catProd }}
+                      <th colSpan="{{ two }}" style="border:1px solid var(--color-line);padding:6px">{{ t.catCopy }}
                       </th>
-                      <th colSpan="{{ two }}" style="border:1px solid var(--color-line);padding:6px">{{ t.catDesign }}
+                      <th colSpan="{{ two }}" style="border:1px solid var(--color-line);padding:6px">{{ t.catCard }}
                       </th>
-                      <th colSpan="{{ two }}" style="border:1px solid var(--color-line);padding:6px">{{ t.catColor }}
+                      <th colSpan="{{ two }}" style="border:1px solid var(--color-line);padding:6px">{{ t.catCert }}
+                      </th>
+                      <th colSpan="{{ two }}" style="border:1px solid var(--color-line);padding:6px">{{ t.catLayout }}
                       </th>
                       <th rowSpan="{{ two }}"
                         style="border:1px solid var(--color-line);padding:6px;text-align:right;vertical-align:bottom">{{
                         t.grandTotal }}</th>
                     </tr>
                     <tr>
-                      <sc-for list="{{ subHead }}" as="h" hint-placeholder-count="6">
+                      <sc-for list="{{ subHead }}" as="h" hint-placeholder-count="8">
                         <th style="border:1px solid var(--color-line);padding:5px;font-weight:600">{{ h.label }}</th>
                       </sc-for>
                     </tr>
@@ -1716,7 +1975,7 @@
                         <td colSpan="{{ r.span }}"
                           style="border:1px solid var(--color-line);padding:5px 6px;font-weight:{{ r.fw }};background:{{ r.bg }};text-align:left;padding-left:{{ r.pad }}">
                           {{ r.name }}</td>
-                        <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="7">
+                        <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="9">
                           <td
                             style="border:1px solid var(--color-line);padding:5px 6px;text-align:right;font-variant-numeric:tabular-nums;font-weight:{{ r.fw }};background:{{ r.bg }}">
                             {{ c.v }}</td>
@@ -1725,7 +1984,8 @@
                     </sc-for>
                   </tbody>
                 </table>
-                <div style="margin-top:20px;border:1px solid var(--color-line);break-inside:avoid;page-break-inside:avoid">
+                <div
+                  style="margin-top:20px;border:1px solid var(--color-line);break-inside:avoid;page-break-inside:avoid">
                   <div
                     style="padding:7px 10px;border-bottom:1px solid var(--color-line);font-size:12.5px;font-weight:800">
                     {{ t.revenueTitle }}</div>
@@ -1738,7 +1998,8 @@
                   </sc-for>
                 </div>
                 <div style="font-size:11px;line-height:1.7;margin-top:16px">{{ t.a4Foot }}</div>
-                <div style="margin-top:44px;font-size:12px;text-align:right;line-height:1.9;break-inside:avoid;page-break-inside:avoid">
+                <div
+                  style="margin-top:44px;font-size:12px;text-align:right;line-height:1.9;break-inside:avoid;page-break-inside:avoid">
                   <div>{{ t.signName }}</div>
                   <div>{{ t.signRole }}</div>
                 </div>
@@ -1948,6 +2209,93 @@
         </div>
       </footer>
 
+      <sc-if value="{{ jobDetailOpen }}" hint-placeholder-val="{{ false }}">
+        <div class="no-print" onClick="{{ closeJobDetail }}"
+          style="position:fixed;inset:0;z-index:70;background:rgba(16,24,40,.45);display:flex;align-items:center;justify-content:center;padding:20px">
+          <div onClick="{{ stopJobDetailClick }}"
+            style="background:#fff;border-radius:16px;box-shadow:var(--shadow-lg);width:100%;max-width:560px;max-height:86vh;overflow-y:auto">
+            <div
+              style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:20px 22px;border-bottom:1px solid var(--color-line)">
+              <div>
+                <div style="font-size:20px;font-weight:800;letter-spacing:-0.01em">{{ jobDetailNo }}</div>
+                <div style="font-size:13.5px;color:var(--color-neutral-700);margin-top:4px">{{ jobDetailRequester }} ·
+                  {{ jobDetailUnit }}</div>
+              </div>
+              <button type="button" onClick="{{ closeJobDetail }}" aria-label="close"
+                style="border:0;background:transparent;color:var(--color-neutral-700);font-size:20px;line-height:1;width:32px;height:32px;cursor:pointer;font-family:inherit;flex:none">✕</button>
+            </div>
+            <div style="padding:18px 22px;display:flex;flex-direction:column;gap:18px">
+              <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+                <span
+                  style="display:inline-block;padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:700;background:{{ jobDetailTagBg }};color:{{ jobDetailTagFg }}">{{
+                  jobDetailStatusLabel }}</span>
+                <span style="font-size:13.5px;color:var(--color-neutral-700)">{{ t.needBy }} {{ jobDetailNeed }}</span>
+                <span style="font-size:13.5px;color:var(--color-neutral-700)">· {{ t.budgetTitle }} {{
+                  jobDetailBudgetLabel }}</span>
+              </div>
+              <div>
+                <div
+                  style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-neutral-700);margin-bottom:10px">
+                  {{ t.jobDetailItemsTitle }}</div>
+                <sc-for list="{{ jobDetailItems }}" as="it" hint-placeholder-count="2">
+                  <div style="padding:10px 0;border-bottom:1px solid var(--color-divider)">
+                    <div style="display:flex;justify-content:space-between;gap:12px;font-size:14.5px;font-weight:700">
+                      <span>{{ it.service }}</span>
+                      <span style="color:var(--color-neutral-700);font-weight:600;white-space:nowrap">{{ it.qty
+                        }}</span>
+                    </div>
+                    <sc-if value="{{ it.chips }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-size:13px;color:var(--color-neutral-700);margin-top:3px">{{ it.chips }}</div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+              <div>
+                <div
+                  style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-neutral-700);margin-bottom:10px">
+                  {{ t.jobDetailSlipTitle }}</div>
+                <sc-if value="{{ jobDetailFilesLoading }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:13.5px;color:var(--color-neutral-700)">{{ t.jobDetailLoadingFiles }}</div>
+                </sc-if>
+                <sc-if value="{{ hasJobDetailSlipFiles }}" hint-placeholder-val="{{ false }}">
+                  <sc-for list="{{ jobDetailSlipFiles }}" as="f" hint-placeholder-count="1">
+                    <div style="margin-bottom:14px">
+                      <sc-if value="{{ f.showImg }}" hint-placeholder-val="{{ true }}">
+                        <a href="{{ f.link }}" target="_blank" rel="noopener" style="display:block">
+                          <img src="{{ f.imgSrc }}" onError="{{ f.onImgError }}" alt="{{ f.name }}"
+                            style="width:100%;max-width:320px;border-radius:10px;border:1px solid var(--color-line);display:block">
+                        </a>
+                        <div
+                          style="font-size:12.5px;color:var(--color-neutral-700);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+                          title="{{ f.name }}">{{ f.name }}</div>
+                      </sc-if>
+                      <sc-if value="{{ f.showFallback }}" hint-placeholder-val="{{ false }}">
+                        <a href="{{ f.link }}" target="_blank" rel="noopener"
+                          style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--color-line);border-radius:10px;background:var(--color-band);text-decoration:none;color:var(--color-text)">
+                          <span style="font-size:20px">🧾</span>
+                          <span
+                            style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+                            title="{{ f.name }}">{{ f.name }}</span>
+                        </a>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </sc-if>
+                <sc-if value="{{ jobDetailNoSlipShown }}" hint-placeholder-val="{{ true }}">
+                  <div style="font-size:13.5px;color:var(--color-neutral-600)">{{ t.jobDetailNoSlip }}</div>
+                </sc-if>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;padding:16px 22px;border-top:1px solid var(--color-line)">
+              <button type="button" class="btn btn-primary" onClick="{{ viewJobDetailFull }}" style="min-height:44px">{{
+                t.jobDetailViewFull }}</button>
+              <button type="button" class="btn btn-ghost" onClick="{{ closeJobDetail }}" style="min-height:44px">{{
+                t.jobDetailClose }}</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
       <sc-if value="{{ calcOpen }}" hint-placeholder-val="{{ false }}">
         <div class="no-print"
           style="position:fixed;left:{{ calcX }};top:{{ calcY }};width:{{ calcW }};height:{{ calcH }};z-index:60;background:#fff;border:2px solid var(--color-text);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden">
@@ -2049,19 +2397,30 @@ class Component extends DCLogic {
     svcGroup:null, sel:{}, prodColor:"bw", prodSize:"A4", prodPaperType:"", prodSides:"two", prodOwnPaper:false,
     prodQtyOrig:1, prodQtySets:1, staple:"corner",
     examType:"mid", examSubject:"", budget:"has", budgetAcct:"",
-    priceOff:{}, calcExpr:"", calcDisplay:"0", curNo:null,
+    dupHasCover:false,
+    cardSides:"one", cardQty:"",
+    certLogo:"black", certTrim:false, certQty:"",
+    layoutColor:"bw", layoutPages:"",
+    a4PaperType:"bond70", a4Qty:"",
+    a3PaperType:"bond80", a3Qty:"",
+    a5Qty:"",
+    calcExpr:"", calcDisplay:"0", curNo:null,
     calcOpen:false, calcX:null, calcY:96, calcW:320, calcH:420,
     form:{ name:"", pos:"", unit:"", phone:"", needBy:"", purpose:"", note:"" },
-    q:"", submitted:false, submitBusy:false, submitError:null, newJobNo:"", jobs:{}, tab:0, mf:0, reportSent:false, pdpaConsent:false,
+    q:"", submitted:false, submitBusy:false, submitError:null, newJobNo:"", tab:0, mf:0, reportSent:false, pdpaConsent:false,
     reportEmailOpen:false, reportEmailTo:"", reportEmailErr:null, reportEmailBusy:false,
     dpOpen:null, dpMonthNeed:null, dpMonthRange:null, needByISO:null, rgStart:null, rgEnd:null,
+    repMode:"month", repYear:"", repMonth:"",
     dashYearMode:"be", dashYear:String(new Date().getFullYear()+543), dashMonth:"8", dashUnit:"",
-    gasUrl:"https://script.google.com/macros/s/AKfycbzmjDv2VS9TksC3RQZVSGJDeJIAct5j9rgPT3VFLWSt5QixX0JHFgI2YJJ__ABnFTwJ/exec",
+    gasUrl:"https://script.google.com/macros/s/AKfycbwzZHqGi_xWue1We-byoivtbmqxW8hRM1Wor_XLY9eOUSVnAhS0gBjHDZUgOhPK_OGy/exec",
     gasToken:"6552b83f-9a7a-4dd1-8169-05193c6744e3",
     spreadsheetId:"1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
     folderId:"1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L",
     liveJobs:[], liveItems:[], jobsLoaded:false, jobsLoading:false, liveSyncError:null,
+    livePriceRules:[], priceRulesLoaded:false, priceRulesLoading:false, priceRulesError:null,
     uploadedFiles:[], uploadProgressText:"", isDragOver:false, fileWarnMsg:"", lastUploadedCount:0,
+    paymentSlipFiles:[], paymentSlipWarnMsg:"",
+    jobDetailOpen:false, jobDetailJobNo:null, jobDetailFiles:[], jobDetailFilesLoading:false, slipImgErrors:{},
     mineEmailInput:"", mineSelectedEmail:"",
     connResults:{
       sheet:{ ok:true, name:"SPU-Printing-Service-DB", at:new Date().toISOString() },
@@ -2081,6 +2440,17 @@ class Component extends DCLogic {
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }
+  // วันที่ (YYYY-MM-DD) ตามเขตเวลา Asia/Bangkok ของค่า submitted_at ที่ส่งมาเป็น UTC
+  _bkkDate(raw){
+    if(!raw) return "";
+    const dt=new Date(raw);
+    return isNaN(dt.getTime())?String(raw).slice(0,10):new Date(dt.getTime()+7*3600*1000).toISOString().slice(0,10);
+  }
+  // วันที่คำขอล่าสุดในชีต ใช้เป็นเดือนเริ่มต้นของปฏิทินและตัวกรอง ให้ตรงกับข้อมูลที่มีอยู่จริง
+  _latestJobISO(jobs){
+    const ds=(jobs||this.state.liveJobs||[]).map(j=>this._bkkDate(j.rawSubmittedAt)).filter(Boolean).sort();
+    return ds.length?ds[ds.length-1]:null;
+  }
   _months(lang){ return lang==="th"
     ? ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"]
     : ["January","February","March","April","May","June","July","August","September","October","November","December"]; }
@@ -2093,7 +2463,7 @@ class Component extends DCLogic {
   _monthKey(kind){ const S=this.state;
     const stored=kind==="need"?S.dpMonthNeed:S.dpMonthRange;
     if(stored) return stored;
-    const anchor=kind==="need"?S.needByISO:S.rgStart;
+    const anchor=kind==="need"?S.needByISO:(S.rgStart||this._latestJobISO());
     return (anchor||this._today()).slice(0,7); }
   _setMonth(kind,ym){ this.setState(kind==="need"?{ dpMonthNeed:ym }:{ dpMonthRange:ym }); }
   pickDate(kind,iso){
@@ -2151,7 +2521,7 @@ class Component extends DCLogic {
   componentDidMount() {
     import("./spu-data.js").then(d => this.setState({ d }));
     const defaultGas = {
-      gasUrl: "https://script.google.com/macros/s/AKfycbzmjDv2VS9TksC3RQZVSGJDeJIAct5j9rgPT3VFLWSt5QixX0JHFgI2YJJ__ABnFTwJ/exec",
+      gasUrl: "https://script.google.com/macros/s/AKfycbwzZHqGi_xWue1We-byoivtbmqxW8hRM1Wor_XLY9eOUSVnAhS0gBjHDZUgOhPK_OGy/exec",
       gasToken: "6552b83f-9a7a-4dd1-8169-05193c6744e3",
       spreadsheetId: "1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
       folderId: "1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L"
@@ -2171,11 +2541,11 @@ class Component extends DCLogic {
       patch.gasUrl = defaultGas.gasUrl;
       const savedConn = JSON.parse(localStorage.getItem("spuGasConnResults") || "null");
       patch.connResults = (savedConn && savedConn.sheet && savedConn.drive && savedConn.access) ? savedConn : defaultConnResults;
-      this.setState(patch, () => this._loadLiveJobs());
+      this.setState(patch, () => { this._loadLiveJobs(); this._loadPriceRules(); });
       localStorage.setItem("spuGasConfig", JSON.stringify({ gasUrl: patch.gasUrl, gasToken: patch.gasToken, spreadsheetId: patch.spreadsheetId, folderId: patch.folderId }));
       localStorage.setItem("spuGasConnResults", JSON.stringify(patch.connResults));
     } catch (e) {
-      this.setState({ ...defaultGas, connResults: defaultConnResults }, () => this._loadLiveJobs());
+      this.setState({ ...defaultGas, connResults: defaultConnResults }, () => { this._loadLiveJobs(); this._loadPriceRules(); });
     }
     this._calcKey = e => {
       if (!this.state.calcOpen) return;
@@ -2248,7 +2618,7 @@ class Component extends DCLogic {
     if(bytes>=1024*1024) return (bytes/(1024*1024)).toFixed(1)+" MB";
     return Math.max(1,Math.round(bytes/1024))+" KB";
   }
-  _handleFiles(fileList){
+  _handleFilesInto(fileList, stateKey, warnKey){
     if(!fileList||fileList.length===0) return;
     const MAX_FILE_SIZE = 20 * 1024 * 1024;
     const arr = Array.from(fileList);
@@ -2273,14 +2643,15 @@ class Component extends DCLogic {
           base64
         };
         this.setState(st=>({
-          uploadedFiles: [...st.uploadedFiles, item],
-          fileWarnMsg: warn
+          [stateKey]: [...st[stateKey], item],
+          [warnKey]: warn
         }));
       };
       reader.readAsDataURL(file);
     });
-    if(warn) this.setState({ fileWarnMsg: warn });
+    if(warn) this.setState({ [warnKey]: warn });
   }
+  _handleFiles(fileList){ this._handleFilesInto(fileList, "uploadedFiles", "fileWarnMsg"); }
   _removeFile(id){
     this.setState(st=>({
       uploadedFiles: st.uploadedFiles.filter(f=>f.id!==id),
@@ -2289,6 +2660,18 @@ class Component extends DCLogic {
   }
   _triggerFileSelect(){
     const el = document.getElementById("spu-real-file-input");
+    if(el) el.click();
+  }
+  // — สลิปการโอนเงิน (เฉพาะกรณีเลือกงบ "โอนจ่าย งบส่วนตัว") — ใช้กลไกอัปโหลดเดียวกัน แค่เก็บแยกลิสต์และแท็ก category ต่างกัน —
+  _handlePaymentSlip(fileList){ this._handleFilesInto(fileList, "paymentSlipFiles", "paymentSlipWarnMsg"); }
+  _removePaymentSlip(id){
+    this.setState(st=>({
+      paymentSlipFiles: st.paymentSlipFiles.filter(f=>f.id!==id),
+      paymentSlipWarnMsg: ""
+    }));
+  }
+  _triggerPaymentSlipSelect(){
+    const el = document.getElementById("spu-slip-file-input");
     if(el) el.click();
   }
   async _loadLiveJobs(){
@@ -2331,11 +2714,19 @@ class Component extends DCLogic {
             sent, need, est, conf, qty:1, status, overdue:isOver,
             folderId:row.drive_folder_id||"",
             budgetSource:row.budget_source||"", budgetAcct:row.budget_acct||"",
-            rawSubmittedAt:row.submitted_at||""
+            rawSubmittedAt:row.submitted_at||"", rawCompletedAt:row.completed_at||""
           };
         });
         const rawItems = Array.isArray(r.items) ? r.items : [];
-        this.setState({ liveJobs:mapped, liveItems:rawItems, jobsLoaded:true, jobsLoading:false, liveSyncError:null });
+        const patch={ liveJobs:mapped, liveItems:rawItems, jobsLoaded:true, jobsLoading:false, liveSyncError:null };
+        const latest=this._latestJobISO(mapped);
+        if(latest){
+          const [ly,lm]=latest.split("-").map(Number);
+          // ตั้งค่าเริ่มต้นของตัวกรองให้ตรงกับเดือนล่าสุดที่มีข้อมูลจริง จนกว่าผู้ใช้จะเลือกเอง
+          if(!this._dashTouched){ patch.dashYear=String(ly+543); patch.dashMonth=String(lm); patch.dashYearMode="be"; }
+          if(!this._repTouched){ patch.repYear=String(ly+543); patch.repMonth=String(lm); patch.repMode="month"; }
+        }
+        this.setState(patch);
       }else{
         this.setState({ jobsLoading:false, liveSyncError:(r&&r.error)||"load_failed" });
       }
@@ -2343,9 +2734,49 @@ class Component extends DCLogic {
       this.setState({ jobsLoading:false, liveSyncError:String((err&&err.message)||err) });
     }
   }
+  async _loadPriceRules(){
+    const S=this.state;
+    if(!S.gasUrl||!S.spreadsheetId) return;
+    this.setState({ priceRulesLoading:true, priceRulesError:null });
+    try{
+      const r=await this._gasCall("listPriceRules");
+      if(r&&r.ok&&Array.isArray(r.rules)){
+        this.setState({ livePriceRules:r.rules, priceRulesLoaded:true, priceRulesLoading:false, priceRulesError:null });
+      }else{
+        this.setState({ priceRulesLoading:false, priceRulesError:(r&&r.error)||"load_failed" });
+      }
+    }catch(err){
+      this.setState({ priceRulesLoading:false, priceRulesError:String((err&&err.message)||err) });
+    }
+  }
+  async _togglePriceRule(ruleId, nextActive){
+    // อัปเดตหน้าจอทันที (optimistic) แล้วค่อยยืนยันกับ Google Sheet เบื้องหลัง — ถ้าล้มเหลวค่อยย้อนกลับ
+    this.setState(st=>({
+      livePriceRules: st.livePriceRules.map(row=>row.rule_id===ruleId?{ ...row, active:nextActive }:row)
+    }));
+    const r=await this._gasCall("togglePriceRule", { ruleId, active:nextActive });
+    if(!r||!r.ok){
+      this.setState(st=>({
+        livePriceRules: st.livePriceRules.map(row=>row.rule_id===ruleId?{ ...row, active:!nextActive }:row),
+        priceRulesError:(r&&r.error)||"toggle_failed"
+      }));
+    }
+  }
+  // — popup รายละเอียดคำขอ (หน้า "คิวงาน" ของแอดมิน) —
+  async _openJobDetail(jobNo){
+    this.setState({ jobDetailOpen:true, jobDetailJobNo:jobNo, jobDetailFiles:[], jobDetailFilesLoading:true });
+    const r = await this._gasCall("listFilesForJob", { jobNo });
+    if(r && r.ok && Array.isArray(r.files)){
+      this.setState({ jobDetailFiles:r.files, jobDetailFilesLoading:false });
+    } else {
+      this.setState({ jobDetailFilesLoading:false });
+    }
+  }
+  _closeJobDetail(){
+    this.setState({ jobDetailOpen:false, jobDetailJobNo:null, jobDetailFiles:[] });
+  }
   async _advanceStatus(jobNo, nextStatus){
     this.setState(st=>({
-      jobs:{ ...st.jobs, [jobNo]:nextStatus },
       liveJobs:st.liveJobs.map(j=>j.no===jobNo?{ ...j, status:nextStatus }:j)
     }));
     try{
@@ -2374,7 +2805,7 @@ class Component extends DCLogic {
     };
   }
   stTag(code){ const p=this.statusPalette()[code]; return p?[p.bg,p.fg]:["var(--color-neutral-100)","var(--color-neutral-700)"]; }
-  jobStatus(j){ return this.state.jobs[j.no]||j.status; }
+  jobStatus(j){ return j.status; }
   go(page){
     return () => {
       const isExecUser = this.state.adminUserObj && this.state.adminUserObj.role === "EXECUTIVE";
@@ -2428,7 +2859,7 @@ class Component extends DCLogic {
         let r = await this._gasCall("checkAdminUser", { email, password: pass });
         // Fallback: If unknown_action occurs, it means the browser contacted an older deployment URL.
         // Force retry directly using the updated active Web App URL:
-        const activeUrl = "https://script.google.com/macros/s/AKfycbzmjDv2VS9TksC3RQZVSGJDeJIAct5j9rgPT3VFLWSt5QixX0JHFgI2YJJ__ABnFTwJ/exec";
+        const activeUrl = "https://script.google.com/macros/s/AKfycbwzZHqGi_xWue1We-byoivtbmqxW8hRM1Wor_XLY9eOUSVnAhS0gBjHDZUgOhPK_OGy/exec";
         if (r && (r.error === "unknown_action" || r.error === "missing_url")) {
           this.setState({ gasUrl: activeUrl });
           try {
@@ -2609,6 +3040,55 @@ class Component extends DCLogic {
       bg:S.examType===k?INK:"transparent", fg:S.examType===k?BG:INK, go:()=>this.setState({ examType:k }) }));
     const setExamSubject=e=>this.setState({ examSubject:e.target.value });
 
+    // — พิมพ์สำเนา: มีปกสี 180 แกรม หรือไม่ (R04/R05) —
+    const isDup=S.sel.dup!==undefined;
+    const toggleDupCover=()=>this.setState(st=>({ dupHasCover:!st.dupHasCover }));
+
+    // — นามบัตร: จำนวนด้าน (R07/R08) + จำนวนใบ —
+    const isCard=S.sel.card!==undefined;
+    const cardSidesBg={ one:S.cardSides==="one"?INK:"transparent", two:S.cardSides==="two"?INK:"transparent" };
+    const cardSidesFg={ one:S.cardSides==="one"?BG:INK, two:S.cardSides==="two"?BG:INK };
+    const setCardSides={ one:mkToggle("cardSides")("one"), two:mkToggle("cardSides")("two") };
+    const setCardQty=e=>this.setState({ cardQty:e.target.value });
+
+    // — วุฒิบัตร: แบบโลโก้ (R09/R10) + เจียนขอบ 4 ด้าน (R11 ต่อแผ่น) + จำนวนแผ่น —
+    const isCert=S.sel.cert!==undefined;
+    const certLogoBg={ black:S.certLogo==="black"?INK:"transparent", color:S.certLogo==="color"?INK:"transparent" };
+    const certLogoFg={ black:S.certLogo==="black"?BG:INK, color:S.certLogo==="color"?BG:INK };
+    const setCertLogo={ black:mkToggle("certLogo")("black"), color:mkToggle("certLogo")("color") };
+    const toggleCertTrim=()=>this.setState(st=>({ certTrim:!st.certTrim }));
+    const setCertQty=e=>this.setState({ certQty:e.target.value });
+
+    // — จัดรูปเล่ม/ออกแบบ: ขาวดำ (R19 คำนวณได้) / 4 สี (R20 ช่วงราคา รอยืนยัน) + จำนวนหน้า —
+    const isLayout=S.sel.layout!==undefined;
+    const layoutColorBg={ bw:S.layoutColor==="bw"?INK:"transparent", color:S.layoutColor==="color"?INK:"transparent" };
+    const layoutColorFg={ bw:S.layoutColor==="bw"?BG:INK, color:S.layoutColor==="color"?BG:INK };
+    const setLayoutColor={ bw:mkToggle("layoutColor")("bw"), color:mkToggle("layoutColor")("color") };
+    const setLayoutPages=e=>this.setState({ layoutPages:e.target.value });
+    const isLayoutColorMode=S.layoutColor==="color";
+
+    // — พริ้นท์สี A4: ชนิดกระดาษ (R12–R16) + จำนวนแผ่น —
+    const isA4=S.sel.a4!==undefined;
+    const a4PaperOpts=[["bond70",t.a4PaperBond70],["simbo250",t.a4PaperSimbo250],["mouColor",t.a4PaperMouColor],
+      ["mouBlack",t.a4PaperMouBlack],["f4own",t.a4PaperF4Own]].map(([k,label])=>({ label,
+      bg:S.a4PaperType===k?INK:"transparent", fg:S.a4PaperType===k?BG:INK, go:()=>this.setState({ a4PaperType:k }) }));
+    const setA4Qty=e=>this.setState({ a4Qty:e.target.value });
+
+    // — พริ้นท์สี A3: ชนิดกระดาษ (R17 ช่วงราคา รอยืนยัน / R18 คำนวณได้) + จำนวนแผ่น —
+    const isA3=S.sel.a3!==undefined;
+    const a3PaperOpts=[["bond80",t.a3PaperBond80],["simbo250",t.a3PaperSimbo250]].map(([k,label])=>({ label,
+      bg:S.a3PaperType===k?INK:"transparent", fg:S.a3PaperType===k?BG:INK, go:()=>this.setState({ a3PaperType:k }) }));
+    const setA3Qty=e=>this.setState({ a3Qty:e.target.value });
+    const isA3RangeMode=S.a3PaperType==="bond80";
+    const a4PaperLabel={ bond70:t.a4PaperBond70, simbo250:t.a4PaperSimbo250, mouColor:t.a4PaperMouColor,
+      mouBlack:t.a4PaperMouBlack, f4own:t.a4PaperF4Own }[S.a4PaperType]||"";
+    const a3PaperLabel={ bond80:t.a3PaperBond80, simbo250:t.a3PaperSimbo250 }[S.a3PaperType]||"";
+
+    // — พริ้นท์สี A5 / เข้าเล่ม: ไม่มีกฎราคาคงที่ (MANUAL_QUOTE) — เก็บแค่จำนวนไว้ให้แอดมินตีราคา —
+    const isA5=S.sel.a5!==undefined;
+    const setA5Qty=e=>this.setState({ a5Qty:e.target.value });
+    const isBind=S.sel.bind!==undefined;
+
     // — budget: exam papers and exercise sheets are a standing service, no budget asked —
     const FREE_ITEMS=["exam"];
     const budgetNeeded=selIds.length>0 && selIds.some(id=>!FREE_ITEMS.includes(id));
@@ -2645,6 +3125,13 @@ class Component extends DCLogic {
     const filesText = filesCount > 0
       ? (filesCount + (S.lang==="th"?" ไฟล์":" files"))
       : (S.lang==="th"?"ไม่มีไฟล์แนบ (ส่งภายหลังได้)":"No files attached");
+
+    // — แนบสลิปการโอนเงิน (เฉพาะกรณีเลือกงบ "โอนจ่าย งบส่วนตัว") —
+    const slipFilesList = S.paymentSlipFiles.map(f => ({
+      name: f.name, size: f.sizeStr, remove: () => this._removePaymentSlip(f.id)
+    }));
+    const hasSlipFiles = S.paymentSlipFiles.length > 0;
+    const slipFileCountLabel = S.paymentSlipFiles.length + (S.lang==="th"?" ไฟล์":" files");
     const reviewRows=[
       [S.lang==="th"?"บริการ":"Service", S.svcGroup?(S.svcGroup==="PROD"?t.svcGroupProd:t.svcGroupDesign):"—"],
       [S.lang==="th"?"รายการที่เลือก":"Items", selected.length?selected.map(s=>this.sname(s)).join(", "):(S.lang==="th"?"ยังไม่ได้เลือก":"None selected")],
@@ -2664,9 +3151,36 @@ class Component extends DCLogic {
       reviewRows.push([t.examType, S.examType==="mid"?t.examMid:t.examOut]);
       reviewRows.push([t.examSubject, S.examSubject||"—"]);
     }
+    if(isDup){
+      reviewRows.push([t.dupCoverLabel, S.dupHasCover?t.dupCoverYes:t.dupCoverNo]);
+    }
+    if(isCard){
+      reviewRows.push([t.cardSidesLabel, S.cardSides==="two"?t.cardSidesTwo:t.cardSidesOne]);
+      reviewRows.push([t.cardQtyLabel, S.cardQty||"—"]);
+    }
+    if(isCert){
+      reviewRows.push([t.certLogoLabel, S.certLogo==="color"?t.certLogoColor:t.certLogoBlack]);
+      reviewRows.push([t.certTrimLabel, S.certTrim?(S.lang==="th"?"ใช่":"Yes"):(S.lang==="th"?"ไม่":"No")]);
+      reviewRows.push([t.certQtyLabel, S.certQty||"—"]);
+    }
+    if(isLayout){
+      reviewRows.push([t.layoutColorLabel, S.layoutColor==="color"?t.prodColorColor:t.prodColorBw]);
+      reviewRows.push([t.layoutPagesLabel, S.layoutPages||"—"]);
+    }
+    if(isA4){
+      reviewRows.push([t.paperTypeLabel, a4PaperLabel||"—"]);
+      reviewRows.push([t.sheetQtyLabel, S.a4Qty||"—"]);
+    }
+    if(isA3){
+      reviewRows.push([t.paperTypeLabel, a3PaperLabel||"—"]);
+      reviewRows.push([t.sheetQtyLabel, S.a3Qty||"—"]);
+    }
+    if(isA5){
+      reviewRows.push([t.sheetQtyLabel, S.a5Qty||"—"]);
+    }
     if(budgetNeeded){
       reviewRows.push([t.budgetTitle, budgetLabelNow]);
-      if(S.budget==="personal") reviewRows.push([t.budgetAcct, S.budgetAcct||"—"]);
+      if(S.budget==="personal") reviewRows.push([t.budgetSlipUploadTitle, S.lang==="th"?(hasSlipFiles?(S.paymentSlipFiles.length+" ไฟล์"):"ยังไม่ได้แนบ"):(hasSlipFiles?(S.paymentSlipFiles.length+" files"):"Not attached yet")]);
     }
     const reviewRowsOut=reviewRows.map(([k,v])=>({ k, v }));
 
@@ -2688,11 +3202,41 @@ class Component extends DCLogic {
         nextLabel: next ? ("→ " + this.status(next)) : (S.lang === "th" ? "สิ้นสุด" : "final"),
         advance: next ? () => this._advanceStatus(j.no, next) : () => {},
         open: () => this.setState({ page: "track", curNo: j.no }),
-        folderId: j.folderId || ""
+        viewDetail: () => this._openJobDetail(j.no),
+        folderId: j.folderId || "",
+        rawSubmittedAt: j.rawSubmittedAt || "", rawCompletedAt: j.rawCompletedAt || "",
+        budgetSource: j.budgetSource || "", budgetAcct: j.budgetAcct || ""
       };
     });
     const qq = S.q.trim().toLowerCase();
     const filteredJobs = qq ? jobsAll.filter(j => (j.no + j.requester + j.unit + j.service).toLowerCase().includes(qq)) : jobsAll;
+
+    // — popup รายละเอียดคำขอ (หน้า "คิวงาน") — สรุปด่วน: รายการที่สั่ง + งบประมาณ + สลิปการโอนเงิน —
+    const jobDetail = jobsAll.find(j => j.no === S.jobDetailJobNo) || null;
+    const jobDetailItems = (S.liveItems||[]).filter(it => String(it.job_no)===String(S.jobDetailJobNo)).map(it => {
+      const svc = this.svc(it.service_code);
+      const chips = [it.color_mode, it.paper_size, it.paper_type, it.sides, it.staple, it.exam_type, it.exam_subject]
+        .filter(v => v && String(v).trim()).join(" · ");
+      return { service: svc?this.sname(svc):(it.service_code||"—"), qty:(it.quantity||"—")+" "+(it.unit||""), chips };
+    });
+    // เฉพาะสลิปการโอนเงิน (category "payment-slip") — ตัดไฟล์งานพิมพ์ทั่วไปออกจาก popup นี้ตามที่ขอ
+    const jobDetailSlipFiles = (S.jobDetailFiles||[]).filter(f => f.file_category === "payment-slip").map(f => {
+      const isImage = /^image\//.test(f.mime_type||"");
+      const hasImgError = !!S.slipImgErrors[f.file_id];
+      return {
+        name: f.file_name||"—", link: f.web_view_link||"",
+        showImg: isImage && !hasImgError, showFallback: !isImage || hasImgError,
+        imgSrc: "https://drive.google.com/thumbnail?id="+encodeURIComponent(f.file_id)+"&sz=w500",
+        onImgError: () => this.setState(st=>({ slipImgErrors:{ ...st.slipImgErrors, [f.file_id]:true } }))
+      };
+    });
+    const jobDetailBudgetLabel = jobDetail
+      ? ({ has:t.budgetHas, project:t.budgetProject, personal:t.budgetPersonal, internal:S.lang==="th"?"บริการภายใน (ไม่เรียกเก็บ)":"Internal (not charged)" }[(jobDetail.raw&&jobDetail.raw.budgetSource)||""] || "—")
+      : "—";
+    const closeJobDetail = () => this._closeJobDetail();
+    const viewJobDetailFull = () => { const no=S.jobDetailJobNo; this.setState({ page:"track", curNo:no, jobDetailOpen:false }); };
+    const stopJobDetailClick = e => { if(e&&e.stopPropagation) e.stopPropagation(); };
+    const jobDetailNoSlipShown = !S.jobDetailFilesLoading && jobDetailSlipFiles.length===0;
 
     const PAL = this.statusPalette();
     const activeMineEmail = (S.mineSelectedEmail || S.gateEmail || "").trim().toLowerCase();
@@ -2806,16 +3350,23 @@ class Component extends DCLogic {
       [t.confirmed, cur.conf || "—"]
     ].map(([k, v]) => ({ k, v })) : [];
 
-    const priceRules=d.PRICE_RULES.map(([svcId,spec,type,price,from,state],idx)=>{
-      const pend=state==="pending", on=!S.priceOff[idx];
+    // ตารางราคา — อ่าน/เขียนแท็บ PRICE_RULES ใน Google Sheet จริงแล้ว (ปุ่มเปิด/ปิดมีผลจริงในชีต ไม่ใช่แค่ state ในเบราว์เซอร์)
+    const priceRulesNotSeeded=S.priceRulesLoaded&&S.livePriceRules.length===0;
+    const priceRules=S.livePriceRules.map(row=>{
+      const pend=row.price_type==="MANUAL_QUOTE";
+      const on=row.active===true||String(row.active).toUpperCase()==="TRUE";
+      const priceDisplay=pend?(S.lang==="th"?"รอกำหนด":"To be set")
+        :(row.price_type==="PRICE_RANGE"?(row.min_price+"–"+row.max_price):String(row.price||""));
       const stateLabel=!on?t.priceOffLabel
         :(pend?(S.lang==="th"?"รอกำหนดราคา":"awaiting rule"):(S.lang==="th"?"ใช้งาน":"active"));
-      return { service:this.sname(this.svc(svcId)), spec:P(spec), type, price:P(price), from,
+      const svc=this.svc(row.service_code);
+      return { service:svc?this.sname(svc):row.service_code, spec:P(row.condition||""), type:row.price_type||"",
+        price:priceDisplay, from:row.effective_from||"",
         priceColor:pend?AC7:INK, state:stateLabel,
         tagBg:!on?N1:(pend?"var(--color-accent-200)":N2), tagFg:!on?"var(--color-neutral-600)":(pend?"var(--color-accent-800)":INK),
         rowOpacity:on?"1":"0.5", onStr:on?"true":"false", swBg:on?AC:"var(--color-neutral-400)",
-        swJustify:on?"flex-end":"flex-start", toggleAria:P(spec)+" · "+(on?t.priceActive:t.priceOffLabel),
-        toggle:()=>this.setState(st=>{ const po={...st.priceOff}; if(po[idx]) delete po[idx]; else po[idx]=1; return { priceOff:po }; }) }; });
+        swJustify:on?"flex-end":"flex-start", toggleAria:P(row.condition||"")+" · "+(on?t.priceActive:t.priceOffLabel),
+        toggle:()=>this._togglePriceRule(row.rule_id,!on) }; });
     const formulas=d.FORMULAS.map(([svcId,f])=>({ service:this.sname(this.svc(svcId)), formula:P(f) }));
 
     // — floating calculator window —
@@ -2898,39 +3449,65 @@ class Component extends DCLogic {
       XLSX.writeFile(wb, "printing-service-requests-"+this._today()+".xlsx");
     };
 
-    const totalRev = jobsAll.reduce((sum, j) => sum + (j.conf && j.conf !== "—" ? Number(String(j.conf).replace(/,/g, "")) : (Number(String(j.est).replace(/,/g, "")) || 0)), 0);
-    const uniqUsers = new Set(jobsAll.map(j => (j.raw && j.raw.email) || j.requester).filter(Boolean)).size;
-    const uniqUnits = new Set(jobsAll.map(j => j.unit).filter(Boolean)).size;
+    // — แดชบอร์ด: ตัวกรอง ปี / เดือน / หน่วยงาน กรองข้อมูลจริงทั้งหน้า ตัวเลขทุกส่วนมาจากชุดงานเดียวกับที่เลือก —
+    const bkkDate = raw => this._bkkDate(raw);
+    const dashYearNum=Number(S.dashYear), dashMonthNum=Number(S.dashMonth);
+    const isAcademic=S.dashYearMode==="academic";
+    // ปีของงาน (พ.ศ.) ตามโหมดปี: ปฏิทิน = ปีที่ส่งคำขอ · ปีการศึกษา = ส.ค.–ก.ค. (ส.ค. ขึ้นปีการศึกษาใหม่)
+    const dashYearOf=(y,m)=>isAcademic?(m>=8?y+543:y+542):y+543;
+    const dashInfo=j=>{ const iso=bkkDate(j.rawSubmittedAt); if(!iso) return null; const [y,m]=iso.split("-").map(Number); return { y, m, yr:dashYearOf(y,m) }; };
+    const unitOk=j=>!S.dashUnit||this.L(j,"unit")===S.dashUnit;
+    const dashYearJobs=jobsAll.filter(j=>{ const i=dashInfo(j); return i&&i.yr===dashYearNum&&unitOk(j); });
+    const dashJobs=dashMonthNum===0?dashYearJobs:dashYearJobs.filter(j=>dashInfo(j).m===dashMonthNum);
+    const dcnt=c=>dashJobs.filter(j=>j.code===c).length;
+
+    // เวลาทำงานเฉลี่ย: นับจากวันที่ส่งคำขอถึงวันที่รับงาน (เขตเวลาไทย) เฉพาะงานที่มีครบทั้งสองวัน
+    // งานที่วันรับงานอยู่ก่อนวันส่งคำขอถือเป็นข้อมูลผิด ไม่นำมาเฉลี่ย
+    const tatDays = dashJobs.map(j => {
+      const a = bkkDate(j.rawSubmittedAt), b = bkkDate(j.rawCompletedAt);
+      if (!a || !b) return null;
+      return Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
+    }).filter(v => v !== null && v >= 0);
+    const tatAvg = tatDays.length ? tatDays.reduce((s, v) => s + v, 0) / tatDays.length : null;
+    const tatText = tatAvg === null ? "—"
+      : (S.lang === "th"
+        ? (tatAvg < 0.5 ? "ภายในวันเดียว" : tatAvg.toFixed(1) + " วัน")
+        : (tatAvg < 0.5 ? "Same day" : tatAvg.toFixed(1) + " days"));
+
+    const totalRev = dashJobs.reduce((sum, j) => sum + (j.conf && j.conf !== "—" ? Number(String(j.conf).replace(/,/g, "")) : (Number(String(j.est).replace(/,/g, "")) || 0)), 0);
+    const uniqUsers = new Set(dashJobs.map(j => (j.raw && j.raw.email) || j.requester).filter(Boolean)).size;
+    const uniqUnits = new Set(dashJobs.map(j => j.unit).filter(Boolean)).size;
 
     const kpis=[
-      [t.kpiAll,String(jobsAll.length),t.kpiAllSub,INK],
+      [t.kpiAll,String(dashJobs.length),t.kpiAllSub,INK],
       [t.kpiUniqUser,String(uniqUsers),t.kpiUserSub,INK],
       [t.kpiUniqUnit,String(uniqUnits),t.kpiUnitSub,INK],
-      [t.kpiDone,String(cnt("SERVICE_DONE")),t.kpiDoneSub,"#0f7a4c"],
+      [t.kpiDone,String(dcnt("SERVICE_DONE")),t.kpiDoneSub,"#0f7a4c"],
       [t.kpiValue,this.B(totalRev),t.kpiValueSub,AC],
-      [t.kpiTat,S.lang==="th"?(jobsAll.length>0?"1-3 วัน":"—"):(jobsAll.length>0?"1-3 days":"—"),t.kpiTatSub,INK]
+      [t.kpiTat,tatText,t.kpiTatSub,INK]
     ].map(([label,v,sub,color])=>({ label, v, sub, color }));
     const beNow=new Date().getFullYear()+543;
-    const yearOpts=[beNow-2,beNow-1,beNow].map(y=>({ v:String(y),
-      label:S.dashYearMode==="academic"?(S.lang==="th"?"ปีการศึกษา "+y:"Academic "+y):(S.lang==="th"?"พ.ศ. "+y:"B.E. "+y) }));
+    const dataYears=jobsAll.map(j=>{ const i=dashInfo(j); return i?i.yr:null; }).filter(Boolean);
+    const yearList=[...new Set([beNow-2,beNow-1,beNow,...dataYears,dashYearNum])].sort((a,b)=>a-b);
+    const yearOpts=yearList.map(y=>({ v:String(y),
+      label:isAcademic?(S.lang==="th"?"ปีการศึกษา "+y:"Academic "+y):(S.lang==="th"?"พ.ศ. "+y:"B.E. "+y) }));
     const monthOpts=[{ v:"0", label:t.fAllMonths }].concat(this._months(S.lang).map((name,i)=>({ v:String(i+1), label:name })));
     const unitNames=[...new Set(jobsAll.map(j=>this.L(j,"unit")).filter(Boolean))];
     const unitOpts=[{ v:"", label:t.allUnits }].concat(unitNames.map(u=>({ v:u, label:u })));
-    const dashMonthNum=Number(S.dashMonth), dashYearNum=Number(S.dashYear);
     const periodText=(()=>{ const months=this._months(S.lang);
       if(dashMonthNum===0){
-        return S.dashYearMode==="academic"
+        return isAcademic
           ? (S.lang==="th"?"ปีการศึกษา "+dashYearNum+" ("+months[7]+" "+dashYearNum+" – "+months[6]+" "+(dashYearNum+1)+")"
                           :"Academic year "+dashYearNum+" ("+months[7]+" "+dashYearNum+" – "+months[6]+" "+(dashYearNum+1)+")")
           : (S.lang==="th"?"ปี พ.ศ. "+dashYearNum+" ("+months[0]+" – "+months[11]+" "+dashYearNum+")"
                           :"Calendar year "+dashYearNum+" ("+months[0]+" – "+months[11]+" "+dashYearNum+")");
       }
-      const actualYear=(S.dashYearMode==="academic"&&dashMonthNum<=7)?dashYearNum+1:dashYearNum;
+      const actualYear=(isAcademic&&dashMonthNum<=7)?dashYearNum+1:dashYearNum;
       return months[dashMonthNum-1]+" "+actualYear;
     })();
 
     const reqMap={};
-    jobsAll.forEach(j=>{
+    dashJobs.forEach(j=>{
       const name=j.requester||(S.lang==="th"?"ผู้ขอรับบริการ":"Requester");
       const unit=j.unit||"—";
       if(!reqMap[name]) reqMap[name]={ name, unit, count:0 };
@@ -2939,7 +3516,7 @@ class Component extends DCLogic {
     const topRequesters=Object.values(reqMap).sort((a,b)=>b.count-a.count).slice(0,10).map((r,i)=>({ rank:i+1, ...r }));
 
     const unitValMap={};
-    jobsAll.forEach(j=>{
+    dashJobs.forEach(j=>{
       const u=j.unit||"—";
       const val=j.conf&&j.conf!=="—"?Number(String(j.conf).replace(/,/g,"")):(Number(String(j.est).replace(/,/g,""))||0);
       unitValMap[u]=(unitValMap[u]||0)+val;
@@ -2948,247 +3525,210 @@ class Component extends DCLogic {
     const topUnitsByValue=Object.entries(unitValMap).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([name,v],i)=>({
       rank:i+1, name, value:this.B(v), w:Math.round(v/maxVal*100)+"%"
     }));
-    const mv=[0,0,0,0,0,0,0,jobsAll.length];
-    const monthly=mv.map((v,i)=>({ v, label:(S.lang==="th"?["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค."]:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"])[i],
-      h:Math.round(v/Math.max(1,jobsAll.length)*180)+"px", bg:i===mv.length-1?AC:INK }));
-    const ts=[["copy",cnt("RECEIVED")],["a4",cnt("IN_PRODUCTION")],["cert",cnt("PROD_DONE")],["bind",cnt("SERVICE_DONE")]];
-    const topServices=ts.map(([id,v])=>({ name:this.sname(this.svc(id)), v, w:Math.round(v/Math.max(1,jobsAll.length)*100)+"%" }));
+
+    // กราฟรายเดือนของปีที่เลือก (ตามหน่วยงานที่เลือก) — เดือนที่อยู่ในตัวกรองไฮไลต์สีเด่น
+    const monthOrder=isAcademic?[8,9,10,11,12,1,2,3,4,5,6,7]:[1,2,3,4,5,6,7,8,9,10,11,12];
+    const shortMonths=S.lang==="th"?["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."]
+      :["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const mv=monthOrder.map(m=>dashYearJobs.filter(j=>dashInfo(j).m===m).length);
+    const mvMax=Math.max(1,...mv);
+    const monthly=monthOrder.map((m,i)=>({ v:mv[i], label:shortMonths[m-1],
+      h:Math.round(mv[i]/mvMax*180)+"px", bg:(dashMonthNum===0||m===dashMonthNum)?AC:INK }));
+
+    // บริการยอดนิยม: นับรายการ (JOB_ITEMS) ตามรหัสบริการ เฉพาะงานที่อยู่ในตัวกรอง
+    const dashNos=new Set(dashJobs.map(j=>j.no));
+    const svcCount={};
+    (S.liveItems||[]).forEach(it=>{ if(dashNos.has(it.job_no)&&it.service_code) svcCount[it.service_code]=(svcCount[it.service_code]||0)+1; });
+    const svcTop=Object.entries(svcCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const svcMax=Math.max(1,...svcTop.map(x=>x[1]));
+    const topServices=svcTop.map(([id,v])=>{ const sv=this.svc(id); return { name:sv?this.sname(sv):id, v, w:Math.round(v/svcMax*100)+"%" }; });
     const statusMix=[
-      ["RECEIVED",cnt("RECEIVED"),"#2f56c6"],
-      ["IN_PRODUCTION",cnt("IN_PRODUCTION"),INK],
-      ["PROD_DONE",cnt("PROD_DONE"),AC],
-      ["SERVICE_DONE",cnt("SERVICE_DONE"),N7]
+      ["RECEIVED",dcnt("RECEIVED"),"#2f56c6"],
+      ["IN_PRODUCTION",dcnt("IN_PRODUCTION"),INK],
+      ["PROD_DONE",dcnt("PROD_DONE"),AC],
+      ["SERVICE_DONE",dcnt("SERVICE_DONE"),N7]
     ].map(([code,v,color])=>({ label:this.status(code), v, color }));
 
     const rr=(name,cells,head)=>({ name, cells:cells.map(v=>({ v })), span:1,
       fw:head?"700":"400", bg:head?N2:"transparent", pad:head?"6px":"18px" });
 
-    // --- Live A4 Report Calculation from Google Sheet Data ---
-    // ใช้ข้อมูลจริงจาก Google Sheet เสมอ ตัดปุ่มสลับไปดูตัวอย่างจำลองออกแล้วตามที่ต้องการ
-    const isMockup = false;
-
-    // 1. Mockup template rows (for previewing the full design layout)
-    const mockupReportRows=[
-      rr(S.lang==="th"?"กลุ่มอำนวยการกลาง":"Central Administration",["","","","","","",""],true),
-      rr(S.lang==="th"?"สำนักงานอธิการบดี":"President's Office",["2,400","3,120","2","9,000","—","—","12,120"]),
-      rr(S.lang==="th"?"สำนักงานทะเบียน":"Registrar Office",["4,150","5,400","1","2,000","300","6,000","13,400"]),
-      rr(S.lang==="th"?"กลุ่มงานกิจการนักศึกษา":"Student Affairs",["","","","","","",""],true),
-      rr(S.lang==="th"?"กองกิจการนักศึกษา":"Student Affairs Division",["5,600","7,250","3","12,500","120","2,400","22,150"]),
-      rr(S.lang==="th"?"กลุ่มงานการคลัง":"Finance Group",["","","","","","",""],true),
-      rr(S.lang==="th"?"กองการคลัง":"Finance Division",["1,450","1,880","1","900*","—","—","2,780"]),
-      rr(S.lang==="th"?"คณะต่าง ๆ":"Faculties",["","","","","","",""],true),
-      rr(S.lang==="th"?"คณะบริหารธุรกิจ":"Business Administration",["3,540","4,600","5","15,000","240","4,800","24,400"]),
-      rr(S.lang==="th"?"คณะนิเทศศาสตร์":"Communication Arts",["1,120","1,450","4","11,000*","90","1,800","14,250"]),
-      rr(S.lang==="th"?"คณะวิศวกรรมศาสตร์":"Engineering",["1,770","2,300","2","6,500","200","*","8,800"]),
-      { name:S.lang==="th"?"รวมทั้งสิ้น":"Grand total",
-        cells:["20,030","26,000","18","56,900","950","15,000","97,900"].map(v=>({ v })), span:1, fw:"800", bg:N2, pad:"6px" }
-    ];
-    const mockupRevenueRows=[
-      [t.revValue,"97,900","800",N2],
-      [t.revProject,"58,400","400","transparent"],
-      [t.revExternal,"12,300","400","transparent"],
-      [t.revInternal,"27,200","400","transparent"]
-    ].map(([label,value,fw,bg])=>({ label, value, fw, bg }));
-
-    // 2. Filter live jobs based on selected date range or current active month
-    let liveReportJobs = jobsAll;
-    if (S.rgStart && S.rgEnd) {
-      liveReportJobs = jobsAll.filter(j => {
-        const d = (j.rawSubmittedAt || "").slice(0, 10);
-        return d >= S.rgStart && d <= S.rgEnd;
-      });
+    // --- รายงาน A4 คำนวณสดจาก Google Sheet ตาม Document/REPORT-DATA-SPEC.md (หัวข้อ 3–6) ---
+    // 1. กรองตามวันที่ส่งคำขอ (เขตเวลาไทย) — เลือกได้ 5 แบบ: รายเดือน / รายปี / ปีการศึกษา / กำหนดเอง / ทุกช่วงเวลา
+    const repMode = S.repMode || "month";
+    const repLatestISO = this._latestJobISO() || this._today();
+    const repYearBE = Number(S.repYear) || (Number(repLatestISO.slice(0, 4)) + 543);
+    const repMonthNum = Number(S.repMonth) || Number(repLatestISO.slice(5, 7));
+    const repYearCE = repYearBE - 543;
+    const lastDayOf = (y, m) => new Date(y, m, 0).getDate();
+    const ymd = (y, m, d) => y + "-" + this._pad(m) + "-" + this._pad(d);
+    let filStart = null, filEnd = null;
+    if (repMode === "month") {
+      filStart = ymd(repYearCE, repMonthNum, 1);
+      filEnd = ymd(repYearCE, repMonthNum, lastDayOf(repYearCE, repMonthNum));
+    } else if (repMode === "year") {
+      filStart = ymd(repYearCE, 1, 1);
+      filEnd = ymd(repYearCE, 12, 31);
+    } else if (repMode === "academic") {
+      // ปีการศึกษาตาม REPORT-DATA-SPEC.md ข้อ 3.1: 1 ก.ค. ปีนั้น – 31 ส.ค. ปีถัดไป
+      filStart = ymd(repYearCE, 7, 1);
+      filEnd = ymd(repYearCE + 1, 8, 31);
+    } else if (repMode === "custom") {
+      // เลือกวันเริ่มค้างไว้แล้วยังไม่เลือกวันจบ ให้ถือเป็นวันเดียว ไม่ปล่อยให้กลายเป็นไม่กรองเลย
+      filStart = S.rgStart;
+      filEnd = S.rgEnd || S.rgStart;
     }
+    const pickedRange = !!(filStart && filEnd);
+    const liveReportJobs = pickedRange
+      ? jobsAll.filter(j => { const dd = bkkDate(j.rawSubmittedAt); return dd >= filStart && dd <= filEnd; })
+      : jobsAll;
 
-    // Map of live items (from JOB_ITEMS) by job_no
     const itemsByJob = {};
-    if (Array.isArray(S.liveItems)) {
-      S.liveItems.forEach(it => {
-        const jno = it.job_no || "";
-        if (!itemsByJob[jno]) itemsByJob[jno] = [];
-        itemsByJob[jno].push(it);
+    (S.liveItems || []).forEach(it => { const k = it.job_no || ""; (itemsByJob[k] = itemsByJob[k] || []).push(it); });
+
+    // 2. คอลัมน์ของตาราง: 0 พิมพ์สำเนา (copy/dup/exam) · 1 นามบัตร (card) · 2 วุฒิบัตร (cert) · 3 จัดรูปเล่ม/พริ้นสี (ที่เหลือทั้งหมด)
+    const colOf = code => {
+      const c = String(code || "").toLowerCase();
+      return (c === "copy" || c === "dup" || c === "exam") ? 0 : c === "card" ? 1 : c === "cert" ? 2 : 3;
+    };
+    // บล็อกรายได้ตามประเภทงบของงาน: 0 มูลค่างาน (has/internal/ไม่ระบุ) · 1 โอนจ่าย/งบโครงการ · 2 รายได้ภายนอก (งบส่วนตัว)
+    const blockOf = bs => bs === "project" ? 1 : bs === "personal" ? 2 : 0;
+    const toNum = v => Number(String(v == null ? "" : v).replace(/,/g, "")) || 0;
+    const newAcc = () => ({ q: [0, 0, 0, 0], m: [0, 0, 0, 0], star: [false, false, false, false], jobs3: new Set(), total: 0, starTotal: false, boxes: 0 });
+    // เพิ่มหนึ่งรายการเข้ายอดของหน่วยงาน: จำนวน = SUM(quantity) / นามบัตรนับเป็นกล่อง / จัดรูปเล่ม-พริ้นสีนับจำนวนงานไม่ซ้ำ
+    // ยอดเงิน = ราคายืนยัน ถ้ายังไม่ยืนยันใช้ราคาประมาณการ และกำกับ * (รวมกรณีไม่มีราคา)
+    const addTo = (acc, jobNo, code, qty, confirmed, estimated) => {
+      const c = colOf(code);
+      const conf = toNum(confirmed);
+      const val = conf || toNum(estimated);
+      if (c === 3) acc.jobs3.add(jobNo); else acc.q[c] += qty;
+      acc.m[c] += val;
+      acc.total += val;
+      if (!conf) { acc.star[c] = true; acc.starTotal = true; }
+      return val;
+    };
+    const sumAcc = list => {
+      const s = newAcc();
+      list.forEach(a => {
+        for (let i = 0; i < 4; i++) { s.q[i] += a.q[i]; s.m[i] += a.m[i]; s.star[i] = s.star[i] || a.star[i]; }
+        a.jobs3.forEach(x => s.jobs3.add(x));
+        s.total += a.total; s.starTotal = s.starTotal || a.starTotal; s.boxes += a.boxes;
       });
-    }
-
-    // Standard Groups for SPU Report
-    const reportGroups = [
-      {
-        th: "กลุ่มอำนวยการกลาง", en: "Central Administration",
-        units: [
-          { th: "สำนักงานอธิการบดี", en: "President's Office" },
-          { th: "สำนักงานทะเบียน", en: "Registrar Office" },
-          { th: "สำนักงานวิชาการ", en: "Academic Affairs Office" },
-          { th: "สำนักหอสมุด", en: "Library Office" }
-        ]
-      },
-      {
-        th: "กลุ่มงานกิจการนักศึกษา", en: "Student Affairs",
-        units: [
-          { th: "กองกิจการนักศึกษา", en: "Student Affairs Division" },
-          { th: "ศูนย์กีฬา", en: "Sports Center" }
-        ]
-      },
-      {
-        th: "กลุ่มงานการคลัง", en: "Finance Group",
-        units: [
-          { th: "กองการคลัง", en: "Finance Division" },
-          { th: "สำนักงานพัสดุ", en: "Procurement Office" }
-        ]
-      },
-      {
-        th: "คณะต่าง ๆ", en: "Faculties",
-        units: [
-          { th: "คณะบริหารธุรกิจ", en: "Business Administration" },
-          { th: "คณะนิเทศศาสตร์", en: "Communication Arts" },
-          { th: "คณะวิศวกรรมศาสตร์", en: "Engineering" },
-          { th: "คณะเทคโนโลยีสารสนเทศ", en: "Information Technology" },
-          { th: "คณะนิติศาสตร์", en: "Law" },
-          { th: "คณะศิลปศาสตร์", en: "Liberal Arts" },
-          { th: "คณะบัญชี", en: "Accountancy" },
-          { th: "คณะสถาปัตยกรรมศาสตร์", en: "Architecture" }
-        ]
-      }
-    ];
-
-    // Find any extra unit that appears in liveReportJobs but not in standard list
-    const knownUnitSet = new Set();
-    reportGroups.forEach(g => g.units.forEach(u => { knownUnitSet.add(u.th); knownUnitSet.add(u.en); }));
-    const extraUnits = [];
-    liveReportJobs.forEach(j => {
-      const u = j.unitTh || j.unit || "";
-      if (u && !knownUnitSet.has(u) && !extraUnits.some(eu => eu.th === u)) {
-        extraUnits.push({ th: u, en: u });
-      }
-    });
-    if (extraUnits.length > 0) {
-      reportGroups.push({
-        th: "หน่วยงานอื่น ๆ", en: "Other Units",
-        units: extraUnits
-      });
-    }
-
-    // Helper to categorize job or item:
-    // cat: 1 = prod (งานผลิต), 2 = design (งานพิมพ์และออกแบบ), 3 = color (พริ้นท์)
-    const getCat = (svcCode, text) => {
-      const s = String(svcCode || "").toLowerCase();
-      const p = String(text || "").toLowerCase();
-      if (s === "copy" || s === "dup" || s === "exam" || s === "bind" ||
-          p.includes("ผลิต") || p.includes("สำเนา") || p.includes("ข้อสอบ") || p.includes("เข้าเล่ม") || p.includes("ถ่ายเอกสาร")) {
-        return 1;
-      }
-      if (s === "card" || s === "cert" || s === "layout" ||
-          p.includes("ออกแบบ") || p.includes("นามบัตร") || p.includes("วุฒิบัตร") || p.includes("layout") || p.includes("artwork")) {
-        return 2;
-      }
-      return 3;
+      return s;
     };
 
-    // Aggregate by unit
-    const unitMap = {};
-    // สรุปตามแหล่งงบประมาณจริงที่ผู้ขอเลือกตอนส่งฟอร์ม (budget_source จากแท็บ JOBS)
-    // — "has" (มีงบของหน่วยงานเอง) นับรวมอยู่ใน revValue (ยอดรวมทั้งหมด) อยู่แล้ว จึงไม่แยกเป็นแถวของตัวเอง
-    let totalProjectVal = 0, totalExternalVal = 0, totalInternalVal = 0;
+    // 3. รวมยอดที่ระดับรายการ (JOB_ITEMS) แยกตามบล็อกงบ → หน่วยงาน
+    const blocks = [{}, {}, {}];
+    let internalTotal = 0;
     liveReportJobs.forEach(j => {
-      const u = j.unitTh || j.unit || (S.lang === "th" ? "สำนักงานอธิการบดี" : "President's Office");
-      if (!unitMap[u]) {
-        unitMap[u] = { prodSheets: 0, prodVal: 0, designCnt: 0, designVal: 0, printCnt: 0, printVal: 0, totalVal: 0 };
-      }
-      const val = Number(j.conf && j.conf !== "—" ? String(j.conf).replace(/,/g, "") : (String(j.est).replace(/,/g, "") || 0)) || 0;
-      const bs = j.budgetSource || "";
-      if (bs === "project") totalProjectVal += val;
-      else if (bs === "personal") totalExternalVal += val;
-      else if (bs === "internal") totalInternalVal += val;
+      const u = (j.unitTh || j.unit || "").trim() || (S.lang === "th" ? "ไม่ระบุหน่วยงาน" : "Unspecified unit");
+      const acc = blocks[blockOf(j.budgetSource)][u] || (blocks[blockOf(j.budgetSource)][u] = newAcc());
       const jobItems = itemsByJob[j.no];
-      if (Array.isArray(jobItems) && jobItems.length > 0) {
-        jobItems.forEach(it => {
-          const itCat = getCat(it.service_code, it.service_code);
-          const itQty = Number(it.quantity) || 1;
-          const itVal = Number(it.confirmed_amount || it.estimated_amount || 0) || 0;
-          if (itCat === 1) {
-            unitMap[u].prodSheets += itQty;
-            unitMap[u].prodVal += itVal;
-          } else if (itCat === 2) {
-            unitMap[u].designCnt += itQty;
-            unitMap[u].designVal += itVal;
-          } else {
-            unitMap[u].printCnt += itQty;
-            unitMap[u].printVal += itVal;
-          }
-          unitMap[u].totalVal += itVal;
-        });
+      let jobVal = 0;
+      if (jobItems && jobItems.length) {
+        jobItems.forEach(it => { jobVal += addTo(acc, j.no, it.service_code, Number(it.quantity) || 0, it.confirmed_amount, it.estimated_amount); });
       } else {
-        // Categorize at job level
-        const jCat = getCat(j.svc, j.purpose);
-        const jQty = Number(j.qty) || 1;
-        if (jCat === 1) {
-          unitMap[u].prodSheets += jQty;
-          unitMap[u].prodVal += val;
-        } else if (jCat === 2) {
-          unitMap[u].designCnt += jQty;
-          unitMap[u].designVal += val;
-        } else {
-          unitMap[u].printCnt += jQty;
-          unitMap[u].printVal += val;
-        }
-        unitMap[u].totalVal += val;
+        jobVal = addTo(acc, j.no, j.svc, Number(j.qty) || 0, j.conf === "—" ? "" : j.conf, j.est);
       }
+      if (j.budgetSource === "internal") internalTotal += jobVal;
     });
 
-    // Generate liveReportRows
-    let totalProdSheets = 0, totalProdVal = 0, totalDesignCnt = 0, totalDesignVal = 0, totalPrintCnt = 0, totalPrintVal = 0, totalGrand = 0;
+    // 4. รูปแบบแสดงผล: จำนวน = จำนวนเต็มคั่นหลักพัน · เงิน = ทศนิยม 2 ตำแหน่งเสมอ · 0 = "—" · ยังไม่ยืนยันราคา = ต่อท้าย *
+    const fmtInt = n => n > 0 ? n.toLocaleString("en-US") : "—";
+    const moneyStr = n => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtMoney = (n, star) => n > 0 ? moneyStr(n) + (star ? "*" : "") : (star ? "*" : "—");
+    const cellsOf = a => [
+      fmtInt(a.q[0]), fmtMoney(a.m[0], a.star[0]),
+      fmtInt(a.boxes), fmtMoney(a.m[1], a.star[1]),
+      fmtInt(a.q[2]), fmtMoney(a.m[2], a.star[2]),
+      fmtInt(a.jobs3.size), fmtMoney(a.m[3], a.star[3]),
+      fmtMoney(a.total, a.starTotal)
+    ];
+    const blockDefs = S.lang === "th" ? [
+      { head: "รวมรายได้ (มูลค่างาน)", total: "รวมรายได้ (มูลค่างาน)" },
+      { head: "รายได้ โอนจ่าย / งบโครงการ", total: "รวมรายได้ (โอนจ่าย / งบโครงการ)" },
+      { head: "รายได้ภายนอก", total: "รวมรายได้ภายนอก (จ่ายเงินสดที่ สนง.การคลัง)" }
+    ] : [
+      { head: "Revenue (job value)", total: "Total revenue (job value)" },
+      { head: "Transfer / project budget", total: "Total revenue (transfer / project budget)" },
+      { head: "External revenue", total: "Total external revenue (cash at Finance Office)" }
+    ];
 
     const liveReportRows = [];
-    reportGroups.forEach(g => {
-      liveReportRows.push(rr(S.lang === "th" ? g.th : g.en, ["", "", "", "", "", "", ""], true));
-      g.units.forEach(u => {
-        const uLabel = S.lang === "th" ? u.th : u.en;
-        const data = unitMap[u.th] || unitMap[u.en] || { prodSheets: 0, prodVal: 0, designCnt: 0, designVal: 0, printCnt: 0, printVal: 0, totalVal: 0 };
-        totalProdSheets += data.prodSheets;
-        totalProdVal += data.prodVal;
-        totalDesignCnt += data.designCnt;
-        totalDesignVal += data.designVal;
-        totalPrintCnt += data.printCnt;
-        totalPrintVal += data.printVal;
-        totalGrand += data.totalVal;
-
-        liveReportRows.push(rr(uLabel, [
-          data.prodSheets > 0 ? data.prodSheets.toLocaleString() : "—",
-          data.prodVal > 0 ? data.prodVal.toLocaleString() : "—",
-          data.designCnt > 0 ? data.designCnt.toLocaleString() : "—",
-          data.designVal > 0 ? data.designVal.toLocaleString() : "—",
-          data.printCnt > 0 ? data.printCnt.toLocaleString() : "—",
-          data.printVal > 0 ? data.printVal.toLocaleString() : "—",
-          data.totalVal > 0 ? data.totalVal.toLocaleString() : "—"
-        ], false));
+    const blockSum = [newAcc(), newAcc(), newAcc()];
+    const blockAccs = [];
+    blockDefs.forEach((def, b) => {
+      const entries = Object.keys(blocks[b]).map(name => ({ name, a: blocks[b][name] }));
+      if (!entries.length) return;
+      entries.forEach(e => { e.a.boxes = Math.ceil(e.a.q[1] / 100); });
+      entries.sort((x, y) => (y.a.total - x.a.total) || x.name.localeCompare(y.name, "th"));
+      liveReportRows.push(rr(def.head, ["", "", "", "", "", "", "", "", ""], true));
+      entries.forEach(e => liveReportRows.push(rr(e.name, cellsOf(e.a), false)));
+      blockSum[b] = sumAcc(entries.map(e => e.a));
+      blockAccs.push(blockSum[b]);
+      liveReportRows.push(rr(def.total, cellsOf(blockSum[b]), true));
+    });
+    const grand = blockAccs.length ? sumAcc(blockAccs) : newAcc();
+    if (blockAccs.length) {
+      liveReportRows.push({
+        name: S.lang === "th" ? "รวมทั้งสิ้น" : "Grand total",
+        cells: cellsOf(grand).map(v => ({ v })),
+        span: 1, fw: "800", bg: N2, pad: "6px"
       });
-    });
+    } else {
+      liveReportRows.push({
+        name: S.lang === "th" ? "ไม่มีรายการในช่วงเวลาที่เลือก" : "No requests in the selected period",
+        cells: [], span: 10, fw: "400", bg: "transparent", pad: "12px"
+      });
+    }
 
-    liveReportRows.push({
-      name: S.lang === "th" ? "รวมทั้งสิ้น" : "Grand total",
-      cells: [
-        totalProdSheets > 0 ? totalProdSheets.toLocaleString() : "0",
-        totalProdVal > 0 ? totalProdVal.toLocaleString() : "0",
-        totalDesignCnt > 0 ? totalDesignCnt.toLocaleString() : "0",
-        totalDesignVal > 0 ? totalDesignVal.toLocaleString() : "0",
-        totalPrintCnt > 0 ? totalPrintCnt.toLocaleString() : "0",
-        totalPrintVal > 0 ? totalPrintVal.toLocaleString() : "0",
-        totalGrand > 0 ? totalGrand.toLocaleString() : "0"
-      ].map(v => ({ v })),
-      span: 1, fw: "800", bg: N2, pad: "6px"
-    });
-
-    // Live revenue rows — แยกตามแหล่งงบประมาณจริงที่บันทึกไว้ต่องาน (budget_source) ไม่ใช่สัดส่วนสมมติ
+    // สรุปรายได้ — คิดจากยอดระดับรายการชุดเดียวกับตาราง จึงตรงกับ "รวมทั้งสิ้น" เสมอ
     const liveRevenueRows = [
-      [t.revValue, totalGrand > 0 ? totalGrand.toLocaleString() : "0", "800", N2],
-      [t.revProject, totalProjectVal > 0 ? totalProjectVal.toLocaleString() : "0", "400", "transparent"],
-      [t.revExternal, totalExternalVal > 0 ? totalExternalVal.toLocaleString() : "0", "400", "transparent"],
-      [t.revInternal, totalInternalVal > 0 ? totalInternalVal.toLocaleString() : "0", "400", "transparent"]
+      [t.revValue, moneyStr(grand.total), "800", N2],
+      [t.revProject, moneyStr(blockSum[1].total), "400", "transparent"],
+      [t.revExternal, moneyStr(blockSum[2].total), "400", "transparent"],
+      [t.revInternal, moneyStr(internalTotal), "400", "transparent"]
     ].map(([label, value, fw, bg]) => ({ label, value, fw, bg }));
 
-    const reportRows = isMockup ? mockupReportRows : liveReportRows;
-    const revenueRows = isMockup ? mockupRevenueRows : liveRevenueRows;
+    const reportRows = liveReportRows;
+    const revenueRows = liveRevenueRows;
 
-    // งานผลิตรายงานเป็น "จำนวนแผ่น" ตามที่ท่านรองฯ ใช้ดูยอด
-    const subHead=[t.sheetsCol,t.amt,t.cnt,t.amt,t.cnt,t.amt].map(label=>({ label }));
+    // 5. ข้อความบนเอกสารที่ผูกกับช่วงเวลา — ต้องตรงกับช่วงที่กรองจริงเสมอ
+    const jobDates = liveReportJobs.map(j => bkkDate(j.rawSubmittedAt)).filter(Boolean).sort();
+    const repStart = pickedRange ? filStart : (jobDates[0] || this._today());
+    const repEnd = pickedRange ? filEnd : (jobDates[jobDates.length - 1] || this._today());
+    const [sY, sM, sD] = repStart.split("-").map(Number);
+    const [eY, eM, eD] = repEnd.split("-").map(Number);
+    const monthNames = this._months(S.lang);
+    const yShow = y => S.lang === "th" ? y + 543 : y;
+    const isWholeMonth = sY === eY && sM === eM && (!pickedRange || (sD === 1 && eD === lastDayOf(eY, eM)));
+    const a4PeriodText = repMode === "year"
+      ? (S.lang === "th"
+        ? ("ประจำปี พ.ศ. " + repYearBE + " (" + monthNames[0] + " – " + monthNames[11] + " " + repYearBE + ")")
+        : ("Calendar year " + repYearCE))
+      : repMode === "academic"
+        ? (S.lang === "th"
+          ? ("ประจำปีการศึกษา " + repYearBE + " (" + monthNames[6] + " " + repYearBE + " – " + monthNames[7] + " " + (repYearBE + 1) + ")")
+          : ("Academic year " + repYearCE + " (Jul " + repYearCE + " – Aug " + (repYearCE + 1) + ")"))
+        : isWholeMonth
+          ? (S.lang === "th" ? "ประจำเดือน" + monthNames[sM - 1] + " " + yShow(sY) : "Month of " + monthNames[sM - 1] + " " + sY)
+          : ((S.lang === "th" ? "ระหว่างวันที่ " : "Period ") + this._fmt(repStart) + (S.lang === "th" ? " ถึง " : " – ") + this._fmt(repEnd));
+    // เลขที่เอกสาร: ระบบยังไม่ออกเลขรันนิ่งให้ ใช้เลขลำดับคงที่ต่อท้ายด้วยปี พ.ศ. ของวันสิ้นสุดช่วง
+    const a4DocNo = "ผพ. 0069/" + (eY + 543);
+    const a4DocDateText = eD + " " + monthNames[eM - 1] + " " + yShow(eY);
+
+    // ตัวเลือกของตัวกรองรายงาน — ปีที่เลือกได้ครอบคลุมทั้งปีที่มีข้อมูลจริงในชีตและปีปัจจุบัน
+    const repModeOpts = [["month", t.repModeMonth], ["year", t.repModeYear], ["academic", t.repModeAcademic],
+      ["custom", t.repModeCustom], ["all", t.repModeAll]].map(([v, label]) => ({ v, label }));
+    const repDataYears = jobsAll.map(j => { const dd = bkkDate(j.rawSubmittedAt); return dd ? Number(dd.slice(0, 4)) + 543 : null; }).filter(Boolean);
+    const repYearList = [...new Set([new Date().getFullYear() + 543, repYearBE, ...repDataYears])].sort((a, b) => b - a);
+    const repYearOpts = repYearList.map(y => ({ v: String(y),
+      label: repMode === "academic" ? (S.lang === "th" ? "ปีการศึกษา " + y : "Academic " + y) : (S.lang === "th" ? "พ.ศ. " + y : "B.E. " + y) }));
+    const repMonthOpts = monthNames.map((name, i) => ({ v: String(i + 1), label: name }));
+    const setRepMode = e => { this._repTouched = true; this.setState({ repMode: e.target.value }); };
+    const setRepYear = e => { this._repTouched = true; this.setState({ repYear: e.target.value }); };
+    const setRepMonth = e => { this._repTouched = true; this.setState({ repMonth: e.target.value }); };
+
+    const subHead=[t.sheetsCol,t.amtMoney,t.boxCol,t.amtMoney,t.sheetsCol,t.amtMoney,t.jobsCol,t.amtMoney].map(label=>({ label }));
 
     const flowSteps=(S.lang==="th"?[
       ["01","ผู้ใช้ส่งคำขอ","เขียนหนึ่งแถวลงแท็บ JOBS และหนึ่งแถวต่อรายการบริการลง JOB_ITEMS"],
@@ -3360,25 +3900,77 @@ class Component extends DCLogic {
         det.examType=S.examType==="mid"?t.examMid:t.examOut;
         det.examSubject=S.examSubject||"";
       }
+      if(svcId==="dup"){
+        det.paperType=S.dupHasCover?t.dupCoverYes:t.dupCoverNo;
+      }
+      if(svcId==="card"){
+        det.sides=S.cardSides==="two"?t.cardSidesTwo:t.cardSidesOne;
+        det.qtyOriginal=S.cardQty;
+      }
+      if(svcId==="cert"){
+        det.colorMode=S.certLogo==="color"?t.certLogoColor:t.certLogoBlack;
+        det.staple=S.certTrim?t.certTrimLabel:"";
+        det.qtyOriginal=S.certQty;
+      }
+      if(svcId==="layout"){
+        det.colorMode=S.layoutColor==="color"?t.prodColorColor:t.prodColorBw;
+        det.qtyOriginal=S.layoutPages;
+      }
+      if(svcId==="a4"){
+        det.paperType=a4PaperLabel;
+        det.qtyOriginal=S.a4Qty;
+      }
+      if(svcId==="a3"){
+        det.paperType=a3PaperLabel;
+        det.qtyOriginal=S.a3Qty;
+      }
+      if(svcId==="a5"){
+        det.qtyOriginal=S.a5Qty;
+      }
       return det;
     };
-    // คำนวณราคาประมาณการจาก PRICE_RULES — เฉพาะกรณีที่ฟอร์มเก็บข้อมูลพอจะระบุราคาได้แน่ชัดไม่กำกวมเท่านั้น
-    // รายการอื่น (ไม่มีกฎราคาตรงตัว หรือฟอร์มยังไม่เก็บตัวแปรพอจะเลือกกฎที่ถูกต้อง) ปล่อยว่างไว้ให้แอดมินประเมินเอง — ห้ามเดาใส่เป็น 0
+    // คำนวณราคาประมาณการจาก PRICE_RULES (ชีตจริง อ่านผ่าน S.livePriceRules) — จับคู่ด้วย rule_id ตรงๆ ไม่ใช่ข้อความ condition
+    // แถวที่เป็น PRICE_RANGE (มีแต่ min/max) หรือ MANUAL_QUOTE หรือหากฎที่ active อยู่ไม่เจอ -> ปล่อยว่างไว้ให้แอดมินประเมินเอง ห้ามเดาใส่เป็น 0
+    const ruleById=id=>(S.livePriceRules||[]).find(r=>String(r.rule_id)===id && (r.active===true||String(r.active).toUpperCase()==="TRUE"));
     const computeItemPrice=(svcId,qty)=>{
-      let rate=null;
+      let ruleId=null, addOnRuleId=null;
       if(svcId==="copy"){
-        if(S.prodSize==="A3") rate=5.00;                                   // A3 ปอนด์ 80 แกรม
-        else if(S.prodSize==="A4") rate=S.prodColor==="color"?2.00:0.50;   // A4 ปอนด์สี 80 แกรม / A4 ปอนด์ 70 แกรม ขาวดำ
-        // A5: ไม่มีกฎราคาในตารางปัจจุบัน -> ปล่อยว่าง (pending)
+        if(S.prodSize==="A3") ruleId="R03";
+        else if(S.prodSize==="A4") ruleId=S.prodColor==="color"?"R02":"R01";
+        // A5: ไม่มีกฎราคาในตาราง -> ปล่อยว่าง (pending)
       } else if(svcId==="dup"){
-        rate=2.00;  // อัตรา A4 ปอนด์ 70 แกรมพื้นฐาน (ยังไม่รวมส่วนต่างปกชุดสี ถ้ามี — ฟอร์มยังไม่เก็บตัวเลือกนี้)
+        ruleId=S.dupHasCover?"R05":"R04";
       } else if(svcId==="exam"){
-        rate=2.00;  // ข้อสอบ A4 ปอนด์ 70 แกรม
+        ruleId="R06";
+      } else if(svcId==="card"){
+        ruleId=S.cardSides==="two"?"R08":"R07";
+      } else if(svcId==="cert"){
+        ruleId=S.certLogo==="color"?"R10":"R09";
+        if(S.certTrim) addOnRuleId="R11";
+      } else if(svcId==="layout"){
+        ruleId=S.layoutColor==="color"?"R20":"R19";
+      } else if(svcId==="a4"){
+        ruleId={ bond70:"R12", simbo250:"R13", mouColor:"R14", mouBlack:"R15", f4own:"R16" }[S.a4PaperType]||null;
+      } else if(svcId==="a3"){
+        ruleId=S.a3PaperType==="simbo250"?"R18":"R17";
       }
-      // card, cert, layout, bind, a4, a3, a5: ฟอร์มยังไม่เก็บตัวแปรที่จำเป็น (เช่น ด้าน/ชนิดกระดาษ/จำนวน) พอจะเลือกกฎราคาที่ถูกต้อง -> pending เสมอ
-      if(rate===null) return { unitPrice:"", estimatedAmount:"" };
-      const amt=Math.round(rate*(Number(qty)||0)*100)/100;
-      return { unitPrice:String(rate), estimatedAmount:String(amt) };
+      // a5, bind: ไม่มีกฎราคาคงที่เลย (MANUAL_QUOTE) -> ruleId ยังเป็น null เสมอ รอแอดมินตีราคา
+      if(!ruleId) return { unitPrice:"", estimatedAmount:"", priceRuleId:"", priceRuleSnapshot:"" };
+      const rule=ruleById(ruleId);
+      if(!rule) return { unitPrice:"", estimatedAmount:"", priceRuleId:"", priceRuleSnapshot:"" }; // กฎถูกลบ/ปิดใช้งาน -> pending
+      const type=String(rule.price_type||"").toUpperCase();
+      if(type==="PRICE_RANGE"||type==="MANUAL_QUOTE"){
+        // ราคาต้องอยู่ในดุลยพินิจของแอดมิน (มีแต่ช่วง หรือไม่มีสูตรเลย) -> ปล่อยว่าง แต่ยังบันทึก rule ที่ใช้ไว้อ้างอิง
+        return { unitPrice:"", estimatedAmount:"", priceRuleId:rule.rule_id, priceRuleSnapshot:rule.condition||"" };
+      }
+      const rate=Number(rule.price)||0;
+      let amt=rate*(Number(qty)||0);
+      if(addOnRuleId){
+        const addRule=ruleById(addOnRuleId);
+        if(addRule) amt+=(Number(addRule.price)||0)*(Number(qty)||0); // เจียนขอบ: บวกต่อแผ่น ตามที่ยืนยัน
+      }
+      amt=Math.round(amt*100)/100;
+      return { unitPrice:String(rate), estimatedAmount:String(amt), priceRuleId:rule.rule_id, priceRuleSnapshot:rule.condition||"" };
     };
     const doSubmitJob=async()=>{
       if(!S.pdpaConsent||S.submitBusy) return;
@@ -3386,15 +3978,18 @@ class Component extends DCLogic {
         ?"ยังไม่ได้ตั้งค่าเชื่อมต่อ Google Sheet กรุณาไปที่แท็บ \"ตั้งค่าเชื่อมต่อ\" ก่อน"
         :"Google Sheet isn't connected yet — set it up on the Settings tab first." }); return; }
       this.setState({ submitBusy:true, submitError:null, uploadProgressText:"" });
+      const designQtyBySvc={ card:S.cardQty, cert:S.certQty, layout:S.layoutPages, a4:S.a4Qty, a3:S.a3Qty, a5:S.a5Qty };
       const items=selected.map(s=>{
         const det=buildItemDetails(s.id);
-        const qty=isProdGroup?(Number(S.prodQtyOrig)||0)*(Number(S.prodQtySets)||0):1;
+        const qty=isProdGroup?(Number(S.prodQtyOrig)||0)*(Number(S.prodQtySets)||0):(Number(designQtyBySvc[s.id])||0);
         const price=computeItemPrice(s.id,qty);
         return { serviceCode:s.id, qty, unit:S.lang==="th"?s.unitTh:s.unitEn,
           unitPrice:price.unitPrice, estimatedAmount:price.estimatedAmount,
+          priceRuleId:price.priceRuleId, priceRuleSnapshot:price.priceRuleSnapshot,
           colorMode:det.colorMode, paperSize:det.paperSize, paperType:det.paperType, sides:det.sides,
           staple:det.staple, ownPaper:det.ownPaper, qtyOriginal:det.qtyOriginal, qtySets:det.qtySets,
-          examType:det.examType, examSubject:det.examSubject };
+          examType:det.examType, examSubject:det.examSubject,
+          serviceGroup:S.svcGroup==="PROD"?t.svcGroupProd:(S.svcGroup==="DESIGN"?t.svcGroupDesign:"") };
       });
       // ยอดรวมทั้งงานจะคำนวณให้ก็ต่อเมื่อ "ทุกรายการ" มีราคาแน่ชัดแล้วเท่านั้น — ถ้ามีรายการใดยัง pending อยู่ ปล่อยยอดรวมว่างไว้เช่นกัน กันเข้าใจผิดว่าเป็นยอดเต็ม
       const allPriced=items.length>0&&items.every(it=>it.estimatedAmount!=="");
@@ -3430,10 +4025,34 @@ class Component extends DCLogic {
             }
           }
         }
+        // อัปโหลดสลิปการโอนเงิน (ถ้ามี) แยก category เป็น "payment-slip" ให้หาเจอง่ายบน Drive/FILES
+        const toUploadSlip = [...S.paymentSlipFiles];
+        if(toUploadSlip.length > 0) {
+          for(let i=0; i<toUploadSlip.length; i++) {
+            const f = toUploadSlip[i];
+            const pText = S.lang==="th"
+              ? ("กำลังอัปโหลดสลิปโอนเงิน " + (i+1) + "/" + toUploadSlip.length + ": " + f.name + " ขึ้น Google Drive…")
+              : ("Uploading payment slip " + (i+1) + "/" + toUploadSlip.length + ": " + f.name + " to Drive…");
+            this.setState({ uploadProgressText: pText });
+            try {
+              await this._gasCall("uploadFile", {
+                jobNo,
+                fileName: f.name,
+                mimeType: f.mimeType,
+                base64: f.base64,
+                category: "payment-slip",
+                email: S.gateEmail
+              });
+            } catch(upErr) {
+              console.warn("Upload payment slip error:", upErr);
+            }
+          }
+        }
         this.setState({
           // ส่งสำเร็จแล้ว — เคลียร์ฟอร์มกลับไปเป็นค่าเริ่มต้นเหมือนตอนเข้าหน้านี้ครั้งแรก ก่อนกรอกข้อมูลใด ๆ
           submitBusy:false, submitted:true, newJobNo:jobNo, submitError:null,
           uploadedFiles:[], uploadProgressText:"", lastUploadedCount:uploadedCount,
+          paymentSlipFiles:[], paymentSlipWarnMsg:"",
           mineSelectedEmail:(S.gateEmail||"").trim().toLowerCase(),
           mineEmailInput:(S.gateEmail||"").trim().toLowerCase(),
           svcGroup:null, sel:{},
@@ -3441,6 +4060,13 @@ class Component extends DCLogic {
           prodQtyOrig:1, prodQtySets:1, staple:"corner",
           examType:"mid", examSubject:"",
           budget:"has", budgetAcct:"",
+          dupHasCover:false,
+          cardSides:"one", cardQty:"",
+          certLogo:"black", certTrim:false, certQty:"",
+          layoutColor:"bw", layoutPages:"",
+          a4PaperType:"bond70", a4Qty:"",
+          a3PaperType:"bond80", a3Qty:"",
+          a5Qty:"",
           needByISO:null, dpOpen:null,
           pdpaConsent:false,
           form:{ ...S.form, needBy:"", purpose:"", note:"" } // เก็บชื่อ-ตำแหน่ง-หน่วยงาน-เบอร์โทรไว้ ส่งคำขอถัดไปสะดวกกว่า
@@ -3454,9 +4080,6 @@ class Component extends DCLogic {
       : (S.submitBusy ? (S.lang==="th"?"กำลังส่งคำขอ…":"Submitting…") : t.submit);
 
     // — ส่งเอกสารสรุปรายงานทางอีเมล: ต้องกรอกอีเมลปลายทางในหน้าเว็บก่อนกดส่งทุกครั้ง ไม่มีอีเมลตายตัว —
-    const a4PeriodText = (S.rgStart && S.rgEnd)
-      ? ((S.lang === "th" ? "ระหว่างวันที่ " : "Period ") + this._fmt(S.rgStart) + (S.lang === "th" ? " ถึง " : " – ") + this._fmt(S.rgEnd))
-      : t.a4Period;
     const toggleReportEmailBox = () => this.setState(st => ({ reportEmailOpen: !st.reportEmailOpen, reportEmailErr: null }));
     const setReportEmailTo = e => this.setState({ reportEmailTo: e.target.value, reportEmailErr: null });
     const doSendEmailReal = async () => {
@@ -3497,6 +4120,14 @@ class Component extends DCLogic {
       prodQtyOrig:S.prodQtyOrig, setProdQtyOrig, prodQtySets:S.prodQtySets, setProdQtySets,
       stapleOpts, prodOwnPaper:S.prodOwnPaper, toggleOwnPaper,
       isExam, examTypeOpts, examSubject:S.examSubject, setExamSubject,
+      isDup, dupHasCover:S.dupHasCover, toggleDupCover,
+      isCard, cardSidesBg, cardSidesFg, setCardSides, cardQty:S.cardQty, setCardQty,
+      isCert, certLogoBg, certLogoFg, setCertLogo, certTrim:S.certTrim, toggleCertTrim, certQty:S.certQty, setCertQty,
+      isLayout, layoutColorBg, layoutColorFg, setLayoutColor, layoutPages:S.layoutPages, setLayoutPages, isLayoutColorMode,
+      isA4, a4PaperOpts, a4Qty:S.a4Qty, setA4Qty,
+      isA3, a3PaperOpts, a3Qty:S.a3Qty, setA3Qty, isA3RangeMode,
+      isA5, a5Qty:S.a5Qty, setA5Qty,
+      isBind,
       budgetShown:selIds.length>0, budgetNeeded, budgetSkipped, budgetOpts, budgetIsHas:budgetNeeded&&S.budget==="has",
       budgetIsPersonal:budgetNeeded&&S.budget==="personal", budgetAcct:S.budgetAcct, setBudgetAcct,
       formulas, calcKeys, calcExpr:S.calcExpr, calcDisplay:S.calcDisplay,
@@ -3517,6 +4148,10 @@ class Component extends DCLogic {
       onDrop:e=>{ e.preventDefault(); this.setState({ isDragOver:false }); if(e.dataTransfer&&e.dataTransfer.files) this._handleFiles(e.dataTransfer.files); },
       fileWarnMsg:S.fileWarnMsg, hasFileWarnMsg:!!S.fileWarnMsg,
       isUploadingFiles:!!S.uploadProgressText, uploadProgressText:S.uploadProgressText,
+      slipFiles:slipFilesList, hasSlipFiles, slipFileCountLabel,
+      choosePaymentSlip:()=>this._triggerPaymentSlipSelect(),
+      onSlipFileInputChange:e=>{ this._handlePaymentSlip(e.target.files); e.target.value=""; },
+      slipWarnMsg:S.paymentSlipWarnMsg, hasSlipWarnMsg:!!S.paymentSlipWarnMsg,
       hasUploadedFilesSuccess:S.lastUploadedCount>0,
       uploadedSuccessMsg:S.lang==="th"?("📁 อัปโหลดไฟล์งานจริงขึ้น Google Drive เรียบร้อยแล้ว "+S.lastUploadedCount+" ไฟล์"):("📁 Uploaded "+S.lastUploadedCount+" files to Google Drive successfully"),
       driveTree, reviewRows:reviewRowsOut,
@@ -3588,19 +4223,29 @@ class Component extends DCLogic {
       notFoundMineTitle:S.lang==="th"?("ไม่พบประวัติคำขอสำหรับ "+activeMineEmail):("No requests found for "+activeMineEmail),
       notFoundMineSub:S.lang==="th"?"อีเมลนี้ยังไม่มีการบันทึกคำขอในชีต JOBS สามารถกดยื่นคำขอรับบริการพิมพ์งานได้ทันที":"This email has no requests in the JOBS sheet yet. You can submit a new printing request now.",
       myJobs:jobsAll.slice(0,5), myCards:myCards, filteredJobs, queueKpis,
+      jobDetailOpen:S.jobDetailOpen,
+      jobDetailNo:jobDetail?jobDetail.no:"—", jobDetailRequester:jobDetail?jobDetail.requester:"—",
+      jobDetailUnit:jobDetail?jobDetail.unit:"—", jobDetailService:jobDetail?jobDetail.service:"—",
+      jobDetailNeed:jobDetail?jobDetail.need:"—", jobDetailStatusLabel:jobDetail?jobDetail.statusLabel:"—",
+      jobDetailTagBg:jobDetail?jobDetail.tagBg:N1, jobDetailTagFg:jobDetail?jobDetail.tagFg:N7,
+      jobDetailBudgetLabel, jobDetailItems, hasJobDetailItems:jobDetailItems.length>0,
+      jobDetailSlipFiles, hasJobDetailSlipFiles:jobDetailSlipFiles.length>0,
+      jobDetailFilesLoading:S.jobDetailFilesLoading,
+      closeJobDetail, viewJobDetailFull, stopJobDetailClick, jobDetailNoSlipShown,
       viewedLabel:S.lang==="th"?"เปิดดูเมื่อ":"Viewed", viewedDate:this._fmt(this._today()),
       q:S.q, setQ:e=>this.setState({ q:e.target.value }),
       mobileFilters, mobileJobs, statusLog,
       curJobNo:cur.no, curJobService:cur.service, curJobUnit:cur.unit,
       trackJobOptions, setTrackJob, hasTrackJobs, curNoSelected:effectiveCurNo||"",
       timeline, jobDetailRows, priceRules, priceNotes,
+      priceRulesNotSeeded, priceRulesLoading:S.priceRulesLoading, priceRulesError:S.priceRulesError,
       rawCols, rawRows, rawCount, doExportCsv, doExportXlsx, kpis, monthly, topServices, statusMix, yearOpts, monthOpts, unitOpts,
       dashYear:S.dashYear, dashMonth:S.dashMonth, dashUnit:S.dashUnit,
-      setDashYear:e=>this.setState({dashYear:e.target.value}), setDashMonth:e=>this.setState({dashMonth:e.target.value}),
-      setDashUnit:e=>this.setState({dashUnit:e.target.value}),
+      setDashYear:e=>{ this._dashTouched=true; this.setState({dashYear:e.target.value}); }, setDashMonth:e=>{ this._dashTouched=true; this.setState({dashMonth:e.target.value}); },
+      setDashUnit:e=>{ this._dashTouched=true; this.setState({dashUnit:e.target.value}); },
       yearModeBeBg:S.dashYearMode==="be"?AC:"transparent", yearModeBeFg:S.dashYearMode==="be"?"#fff":INK,
       yearModeAcBg:S.dashYearMode==="academic"?AC:"transparent", yearModeAcFg:S.dashYearMode==="academic"?"#fff":INK,
-      setYearModeBe:()=>this.setState({dashYearMode:"be"}), setYearModeAcademic:()=>this.setState({dashYearMode:"academic"}),
+      setYearModeBe:()=>{ this._dashTouched=true; this.setState({dashYearMode:"be"}); }, setYearModeAcademic:()=>{ this._dashTouched=true; this.setState({dashYearMode:"academic"}); },
       periodText, topRequesters, topUnitsByValue,
       showMarquee:S.role==="REQ"||S.role==="ADMIN", mqItems,
       calNeed:this.buildCal("need"), calRange:this.buildCal("range"),
@@ -3613,17 +4258,23 @@ class Component extends DCLogic {
       rangeOpen:S.dpOpen==="range", rangeExpanded:S.dpOpen==="range"?"true":"false",
       toggleRange:()=>this.setState(st=>({ dpOpen:st.dpOpen==="range"?null:"range" })),
       rangeText:S.rgStart?(this._fmt(S.rgStart)+" – "+(S.rgEnd?this._fmt(S.rgEnd):"…"))
-        :(S.lang==="th"?"เลือกช่วงวันที่":"Select date range"),
+        :(S.lang==="th"?"ทุกช่วงเวลา · เลือกช่วงวันที่":"All dates · select a range"),
       a4PeriodText,
+      repMode, repModeOpts, setRepMode,
+      repYear:String(repYearBE), repYearOpts, setRepYear,
+      repMonth:String(repMonthNum), repMonthOpts, setRepMonth,
+      repShowYear:repMode==="month"||repMode==="year"||repMode==="academic",
+      repShowMonth:repMode==="month",
+      repShowCal:repMode==="custom",
       reportRows, subHead, doPrint:()=>window.print(),
       toggleReportEmailBox, reportEmailOpen:S.reportEmailOpen, reportEmailTo:S.reportEmailTo, setReportEmailTo,
       doSendEmailReal, reportEmailBusy:S.reportEmailBusy, reportEmailBtnLabel, reportEmailErr:S.reportEmailErr,
       sendEmailMsg:S.reportSent?t.sendEmailOk:"",
-      isLiveReport: !isMockup,
+      isLiveReport: true,
       liveJobReportBadge: S.lang === "th"
         ? ("คำนวณสดจาก Google Sheet (JOBS) รวม " + liveReportJobs.length + " รายการคำขอ")
         : ("Live from Google Sheet (JOBS) · " + liveReportJobs.length + " requests"),
-      a4DocDate: this._fmt(this._today()),
+      a4DocDate: a4DocDateText, a4DocNo,
       flowSteps, sheetTabs, sheetCols, sheetRules,
       settingGroups, setupSteps, setRules, mapRows,
       connBg:connBgLive, connBorder:connBorderLive, connColor:connColorLive, connLabel:connLabelLive, connWhen:connWhenLive,

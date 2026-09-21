@@ -11,7 +11,7 @@
 var SHEET_SCHEMA = {
   JOBS: ["job_no","submitted_at","requester_email","requester_name","position_type","phone","unit_code","required_date","purpose","status","estimated_amount","confirmed_amount","completed_at","drive_folder_id","budget_source","budget_acct"],
   // variant_snapshot (คอลัมน์ D): เลิกเขียนค่าใหม่แล้ว (ทางเลือก A — เก็บคอลัมน์ไว้ ไม่ลบ ข้อมูลเก่าไม่หาย) ใช้คอลัมน์แยกท้ายแถวแทน
-  JOB_ITEMS: ["item_id","job_no","service_code","variant_snapshot","quantity","unit","unit_price","estimated_amount","confirmed_amount","price_rule_id","price_rule_snapshot","override_reason","color_mode","paper_size","paper_type","sides","staple","own_paper","qty_original","qty_sets","exam_type","exam_subject"],
+  JOB_ITEMS: ["item_id","job_no","service_code","variant_snapshot","quantity","unit","unit_price","estimated_amount","confirmed_amount","price_rule_id","price_rule_snapshot","override_reason","color_mode","paper_size","paper_type","sides","staple","own_paper","qty_original","qty_sets","exam_type","exam_subject","service_group"],
   PRICE_RULES: ["rule_id","service_code","condition","price_type","price","min_price","max_price","effective_from","effective_to","active","note"],
   UNITS: ["unit_code","unit_name","parent_group","display_order","active"],
   USERS: ["email","full_name","role","unit_code","phone","active","password"],
@@ -65,6 +65,80 @@ function setupPersonnelSheet() {
   Logger.log("สร้างแท็บ " + PERSONNEL_SHEET_NAME + " ใหม่ พร้อมหัวตาราง: " + headers.join(", "));
 }
 
+// ---------- แท็บ PRICE_RULES (ตารางราคากลาง) — เพิ่งเชื่อมต่อให้หน้า "ตารางราคา" อ่าน/เขียนได้จริง ----------
+/**
+ * รันฟังก์ชันนี้ "ครั้งเดียว" ถ้าแท็บ PRICE_RULES ยังว่างอยู่ (มีแค่หัวตาราง ไม่มีข้อมูล) — จะใส่ราคาตั้งต้นให้ตรงกับ
+ * ที่เคยแสดงเป็นตัวอย่างในหน้าเว็บ ถ้ามีข้อมูลอยู่แล้ว (ไม่ว่าจะแก้ไขไปแค่ไหน) จะไม่แตะต้องอะไรเลย ปลอดภัย
+ */
+function seedPriceRules() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName("PRICE_RULES");
+  if (!sh) { Logger.log("ไม่พบแท็บ PRICE_RULES — กรุณารัน setupSheets ก่อน"); return; }
+  if (sh.getLastRow() > 1) { Logger.log("แท็บ PRICE_RULES มีข้อมูลอยู่แล้ว ไม่แตะต้องของเดิม"); return; }
+  // [rule_id, service_code, condition, price_type, price, min_price, max_price, effective_from, effective_to, active, note]
+  var rows = [
+    ["R01","copy","A4 ปอนด์ 70 แกรม ขาวดำ|A4 bond 70 gsm B/W","PER_SHEET","0.50","","","01/10/2567","","TRUE",""],
+    ["R02","copy","A4 ปอนด์สี 80 แกรม|A4 coloured bond 80 gsm","PER_SHEET","2.00","","","01/10/2567","","TRUE",""],
+    ["R03","copy","A3 ปอนด์ 80 แกรม|A3 bond 80 gsm","PER_SHEET","5.00","","","01/10/2567","","TRUE",""],
+    ["R04","dup","A4 ปอนด์ 70 แกรม|A4 bond 70 gsm","PER_SHEET","2.00","","","01/10/2567","","TRUE",""],
+    ["R05","dup","การ์ดสี 180 แกรม ปกชุด|Coloured card 180 gsm, cover","PER_SHEET","5.00","","","01/10/2567","","TRUE",""],
+    ["R06","exam","ข้อสอบ A4 ปอนด์ 70 แกรม|Exam paper, A4 bond 70 gsm","PER_SHEET","2.00","","","01/10/2567","","TRUE",""],
+    ["R07","card","1 ด้าน ซิมโบแมทพลัส 250 แกรม|1-side Simbo Matt Plus 250 gsm","PER_ITEM","2.50","","","01/10/2567","","TRUE",""],
+    ["R08","card","2 ด้าน แบบมหาวิทยาลัย|2-side university template","PER_ITEM","3.00","","","01/10/2567","","TRUE",""],
+    ["R09","cert","โลโก้ SPU + อักษรสีดำ|SPU logo + black text","PER_SHEET","10.00","","","01/10/2567","","TRUE",""],
+    ["R10","cert","โลโก้ SPU + โลโก้อื่น + อักษรสี|SPU + other logos, colour text","PER_SHEET","15.00","","","01/10/2567","","TRUE",""],
+    ["R11","cert","เจียนขอบ 4 ด้าน เฉพาะวุฒิบัตร|Trim 4 edges, certificates only","ADD_ON","+3.00","","","01/10/2567","","TRUE",""],
+    ["R12","a4","A4 ปอนด์ 70 แกรม|A4 bond 70 gsm","PER_SHEET","15.00","","","01/10/2567","","TRUE",""],
+    ["R13","a4","A4 ซิมโบแมทพลัส 250 แกรม|A4 Simbo Matt Plus 250 gsm","PER_SHEET","20.00","","","01/10/2567","","TRUE",""],
+    ["R14","a4","MOU สครีม 180 แกรม หน้าโลโก้ 4 สี|MOU, Scream 180 gsm, 4-colour logo page","PER_PAGE","20.00","","","01/10/2567","","TRUE",""],
+    ["R15","a4","MOU สครีม 180 แกรม หน้าอักษรสีดำ|MOU, Scream 180 gsm, black text page","PER_PAGE","10.00","","","01/10/2567","","TRUE",""],
+    ["R16","a4","F4 นำกระดาษมาเอง|F4, own paper","PER_SHEET","20.00","","","01/10/2567","","TRUE",""],
+    ["R17","a3","A3 ปอนด์ 80 แกรม|A3 bond 80 gsm","PRICE_RANGE","","30","50","01/10/2567","","TRUE",""],
+    ["R18","a3","A3 ซิมโบแมทพลัส 250 แกรม|A3 Simbo Matt Plus 250 gsm","PER_SHEET","60.00","","","01/10/2567","","TRUE",""],
+    ["R19","layout","จัดรูปเล่มขาวดำ|B/W layout","PER_PAGE","50.00","","","01/10/2567","","TRUE",""],
+    ["R20","layout","จัดรูปเล่ม 4 สี|4-colour layout","PRICE_RANGE","","100","200","01/10/2567","","TRUE",""],
+    ["R21","a5","พริ้นสี A5|Colour print A5","MANUAL_QUOTE","","","","01/10/2567","","TRUE",""],
+    ["R22","bind","เข้าเล่มทั่วไป|General binding","MANUAL_QUOTE","","","","01/10/2567","","TRUE",""]
+  ];
+  sh.getRange(2, 1, rows.length, rows[0].length).setValues(rows);
+  Logger.log("ใส่ราคาตั้งต้น " + rows.length + " รายการให้แท็บ PRICE_RULES แล้ว");
+}
+
+function listPriceRules_(p) {
+  var ss = openSheet_(p);
+  var sh = ss.getSheetByName("PRICE_RULES");
+  if (!sh) return { ok: false, error: "price_rules_sheet_not_found" };
+  var values = sh.getDataRange().getValues();
+  if (values.length <= 1) return { ok: true, rules: [] };
+  var headers = values.shift();
+  var rules = values.map(function (row) {
+    var o = {};
+    headers.forEach(function (h, i) { o[h] = row[i]; });
+    return o;
+  });
+  return { ok: true, rules: rules };
+}
+
+// เปิด/ปิดใช้งานกฎราคาหนึ่งแถว (คอลัมน์ active) — ใช้โดยสวิตช์เปิด/ปิดในหน้า "ตารางราคา"
+function togglePriceRule_(p) {
+  var ss = openSheet_(p);
+  var sh = ss.getSheetByName("PRICE_RULES");
+  if (!sh) return { ok: false, error: "price_rules_sheet_not_found" };
+  var values = sh.getDataRange().getValues();
+  var headers = values[0];
+  var idIdx = headers.indexOf("rule_id");
+  var activeIdx = headers.indexOf("active");
+  if (idIdx === -1 || activeIdx === -1) return { ok: false, error: "columns_not_found" };
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][idIdx]) === String(p.ruleId)) {
+      var newVal = p.active === true || String(p.active).toUpperCase() === "TRUE";
+      sh.getRange(i + 1, activeIdx + 1).setValue(newVal);
+      return { ok: true, ruleId: p.ruleId, active: newVal };
+    }
+  }
+  return { ok: false, error: "rule_not_found" };
+}
+
 // ---------- จุดเข้า HTTP ----------
 function doGet(e) {
   return handle_((e && e.parameter) || {});
@@ -91,12 +165,16 @@ function handle_(p) {
       case "testAccess": return json_(testAccess_(p));
       case "submitJob": return json_(submitJob_(p));
       case "updateStatus": return json_(updateStatus_(p));
+      case "importJobs": return json_(importJobs_(p));
       case "uploadFile": return json_(uploadFile_(p));
       case "listJobs": return json_(listJobs_(p));
       case "checkAdminUser": return json_(checkAdminUser_(p));
       case "listUsers": return json_(listUsers_(p));
       case "sendReportEmail": return json_(sendReportEmail_(p));
       case "lookupPersonnel": return json_(lookupPersonnel_(p));
+      case "listPriceRules": return json_(listPriceRules_(p));
+      case "togglePriceRule": return json_(togglePriceRule_(p));
+      case "listFilesForJob": return json_(listFilesForJob_(p));
       default: return json_({ ok: false, error: "unknown_action" });
     }
   } catch (err) {
@@ -193,7 +271,9 @@ function submitJob_(p) {
     try {
       var folder = openFolder_(p);
       var jobFolder = folder.createFolder(jobNo);
-      ["requester-files", "admin-files", "proof", "final"].forEach(function (n) { jobFolder.createFolder(n); });
+      // สร้างแค่ "requester-files" ล่วงหน้า (โฟลเดอร์เดียวที่ใช้จริงตอนส่งคำขอ) — admin-files/proof/final/payment-slip
+      // ยังไม่สร้างตอนนี้ จะสร้างเองอัตโนมัติทีหลังตอนมีการอัปโหลดไฟล์เข้าหมวดนั้นจริง ๆ ผ่าน findOrCreateFolder_ กันโฟลเดอร์เปล่าคาอยู่ใน Drive
+      jobFolder.createFolder("requester-files");
       jobFolderId = jobFolder.getId();
     } catch (err) {
       // เก็บงานลง Sheet ต่อไปได้ แม้ Drive จะยังเชื่อมต่อไม่ได้
@@ -212,7 +292,7 @@ function submitJob_(p) {
       "", it.priceRuleId || "", it.priceRuleSnapshot || "", "",
       it.colorMode || "", it.paperSize || "", it.paperType || "", it.sides || "",
       it.staple || "", it.ownPaper || "", it.qtyOriginal || "", it.qtySets || "",
-      it.examType || "", it.examSubject || ""
+      it.examType || "", it.examSubject || "", it.serviceGroup || ""
     ]);
   });
   logStatus_(ss, jobNo, "", "RECEIVED", p.email || "system", "web", "ส่งคำขอใหม่ผ่านเว็บ");
@@ -233,6 +313,92 @@ function updateStatus_(p) {
   if (p.status === "SERVICE_DONE") sh.getRange(rowIndex + 1, 13).setValue(new Date()); // column M = completed_at
   logStatus_(ss, p.jobNo, old, p.status, p.by || "", p.channel || "web", p.note || "");
   return { ok: true };
+}
+
+// นำเข้างานย้อนหลังเป็นชุด (เช่น จากไฟล์ Excel/Google Form เดิม) — เขียนลง JOBS, JOB_ITEMS และ STATUS_LOG พร้อมกัน
+// ข้ามรายการที่มีอยู่แล้ว (อีเมล + เวลาส่ง + วัตถุประสงค์ตรงกัน) จึงรันซ้ำได้ปลอดภัย ส่ง dryRun:true เพื่อดูผลก่อนเขียนจริง
+// ส่ง replaceAll:true เพื่อล้างข้อมูลเดิมทั้งหมด (เก็บหัวตารางไว้) แล้วนำเข้าชุดใหม่แทน — เลขที่งานจะเริ่มนับใหม่ตั้งแต่ 0001
+function importJobs_(p) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    var ss = openSheet_(p);
+    var jobsSh = ss.getSheetByName("JOBS");
+    var itemsSh = ss.getSheetByName("JOB_ITEMS");
+    var logSh = ss.getSheetByName("STATUS_LOG");
+    var incoming = (p.jobs || []).slice().sort(function (a, b) { return new Date(a.submittedAt) - new Date(b.submittedAt); });
+
+    var clearedCount = 0;
+    if (p.replaceAll) {
+      clearedCount = Math.max(0, jobsSh.getLastRow() - 1);
+      if (!p.dryRun) {
+        [jobsSh, itemsSh, logSh].forEach(function (sh) {
+          var n = sh.getLastRow() - 1;
+          if (n > 0) sh.deleteRows(2, n);
+        });
+      }
+    }
+
+    var seen = {};
+    var maxByPrefix = {};
+    if (!p.replaceAll) {
+      var jv = jobsSh.getDataRange().getValues();
+      for (var i = 1; i < jv.length; i++) {
+        var sub = jv[i][1] instanceof Date ? jv[i][1].getTime() : new Date(jv[i][1]).getTime();
+        seen[String(jv[i][2]).toLowerCase() + "|" + sub + "|" + jv[i][8]] = true;
+        var no = String(jv[i][0] || "");
+        var m = no.match(/^(PRN-\d{6})-(\d+)$/);
+        if (m) maxByPrefix[m[1]] = Math.max(maxByPrefix[m[1]] || 0, parseInt(m[2], 10));
+      }
+    }
+
+    var jobRows = [], itemRows = [], logRows = [], skipped = 0, created = [];
+    incoming.forEach(function (j) {
+      var when = new Date(j.submittedAt);
+      // เช็คซ้ำเฉพาะตอนนำเข้าเพิ่ม — ถ้าสั่ง replaceAll ชีตถูกล้างไปแล้ว ทุกแถวที่ส่งมาคืองานคนละใบ ไม่ต้องกรอง
+      if (!p.replaceAll) {
+        var key = String(j.email || "").toLowerCase() + "|" + when.getTime() + "|" + (j.purpose || "");
+        if (seen[key]) { skipped++; return; }
+        seen[key] = true;
+      }
+      var prefix = "PRN-" + Utilities.formatDate(when, "Asia/Bangkok", "yyyyMM");
+      maxByPrefix[prefix] = (maxByPrefix[prefix] || 0) + 1;
+      var jobNo = prefix + "-" + ("0000" + maxByPrefix[prefix]).slice(-4);
+      var done = j.completedAt ? new Date(j.completedAt) : when;
+      var status = j.status || "SERVICE_DONE";
+      var it = j.item || {};
+      jobRows.push([jobNo, when, j.email || "", j.name || "", j.position || "", j.phone || "", j.unit || "",
+        j.needBy || "", j.purpose || "", status,
+        j.estimatedAmount === undefined ? "" : j.estimatedAmount,
+        j.confirmedAmount === undefined ? "" : j.confirmedAmount,
+        status === "SERVICE_DONE" ? done : "", "", j.budgetSource || "", j.budgetAcct || ""]);
+      itemRows.push([jobNo + "-1", jobNo, it.serviceCode || "", "", it.qty === undefined ? "" : it.qty, it.unit || "",
+        it.unitPrice === undefined ? "" : it.unitPrice,
+        it.estimatedAmount === undefined ? "" : it.estimatedAmount,
+        it.confirmedAmount === undefined ? "" : it.confirmedAmount, "", "", "",
+        it.colorMode || "", it.paperSize || "", it.paperType || "", it.sides || "", it.staple || "", it.ownPaper || "",
+        it.qtyOriginal === undefined ? "" : it.qtyOriginal, it.qtySets === undefined ? "" : it.qtySets,
+        it.examType || "", it.examSubject || "", it.serviceGroup || ""]);
+      var by = j.importBy || "นำเข้าข้อมูลย้อนหลัง";
+      logRows.push([Utilities.getUuid(), jobNo, "", "RECEIVED", j.email || by, when, by, "import"]);
+      if (status !== "RECEIVED") logRows.push([Utilities.getUuid(), jobNo, "RECEIVED", status, by, done, by, "import"]);
+      created.push(jobNo);
+    });
+
+    if (!p.dryRun && jobRows.length) {
+      var r = jobsSh.getLastRow() + 1;
+      jobsSh.getRange(r, 8, jobRows.length, 1).setNumberFormat("@"); // required_date เก็บเป็นข้อความ กันเลื่อนวัน
+      jobsSh.getRange(r, 1, jobRows.length, jobRows[0].length).setValues(jobRows);
+      var r2 = itemsSh.getLastRow() + 1;
+      itemsSh.getRange(r2, 1, itemRows.length, itemRows[0].length).setValues(itemRows);
+      var r3 = logSh.getLastRow() + 1;
+      logSh.getRange(r3, 1, logRows.length, logRows[0].length).setValues(logRows);
+    }
+    return { ok: true, dryRun: !!p.dryRun, replaceAll: !!p.replaceAll, cleared: clearedCount,
+      received: incoming.length, imported: jobRows.length, skipped: skipped, jobNos: created };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function uploadFile_(p) {
@@ -279,6 +445,26 @@ function listJobs_(p) {
   }
 
   return { ok: true, jobs: jobs, items: items };
+}
+
+// อ่านไฟล์แนบทั้งหมดของงานหนึ่งใบจากแท็บ FILES (รวมสลิปการโอนเงิน category "payment-slip") — ใช้โดย popup รายละเอียดคำขอในหน้า "คิวงาน"
+function listFilesForJob_(p) {
+  var ss = openSheet_(p);
+  var sh = ss.getSheetByName("FILES");
+  if (!sh) return { ok: true, files: [] };
+  var values = sh.getDataRange().getValues();
+  if (values.length <= 1) return { ok: true, files: [] };
+  var headers = values.shift();
+  var jobIdx = headers.indexOf("job_no");
+  if (jobIdx === -1) return { ok: true, files: [] };
+  var files = values
+    .filter(function (row) { return String(row[jobIdx]) === String(p.jobNo); })
+    .map(function (row) {
+      var o = {};
+      headers.forEach(function (h, i) { o[h] = row[i]; });
+      return o;
+    });
+  return { ok: true, files: files };
 }
 
 function checkAdminUser_(p) {
