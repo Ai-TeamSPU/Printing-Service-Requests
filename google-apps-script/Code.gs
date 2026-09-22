@@ -332,9 +332,11 @@ function importJobs_(p) {
     if (p.replaceAll) {
       clearedCount = Math.max(0, jobsSh.getLastRow() - 1);
       if (!p.dryRun) {
+        // ใช้ clearContent ไม่ใช่ deleteRows เพราะ Google Sheets ห้ามลบแถวที่ไม่ได้ตรึงไว้จนหมดทั้งแท็บ
+        // (แท็บที่จำนวนแถวพอดีกับข้อมูลจะลบไม่ผ่าน แล้วทำให้แท็บก่อนหน้าถูกล้างไปแล้วแต่เขียนกลับไม่ได้)
         [jobsSh, itemsSh, logSh].forEach(function (sh) {
           var n = sh.getLastRow() - 1;
-          if (n > 0) sh.deleteRows(2, n);
+          if (n > 0) sh.getRange(2, 1, n, sh.getMaxColumns()).clearContent();
         });
       }
     }

@@ -2447,7 +2447,7 @@ class Component extends DCLogic {
     dpOpen:null, dpMonthNeed:null, dpMonthRange:null, needByISO:null, rgStart:null, rgEnd:null,
     repMode:"month", repYear:"", repMonth:"",
     dashYearMode:"be", dashYear:String(new Date().getFullYear()+543), dashMonth:"8", dashUnit:"",
-    gasUrl:"https://script.google.com/macros/s/AKfycbwzZHqGi_xWue1We-byoivtbmqxW8hRM1Wor_XLY9eOUSVnAhS0gBjHDZUgOhPK_OGy/exec",
+    gasUrl:"https://script.google.com/macros/s/AKfycbz4TrF4kTkmKLhnnmtpFH5ElRQFYQnmBN7GHfJTkAMKTF-TxqAgnDT6Ltz3_SZ-tSem/exec",
     gasToken:"6552b83f-9a7a-4dd1-8169-05193c6744e3",
     spreadsheetId:"1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
     folderId:"1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L",
@@ -2556,7 +2556,7 @@ class Component extends DCLogic {
   componentDidMount() {
     import("./spu-data.js").then(d => this.setState({ d }));
     const defaultGas = {
-      gasUrl: "https://script.google.com/macros/s/AKfycbwzZHqGi_xWue1We-byoivtbmqxW8hRM1Wor_XLY9eOUSVnAhS0gBjHDZUgOhPK_OGy/exec",
+      gasUrl: "https://script.google.com/macros/s/AKfycbz4TrF4kTkmKLhnnmtpFH5ElRQFYQnmBN7GHfJTkAMKTF-TxqAgnDT6Ltz3_SZ-tSem/exec",
       gasToken: "6552b83f-9a7a-4dd1-8169-05193c6744e3",
       spreadsheetId: "1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
       folderId: "1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L"
@@ -2894,7 +2894,7 @@ class Component extends DCLogic {
         let r = await this._gasCall("checkAdminUser", { email, password: pass });
         // Fallback: If unknown_action occurs, it means the browser contacted an older deployment URL.
         // Force retry directly using the updated active Web App URL:
-        const activeUrl = "https://script.google.com/macros/s/AKfycbwzZHqGi_xWue1We-byoivtbmqxW8hRM1Wor_XLY9eOUSVnAhS0gBjHDZUgOhPK_OGy/exec";
+        const activeUrl = "https://script.google.com/macros/s/AKfycbz4TrF4kTkmKLhnnmtpFH5ElRQFYQnmBN7GHfJTkAMKTF-TxqAgnDT6Ltz3_SZ-tSem/exec";
         if (r && (r.error === "unknown_action" || r.error === "missing_url")) {
           this.setState({ gasUrl: activeUrl });
           try {
@@ -3653,18 +3653,36 @@ class Component extends DCLogic {
       return s;
     };
 
+    // ชื่อหน่วยงานในชีตเป็นข้อความที่ผู้ขอพิมพ์เอง หน่วยงานเดียวกันจึงสะกดได้หลายแบบ
+    // (เว้นวรรคต่างกัน ใช้คำย่อ สนง./ว. หรือต่อท้ายชื่อผู้บริหารไม่เหมือนกัน)
+    // ถ้าไม่รวมให้เป็นชื่อเดียวก่อนสรุปยอด หน่วยงานเดียวจะแตกเป็นหลายแถวในรายงาน
+    const UNIT_ALIAS = [
+      [/ชลธิศ/, "สำนักงานรองอธิการบดี (ผศ.ดร.ชลธิศ)"],
+      [/การบิน[^]*ท่องเที่ยว/, "วิทยาลัยการบิน การท่องเที่ยว และการบริการ"]
+    ];
+    const canonUnit = raw => {
+      const s = String(raw || "").replace(/\s+/g, " ").trim();
+      for (let i = 0; i < UNIT_ALIAS.length; i++) if (UNIT_ALIAS[i][0].test(s)) return UNIT_ALIAS[i][1];
+      return s;
+    };
+
     // 3. รวมยอดที่ระดับรายการ (JOB_ITEMS) แยกตามบล็อกงบ → หน่วยงาน
-    // บล็อก "รายได้ภายนอก" (b===2) รวมย่อยลงถึงระดับผู้ขอด้วย (หน่วยงาน+ผู้ขอ) เพื่อโชว์ชื่อคนต่อท้ายหน่วยงานในป้ายแถว
-    // ส่วนอีก 2 บล็อกยังรวมแค่ระดับหน่วยงานเหมือนเดิม
+    // สองบล็อกล่างรวมย่อยลึกกว่าระดับหน่วยงาน ตามรูปแบบเอกสารสรุปฉบับจริง:
+    //   b===1 งบ-เงินสด  → หน่วยงาน + ชื่อโครงการ (คอลัมน์ budget_acct ในชีต) ป้ายแถว "หน่วยงาน - โครงการ"
+    //   b===2 รายได้ภายนอก → หน่วยงาน + ผู้ขอ                                 ป้ายแถว "ผู้ขอ - หน่วยงาน"
+    // บล็อกมูลค่างาน (b===0) ยังรวมแค่ระดับหน่วยงานเหมือนเดิม
     const blocks = [{}, {}, {}];
     let internalTotal = 0;
     liveReportJobs.forEach(j => {
-      const u = (j.unitTh || j.unit || "").trim() || (S.lang === "th" ? "ไม่ระบุหน่วยงาน" : "Unspecified unit");
+      const u = canonUnit(j.unitTh || j.unit) || (S.lang === "th" ? "ไม่ระบุหน่วยงาน" : "Unspecified unit");
       const b = blockOf(j.budgetSource);
       const requester = (j.requester || "").trim() || "—";
-      const key = b === 2 ? (u + "\u0000" + requester) : u;
+      const proj = (j.budgetAcct || "").trim();
+      // บล็อกงบ-เงินสด แยกรายโครงการ (หน่วยงาน - ชื่อโครงการ) · บล็อกรายได้ภายนอก แยกรายคน (ผู้ขอ - หน่วยงาน)
+      const sub = b === 2 ? requester : (b === 1 ? proj : "");
+      const key = sub ? (u + "\u0000" + sub) : u;
       const acc = blocks[b][key] || (blocks[b][key] = newAcc());
-      if (b === 2) { acc._unit = u; acc._requester = requester; }
+      if (sub) { acc._unit = u; acc._label = b === 2 ? (requester + " - " + u) : (u + " - " + proj); }
       const jobItems = itemsByJob[j.no];
       let jobVal = 0;
       if (jobItems && jobItems.length) {
@@ -3686,14 +3704,15 @@ class Component extends DCLogic {
       fmtInt(a.jobs3.size), fmtMoney(a.m[3], a.star[3]),
       fmtMoney(a.total, a.starTotal)
     ];
+    // ชื่อบล็อกตามเอกสารสรุปฉบับจริงของโรงพิมพ์ (Document/สรุปงาน เดือนสิงหาคม 2569.pdf)
     const blockDefs = S.lang === "th" ? [
       { head: "รวมรายได้ (มูลค่างาน)", total: "รวมรายได้ (มูลค่างาน)" },
-      { head: "รายได้ โอนจ่าย / งบโครงการ", total: "รวมรายได้ (โอนจ่าย / งบโครงการ)" },
-      { head: "รายได้ภายนอก", total: "รวมรายได้ภายนอก (จ่ายเงินสดที่ สนง.การคลัง)" }
+      { head: "มีงบประมาณ (เงินสด) / โครงการบริการวิชาการ", total: "รวมรายได้ (งบ-เงินสด) / โครงการบริการวิชาการ" },
+      { head: "รายได้ภายนอก", total: "รวมรายได้ (จ่ายเงินสดที่ สนง.การคลัง)" }
     ] : [
       { head: "Revenue (job value)", total: "Total revenue (job value)" },
-      { head: "Transfer / project budget", total: "Total revenue (transfer / project budget)" },
-      { head: "External revenue", total: "Total external revenue (cash at Finance Office)" }
+      { head: "Budgeted (cash) / academic service project", total: "Total revenue (cash budget / academic service project)" },
+      { head: "External revenue", total: "Total revenue (cash paid at Finance Office)" }
     ];
 
     const liveReportRows = [];
@@ -3703,16 +3722,16 @@ class Component extends DCLogic {
       let entries = Object.keys(blocks[b]).map(name => ({ name, a: blocks[b][name] }));
       if (!entries.length) return;
       entries.forEach(e => { e.a.boxes = Math.ceil(e.a.q[1] / 100); });
-      if (b === 2) {
-        // จัดกลุ่มตามหน่วยงาน (หน่วยงานรวมมาก->น้อย) แล้วเรียงผู้ขอในหน่วยงานเดียวกันตามยอด/ชื่อ ป้ายแถวเป็น "หน่วยงาน - ผู้ขอ"
+      if (entries.some(e => e.a._label)) {
+        // แถวย่อย (รายโครงการ/รายคน): จัดกลุ่มตามหน่วยงาน หน่วยงานรวมมาก->น้อย แล้วเรียงแถวย่อยในหน่วยงานเดียวกันตามยอด/ชื่อ
         const byUnit = {};
-        entries.forEach(e => { (byUnit[e.a._unit] = byUnit[e.a._unit] || []).push(e); });
+        entries.forEach(e => { const k = e.a._unit || e.name; (byUnit[k] = byUnit[k] || []).push(e); });
         const unitTotal = u => byUnit[u].reduce((s, e) => s + e.a.total, 0);
         const orderedUnits = Object.keys(byUnit).sort((x, y) => unitTotal(y) - unitTotal(x) || x.localeCompare(y, "th"));
         entries = [];
         orderedUnits.forEach(u => {
-          byUnit[u].sort((x, y) => (y.a.total - x.a.total) || x.a._requester.localeCompare(y.a._requester, "th"));
-          byUnit[u].forEach(e => entries.push({ name: e.a._requester + " - " + u, a: e.a }));
+          byUnit[u].sort((x, y) => (y.a.total - x.a.total) || String(x.a._label || x.name).localeCompare(String(y.a._label || y.name), "th"));
+          byUnit[u].forEach(e => entries.push({ name: e.a._label || e.name, a: e.a }));
         });
       } else {
         entries.sort((x, y) => (y.a.total - x.a.total) || x.name.localeCompare(y.name, "th"));
