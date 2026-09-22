@@ -222,7 +222,7 @@
 
         @page {
           size: A4;
-          margin: 0;
+          margin: 14mm 12mm;
         }
 
         @media print {
@@ -236,11 +236,47 @@
             padding: 0 !important;
           }
 
+          /* @page margin ให้ระยะขอบซ้ำทุกหน้าอยู่แล้ว ตัวกล่อง .a4sheet เลยไม่ต้องมี padding/ความสูงตายตัวของตัวเองอีก
+             ไม่งั้นเนื้อหาที่ยาวเกิน 1 หน้าจะดันขอบกระดาษเพี้ยนตั้งแต่หน้าที่ 2 เป็นต้นไป */
+          .a4sheet-wrap {
+            padding: 0 !important;
+            overflow: visible !important;
+          }
+
           .a4sheet {
             box-shadow: none !important;
             margin: 0 !important;
+            padding: 0 !important;
             width: 100% !important;
             min-height: 0 !important;
+          }
+
+          /* ตารางยาวเกินหนึ่งหน้า: ให้หัวตารางขึ้นซ้ำทุกหน้า ห้ามตัดแถวขาดครึ่งระหว่างหน้า
+             และกันหัวบล็อก/แถวรวมยอดถูกพลัดหน้าแยกจากแถวข้อมูลที่ควรอยู่ด้วยกัน */
+          table {
+            page-break-inside: auto;
+            break-inside: auto;
+          }
+
+          thead {
+            display: table-header-group;
+          }
+
+          tr,
+          td,
+          th {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+
+          tr[data-glue="next"] {
+            page-break-after: avoid;
+            break-after: avoid-page;
+          }
+
+          tr[data-glue="prev"] {
+            page-break-before: avoid;
+            break-before: avoid-page;
           }
         }
       </style>
@@ -1914,7 +1950,7 @@
                 style="border:1px solid var(--color-accent);background:var(--color-accent-100);padding:10px 16px;margin-top:14px;font-size:14px;font-weight:600">
                 {{ sendEmailMsg }}</div>
             </sc-if>
-            <div style="overflow-x:auto;padding:26px 0">
+            <div class="a4sheet-wrap" style="overflow-x:auto;padding:26px 0">
               <div class="a4sheet"
                 style="width:794px;min-height:1123px;background:#fff;box-shadow:var(--shadow-lg);padding:50px 44px;margin:0 auto;color:#000">
                 <div
@@ -1971,7 +2007,7 @@
                   </thead>
                   <tbody>
                     <sc-for list="{{ reportRows }}" as="r" hint-placeholder-count="10">
-                      <tr>
+                      <tr data-glue="{{ r.glue }}">
                         <td colSpan="{{ r.span }}"
                           style="border:1px solid var(--color-line);padding:5px 6px;font-weight:{{ r.fw }};background:{{ r.bg }};text-align:left;padding-left:{{ r.pad }}">
                           {{ r.name }}</td>
@@ -3549,8 +3585,10 @@ class Component extends DCLogic {
       ["SERVICE_DONE",dcnt("SERVICE_DONE"),N7]
     ].map(([code,v,color])=>({ label:this.status(code), v, color }));
 
-    const rr=(name,cells,head)=>({ name, cells:cells.map(v=>({ v })), span:1,
-      fw:head?"700":"400", bg:head?N2:"transparent", pad:head?"6px":"18px" });
+    // glue:"next" กันหัวบล็อกถูกตัดหน้าแยกจากแถวข้อมูลแถวแรกที่ตามมา
+    // glue:"prev" กันแถวรวมยอดถูกตัดหน้าแยกจากแถวข้อมูลแถวสุดท้ายก่อนหน้า
+    const rr=(name,cells,head,glue)=>({ name, cells:cells.map(v=>({ v })), span:1,
+      fw:head?"700":"400", bg:head?N2:"transparent", pad:head?"6px":"18px", glue:glue||"" });
 
     // --- รายงาน A4 คำนวณสดจาก Google Sheet ตาม Document/REPORT-DATA-SPEC.md (หัวข้อ 3–6) ---
     // 1. กรองตามวันที่ส่งคำขอ (เขตเวลาไทย) — เลือกได้ 5 แบบ: รายเดือน / รายปี / ปีการศึกษา / กำหนดเอง / ทุกช่วงเวลา
@@ -3617,11 +3655,17 @@ class Component extends DCLogic {
     };
 
     // 3. รวมยอดที่ระดับรายการ (JOB_ITEMS) แยกตามบล็อกงบ → หน่วยงาน
+    // บล็อก "รายได้ภายนอก" (b===2) รวมย่อยลงถึงระดับผู้ขอด้วย (หน่วยงาน+ผู้ขอ) เพื่อโชว์ชื่อคนต่อท้ายหน่วยงานในป้ายแถว
+    // ส่วนอีก 2 บล็อกยังรวมแค่ระดับหน่วยงานเหมือนเดิม
     const blocks = [{}, {}, {}];
     let internalTotal = 0;
     liveReportJobs.forEach(j => {
       const u = (j.unitTh || j.unit || "").trim() || (S.lang === "th" ? "ไม่ระบุหน่วยงาน" : "Unspecified unit");
-      const acc = blocks[blockOf(j.budgetSource)][u] || (blocks[blockOf(j.budgetSource)][u] = newAcc());
+      const b = blockOf(j.budgetSource);
+      const requester = (j.requester || "").trim() || "—";
+      const key = b === 2 ? (u + "\u0000" + requester) : u;
+      const acc = blocks[b][key] || (blocks[b][key] = newAcc());
+      if (b === 2) { acc._unit = u; acc._requester = requester; }
       const jobItems = itemsByJob[j.no];
       let jobVal = 0;
       if (jobItems && jobItems.length) {
@@ -3657,27 +3701,40 @@ class Component extends DCLogic {
     const blockSum = [newAcc(), newAcc(), newAcc()];
     const blockAccs = [];
     blockDefs.forEach((def, b) => {
-      const entries = Object.keys(blocks[b]).map(name => ({ name, a: blocks[b][name] }));
+      let entries = Object.keys(blocks[b]).map(name => ({ name, a: blocks[b][name] }));
       if (!entries.length) return;
       entries.forEach(e => { e.a.boxes = Math.ceil(e.a.q[1] / 100); });
-      entries.sort((x, y) => (y.a.total - x.a.total) || x.name.localeCompare(y.name, "th"));
-      liveReportRows.push(rr(def.head, ["", "", "", "", "", "", "", "", ""], true));
+      if (b === 2) {
+        // จัดกลุ่มตามหน่วยงาน (หน่วยงานรวมมาก->น้อย) แล้วเรียงผู้ขอในหน่วยงานเดียวกันตามยอด/ชื่อ ป้ายแถวเป็น "หน่วยงาน - ผู้ขอ"
+        const byUnit = {};
+        entries.forEach(e => { (byUnit[e.a._unit] = byUnit[e.a._unit] || []).push(e); });
+        const unitTotal = u => byUnit[u].reduce((s, e) => s + e.a.total, 0);
+        const orderedUnits = Object.keys(byUnit).sort((x, y) => unitTotal(y) - unitTotal(x) || x.localeCompare(y, "th"));
+        entries = [];
+        orderedUnits.forEach(u => {
+          byUnit[u].sort((x, y) => (y.a.total - x.a.total) || x.a._requester.localeCompare(y.a._requester, "th"));
+          byUnit[u].forEach(e => entries.push({ name: e.a._requester + " - " + u, a: e.a }));
+        });
+      } else {
+        entries.sort((x, y) => (y.a.total - x.a.total) || x.name.localeCompare(y.name, "th"));
+      }
+      liveReportRows.push(rr(def.head, ["", "", "", "", "", "", "", "", ""], true, "next"));
       entries.forEach(e => liveReportRows.push(rr(e.name, cellsOf(e.a), false)));
       blockSum[b] = sumAcc(entries.map(e => e.a));
       blockAccs.push(blockSum[b]);
-      liveReportRows.push(rr(def.total, cellsOf(blockSum[b]), true));
+      liveReportRows.push(rr(def.total, cellsOf(blockSum[b]), true, "prev"));
     });
     const grand = blockAccs.length ? sumAcc(blockAccs) : newAcc();
     if (blockAccs.length) {
       liveReportRows.push({
         name: S.lang === "th" ? "รวมทั้งสิ้น" : "Grand total",
         cells: cellsOf(grand).map(v => ({ v })),
-        span: 1, fw: "800", bg: N2, pad: "6px"
+        span: 1, fw: "800", bg: N2, pad: "6px", glue: "prev"
       });
     } else {
       liveReportRows.push({
         name: S.lang === "th" ? "ไม่มีรายการในช่วงเวลาที่เลือก" : "No requests in the selected period",
-        cells: [], span: 10, fw: "400", bg: "transparent", pad: "12px"
+        cells: [], span: 10, fw: "400", bg: "transparent", pad: "12px", glue: ""
       });
     }
 

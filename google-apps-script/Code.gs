@@ -355,12 +355,9 @@ function importJobs_(p) {
     var jobRows = [], itemRows = [], logRows = [], skipped = 0, created = [];
     incoming.forEach(function (j) {
       var when = new Date(j.submittedAt);
-      // เช็คซ้ำเฉพาะตอนนำเข้าเพิ่ม — ถ้าสั่ง replaceAll ชีตถูกล้างไปแล้ว ทุกแถวที่ส่งมาคืองานคนละใบ ไม่ต้องกรอง
-      if (!p.replaceAll) {
-        var key = String(j.email || "").toLowerCase() + "|" + when.getTime() + "|" + (j.purpose || "");
-        if (seen[key]) { skipped++; return; }
-        seen[key] = true;
-      }
+      var key = String(j.email || "").toLowerCase() + "|" + when.getTime() + "|" + (j.purpose || "");
+      if (seen[key]) { skipped++; return; }
+      seen[key] = true;
       var prefix = "PRN-" + Utilities.formatDate(when, "Asia/Bangkok", "yyyyMM");
       maxByPrefix[prefix] = (maxByPrefix[prefix] || 0) + 1;
       var jobNo = prefix + "-" + ("0000" + maxByPrefix[prefix]).slice(-4);
