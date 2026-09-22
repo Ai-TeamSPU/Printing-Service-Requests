@@ -1837,8 +1837,7 @@
               </div>
               <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
                 <select class="input" aria-label="{{ t.repPeriodLabel }}" value="{{ repMode }}"
-                  onChange="{{ setRepMode }}"
-                  style="min-height:44px;font-size:13.5px;font-weight:600;padding:0 10px">
+                  onChange="{{ setRepMode }}" style="min-height:44px;font-size:13.5px;font-weight:600;padding:0 10px">
                   <sc-for list="{{ repModeOpts }}" as="o" hint-placeholder-count="5">
                     <option value="{{ o.v }}">{{ o.label }}</option>
                   </sc-for>
@@ -1860,66 +1859,66 @@
                   </select>
                 </sc-if>
                 <sc-if value="{{ repShowCal }}" hint-placeholder-val="{{ false }}">
-                <div style="position:relative">
-                  <button type="button" onClick="{{ toggleRange }}" aria-expanded="{{ rangeExpanded }}"
-                    style="min-height:44px;display:flex;align-items:center;gap:10px;padding:0 16px;border:1px solid var(--color-line);border-radius:999px;background:#fff;font-size:14px;font-weight:600;color:var(--color-text)">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)"
-                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                      <path d="M16 2v4M8 2v4M3 10h18"></path>
-                    </svg>
-                    <span>{{ rangeText }}</span>
-                  </button>
-                  <sc-if value="{{ rangeOpen }}" hint-placeholder-val="{{ false }}">
-                    <div
-                      style="position:absolute;right:0;top:100%;z-index:40;margin-top:8px;width:308px;background:#fff;border:1px solid var(--color-line);border-radius:16px;box-shadow:0 18px 40px -18px rgba(16,24,40,.35);padding:14px;text-align:left">
+                  <div style="position:relative">
+                    <button type="button" onClick="{{ toggleRange }}" aria-expanded="{{ rangeExpanded }}"
+                      style="min-height:44px;display:flex;align-items:center;gap:10px;padding:0 16px;border:1px solid var(--color-line);border-radius:999px;background:#fff;font-size:14px;font-weight:600;color:var(--color-text)">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                        <path d="M16 2v4M8 2v4M3 10h18"></path>
+                      </svg>
+                      <span>{{ rangeText }}</span>
+                    </button>
+                    <sc-if value="{{ rangeOpen }}" hint-placeholder-val="{{ false }}">
                       <div
-                        style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
-                        <button type="button" aria-label="{{ calRange.prevLabel }}" onClick="{{ calRange.prev }}"
-                          style="width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--color-line);border-radius:999px;background:#fff;color:var(--color-text)">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="m15 18-6-6 6-6"></path>
-                          </svg>
-                        </button>
-                        <div style="font-weight:700;font-size:14.5px">{{ calRange.title }}</div>
-                        <button type="button" aria-label="{{ calRange.nextLabel }}" onClick="{{ calRange.next }}"
-                          style="width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--color-line);border-radius:999px;background:#fff;color:var(--color-text)">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="m9 18 6-6-6-6"></path>
-                          </svg>
-                        </button>
-                      </div>
-                      <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:2px">
-                        <sc-for list="{{ calRange.dows }}" as="w" hint-placeholder-count="7">
-                          <div
-                            style="text-align:center;font-size:11px;font-weight:700;color:var(--color-neutral-700);padding:4px 0">
-                            {{ w.label }}</div>
-                        </sc-for>
-                      </div>
-                      <sc-for list="{{ calRange.weeks }}" as="wk" hint-placeholder-count="6">
-                        <div style="display:grid;grid-template-columns:repeat(7,1fr)">
-                          <sc-for list="{{ wk.days }}" as="dy" hint-placeholder-count="7">
-                            <button type="button" data-dp-day="1" onClick="{{ dy.go }}" aria-selected="{{ dy.sel }}"
-                              aria-label="{{ dy.aria }}"
-                              style="height:38px;border:{{ dy.bd }};border-radius:{{ dy.r }};background:{{ dy.bg }};color:{{ dy.fg }};font-size:13.5px;font-weight:{{ dy.fw }};font-family:inherit;padding:0">{{
-                              dy.label }}</button>
+                        style="position:absolute;right:0;top:100%;z-index:40;margin-top:8px;width:308px;background:#fff;border:1px solid var(--color-line);border-radius:16px;box-shadow:0 18px 40px -18px rgba(16,24,40,.35);padding:14px;text-align:left">
+                        <div
+                          style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+                          <button type="button" aria-label="{{ calRange.prevLabel }}" onClick="{{ calRange.prev }}"
+                            style="width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--color-line);border-radius:999px;background:#fff;color:var(--color-text)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <path d="m15 18-6-6 6-6"></path>
+                            </svg>
+                          </button>
+                          <div style="font-weight:700;font-size:14.5px">{{ calRange.title }}</div>
+                          <button type="button" aria-label="{{ calRange.nextLabel }}" onClick="{{ calRange.next }}"
+                            style="width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--color-line);border-radius:999px;background:#fff;color:var(--color-text)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <path d="m9 18 6-6-6-6"></path>
+                            </svg>
+                          </button>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:2px">
+                          <sc-for list="{{ calRange.dows }}" as="w" hint-placeholder-count="7">
+                            <div
+                              style="text-align:center;font-size:11px;font-weight:700;color:var(--color-neutral-700);padding:4px 0">
+                              {{ w.label }}</div>
                           </sc-for>
                         </div>
-                      </sc-for>
-                      <div
-                        style="display:flex;justify-content:space-between;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--color-line)">
-                        <button type="button" onClick="{{ calRange.goToday }}"
-                          style="border:0;background:transparent;color:var(--color-accent-700);font-weight:700;font-size:13px;padding:6px 4px">{{
-                          calRange.todayLabel }}</button>
-                        <button type="button" onClick="{{ calRange.close }}"
-                          style="border:0;background:var(--color-accent);color:#fff;font-weight:700;font-size:13px;padding:8px 16px;border-radius:999px">{{
-                          calRange.doneLabel }}</button>
+                        <sc-for list="{{ calRange.weeks }}" as="wk" hint-placeholder-count="6">
+                          <div style="display:grid;grid-template-columns:repeat(7,1fr)">
+                            <sc-for list="{{ wk.days }}" as="dy" hint-placeholder-count="7">
+                              <button type="button" data-dp-day="1" onClick="{{ dy.go }}" aria-selected="{{ dy.sel }}"
+                                aria-label="{{ dy.aria }}"
+                                style="height:38px;border:{{ dy.bd }};border-radius:{{ dy.r }};background:{{ dy.bg }};color:{{ dy.fg }};font-size:13.5px;font-weight:{{ dy.fw }};font-family:inherit;padding:0">{{
+                                dy.label }}</button>
+                            </sc-for>
+                          </div>
+                        </sc-for>
+                        <div
+                          style="display:flex;justify-content:space-between;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--color-line)">
+                          <button type="button" onClick="{{ calRange.goToday }}"
+                            style="border:0;background:transparent;color:var(--color-accent-700);font-weight:700;font-size:13px;padding:6px 4px">{{
+                            calRange.todayLabel }}</button>
+                          <button type="button" onClick="{{ calRange.close }}"
+                            style="border:0;background:var(--color-accent);color:#fff;font-weight:700;font-size:13px;padding:8px 16px;border-radius:999px">{{
+                            calRange.doneLabel }}</button>
+                        </div>
                       </div>
-                    </div>
-                  </sc-if>
-                </div>
+                    </sc-if>
+                  </div>
                 </sc-if>
                 <div style="position:relative">
                   <button type="button" class="btn btn-secondary" onClick="{{ toggleReportEmailBox }}"
