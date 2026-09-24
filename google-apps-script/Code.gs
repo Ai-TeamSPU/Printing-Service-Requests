@@ -166,6 +166,7 @@ function handle_(p) {
       case "submitJob": return json_(submitJob_(p));
       case "updateStatus": return json_(updateStatus_(p));
       case "importJobs": return json_(importJobs_(p));
+      case "patchJobDates": return json_(patchJobDates_(p));
       case "uploadFile": return json_(uploadFile_(p));
       case "listJobs": return json_(listJobs_(p));
       case "checkAdminUser": return json_(checkAdminUser_(p));
@@ -400,6 +401,56 @@ function importJobs_(p) {
   }
 }
 
+// ซ่อมเฉพาะคอลัมน์วันที่ของงานที่มีอยู่แล้ว (submitted_at / completed_at) โดยอ้างจาก job_no
+// ใช้ตอนที่ข้อมูลนำเข้าย้อนหลังมีวันที่หาย แต่ยอดเงิน/จำนวน/สถานะยังถูกต้อง จึงไม่อยากล้างแล้วนำเข้าใหม่
+// อ่าน-เขียนทีละคอลัมน์ (ไม่ใช่ทีละเซลล์) เพราะ 100+ แถวถ้ายิง setValue รายเซลล์จะช้าจนหมดเวลา
+function patchJobDates_(p) {
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    var ss = openSheet_(p);
+    var sh = ss.getSheetByName("JOBS");
+    var values = sh.getDataRange().getValues();
+    var headers = values[0];
+    var cNo = headers.indexOf("job_no"), cSub = headers.indexOf("submitted_at"), cDone = headers.indexOf("completed_at");
+    if (cNo < 0 || cSub < 0 || cDone < 0) return { ok: false, error: "missing_columns" };
+    var n = values.length - 1;
+    if (n < 1) return { ok: false, error: "no_rows" };
+
+    var rowOf = {};
+    for (var i = 1; i < values.length; i++) rowOf[String(values[i][cNo])] = i - 1;   // index ในอาร์เรย์คอลัมน์
+
+    var subCol = sh.getRange(2, cSub + 1, n, 1).getValues();
+    var doneCol = sh.getRange(2, cDone + 1, n, 1).getValues();
+
+    var toDate_ = function (v) {
+      if (!v) return null;
+      var dt = new Date(v);
+      return isNaN(dt.getTime()) ? null : dt;
+    };
+    var updated = 0, untouched = 0, missing = [], changes = [];
+    (p.dates || []).forEach(function (x) {
+      var idx = rowOf[String(x.jobNo)];
+      if (idx === undefined) { missing.push(x.jobNo); return; }
+      var sub = toDate_(x.submittedAt), done = toDate_(x.completedAt);
+      var hit = false;
+      if (sub && String(subCol[idx][0]) !== String(sub)) { subCol[idx][0] = sub; hit = true; }
+      if (done && String(doneCol[idx][0]) !== String(done)) { doneCol[idx][0] = done; hit = true; }
+      if (hit) { updated++; if (changes.length < 5) changes.push(x.jobNo); }
+      else untouched++;
+    });
+
+    if (!p.dryRun && updated) {
+      sh.getRange(2, cSub + 1, n, 1).setValues(subCol);
+      sh.getRange(2, cDone + 1, n, 1).setValues(doneCol);
+    }
+    return { ok: true, dryRun: !!p.dryRun, received: (p.dates || []).length,
+      updated: updated, untouched: untouched, missing: missing, sample: changes };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function uploadFile_(p) {
   var folder = openFolder_(p);
   var jobFolder = findOrCreateFolder_(folder, p.jobNo);
@@ -429,6 +480,17 @@ function listJobs_(p) {
     var o = {};
     headers.forEach(function (h, i) { o[h] = row[i]; });
     return o;
+  });
+
+  // เรียงจากไอดีล่าสุดลงไปหาเก่าสุด เพื่อให้หน้า "คิวงาน" ขึ้นคำขอใหม่ล่าสุดไว้บนสุด
+  // (ชีตเป็นแบบ append-only ลำดับแถวจึงเป็นเก่า->ใหม่ ถ้าไม่เรียงตรงนี้หน้าเว็บจะโชว์ใบที่เก่าที่สุดก่อน)
+  // job_no รูปแบบตายตัว PRN-YYYYMM-NNNN ความยาวเท่ากันทุกใบ เทียบเป็นข้อความจึงได้ลำดับตามเวลาเลย
+  // เผื่อกรณีไอดีผิดรูป/ซ้ำ ใช้ submitted_at ตัดสินอีกชั้น
+  var jobTime_ = function (o) { var t = new Date(o.submitted_at).getTime(); return isNaN(t) ? 0 : t; };
+  jobs.sort(function (a, b) {
+    var x = String(a.job_no || ""), y = String(b.job_no || "");
+    if (x !== y) return x < y ? 1 : -1;
+    return jobTime_(b) - jobTime_(a);
   });
 
   var itemsSh = ss.getSheetByName("JOB_ITEMS");
