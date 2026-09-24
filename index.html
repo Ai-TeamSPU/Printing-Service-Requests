@@ -45,9 +45,17 @@
           --font-heading: "IBM Plex Sans Thai", Archivo, system-ui, sans-serif;
           --font-heading-weight: 700;
           --font-body: "IBM Plex Sans Thai", Archivo, system-ui, sans-serif;
-          --radius-sm: 8px;
-          --radius-md: 12px;
-          --radius-lg: 18px;
+          /* มุมโค้งทั้งระบบ — แก้ 5 บรรทัดนี้ที่เดียว มีผลทุกหน้า (ตั้ง 0 ทั้งหมด = เหลี่ยมทั้งระบบ) */
+          --radius-xs: 6px;
+          /* กล่องแจ้งเตือนเล็ก */
+          --radius-input: 10px;
+          /* ช่องกรอก, dropdown, รูป */
+          --radius-group: 12px;
+          /* แถวปุ่มเลือกที่ติดกัน */
+          --radius-card: 16px;
+          /* การ์ด, โมดัล, แผงที่เด้งลงมา */
+          --radius-pill: 999px;
+          /* ปุ่มกด, ป้ายสถานะ, สวิตช์ */
         }
 
         body {
@@ -94,23 +102,23 @@
 
         /* soft cards + rounding for inline-styled surfaces */
         [style*="border:1px solid var(--color-line)"] {
-          border-radius: 16px;
+          border-radius: var(--radius-card);
           box-shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 8px 24px -18px rgba(16, 24, 40, .18);
         }
 
         [style*="display:flex;border:1px solid var(--color-line)"],
         [style*="border:1px solid var(--color-line)"][style*="display:flex"] {
-          border-radius: 12px;
+          border-radius: var(--radius-group);
           overflow: hidden;
           box-shadow: 0 1px 2px rgba(16, 24, 40, .05);
         }
 
         [style*="border:1px solid var(--color-accent)"] {
-          border-radius: 16px;
+          border-radius: var(--radius-card);
         }
 
         .btn {
-          border-radius: 999px !important;
+          border-radius: var(--radius-pill) !important;
           font-weight: 700;
         }
 
@@ -123,7 +131,7 @@
         input,
         select,
         textarea {
-          border-radius: 10px !important;
+          border-radius: var(--radius-input) !important;
           border-color: var(--color-line) !important;
           background: #fff !important;
         }
@@ -312,7 +320,7 @@
             <!-- Admin User: Show active badge, role switchers, and logout button -->
             <sc-if value="{{ isAdminLoggedIn }}" hint-placeholder-val="{{ false }}">
               <span
-                style="font-size:12px;font-weight:700;color:#0f7a4c;background:#dcf6e9;padding:6px 12px;border-radius:999px;white-space:nowrap;display:flex;align-items:center;gap:6px">
+                style="font-size:12px;font-weight:700;color:#0f7a4c;background:#dcf6e9;padding:6px 12px;border-radius:var(--radius-pill);white-space:nowrap;display:flex;align-items:center;gap:6px">
                 <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#0f7a4c"></span>
                 <span>{{ adminActiveBadgeLabel }}</span>
               </span>
@@ -367,7 +375,7 @@
                   <span style="color:var(--color-neutral-800)">{{ m.service }}</span>
                   <span style="color:var(--color-neutral-400)">·</span>
                   <span
-                    style="padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:700;background:{{ m.tagBg }};color:{{ m.tagFg }}">{{
+                    style="padding:2px 9px;border-radius:var(--radius-pill);font-size:11.5px;font-weight:700;background:{{ m.tagBg }};color:{{ m.tagFg }}">{{
                     m.statusLabel }}</span>
                 </div>
               </sc-for>
@@ -569,8 +577,12 @@
                           <div>
                             <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
                               t.prodPaperType }}</label>
-                            <input class="input" value="{{ prodPaperType }}" onChange="{{ setProdPaperType }}"
-                              style="width:100%;min-height:44px;font-size:15px">
+                            <select class="input" value="{{ prodPaperType }}" onChange="{{ setProdPaperType }}"
+                              aria-label="{{ t.prodPaperType }}" style="width:100%;min-height:44px;font-size:15px">
+                              <sc-for list="{{ prodPaperOpts }}" as="o" hint-placeholder-count="4">
+                                <option value="{{ o.v }}">{{ o.label }}</option>
+                              </sc-for>
+                            </select>
                           </div>
                           <div>
                             <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
@@ -840,8 +852,8 @@
                               <button onClick="{{ b.go }}"
                                 style="width:100%;text-align:left;display:flex;gap:12px;align-items:center;padding:12px 14px;border:1px solid {{ b.bd }};background:{{ b.bg }};color:{{ b.fg }};min-height:48px;font-size:15px;font-weight:600">
                                 <span
-                                  style="width:18px;height:18px;border-radius:999px;border:2px solid currentColor;flex:none;display:grid;place-items:center">
-                                  <span style="width:8px;height:8px;border-radius:999px;background:{{ b.dot }}"></span>
+                                  style="width:18px;height:18px;border-radius:var(--radius-pill);border:2px solid currentColor;flex:none;display:grid;place-items:center">
+                                  <span style="width:8px;height:8px;border-radius:var(--radius-pill);background:{{ b.dot }}"></span>
                                 </span>
                                 <span>{{ b.label }}</span>
                               </button>
@@ -950,7 +962,7 @@
                       <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">{{ needByLabel
                         }}</label>
                       <button type="button" onClick="{{ toggleNeedBy }}" aria-expanded="{{ needByExpanded }}"
-                        style="width:100%;min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 14px;border:1px solid var(--color-line);border-radius:10px;background:#fff;font-size:16px;color:{{ needByColor }};text-align:left">
+                        style="width:100%;min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 14px;border:1px solid var(--color-line);border-radius:var(--radius-input);background:#fff;font-size:16px;color:{{ needByColor }};text-align:left">
                         <span>{{ needByText }}</span>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)"
                           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -961,11 +973,11 @@
                       <div style="font-size:12px;color:var(--color-neutral-600);margin-top:5px">{{ needByHint }}</div>
                       <sc-if value="{{ needByOpen }}" hint-placeholder-val="{{ false }}">
                         <div
-                          style="position:absolute;left:0;top:100%;z-index:40;margin-top:8px;width:308px;background:#fff;border:1px solid var(--color-line);border-radius:16px;box-shadow:0 18px 40px -18px rgba(16,24,40,.35);padding:14px;text-align:left">
+                          style="position:absolute;left:0;top:100%;z-index:40;margin-top:8px;width:308px;background:#fff;border:1px solid var(--color-line);border-radius:var(--radius-card);box-shadow:0 18px 40px -18px rgba(16,24,40,.35);padding:14px;text-align:left">
                           <div
                             style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
                             <button type="button" aria-label="{{ calNeed.prevLabel }}" onClick="{{ calNeed.prev }}"
-                              style="width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--color-line);border-radius:999px;background:#fff;color:var(--color-text)">
+                              style="width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--color-line);border-radius:var(--radius-pill);background:#fff;color:var(--color-text)">
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="m15 18-6-6 6-6"></path>
@@ -973,7 +985,7 @@
                             </button>
                             <div style="font-weight:700;font-size:14.5px">{{ calNeed.title }}</div>
                             <button type="button" aria-label="{{ calNeed.nextLabel }}" onClick="{{ calNeed.next }}"
-                              style="width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--color-line);border-radius:999px;background:#fff;color:var(--color-text)">
+                              style="width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--color-line);border-radius:var(--radius-pill);background:#fff;color:var(--color-text)">
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="m9 18 6-6-6-6"></path>
@@ -1003,7 +1015,7 @@
                               style="border:0;background:transparent;color:var(--color-accent-700);font-weight:700;font-size:13px;padding:6px 4px">{{
                               calNeed.todayLabel }}</button>
                             <button type="button" onClick="{{ calNeed.close }}"
-                              style="border:0;background:var(--color-accent);color:#fff;font-weight:700;font-size:13px;padding:8px 16px;border-radius:999px">{{
+                              style="border:0;background:var(--color-accent);color:#fff;font-weight:700;font-size:13px;padding:8px 16px;border-radius:var(--radius-pill)">{{
                               calNeed.doneLabel }}</button>
                           </div>
                         </div>
@@ -1041,7 +1053,7 @@
                             <div style="display:flex;align-items:center;gap:12px;flex-shrink:0">
                               <span style="color:var(--color-neutral-700);font-size:13px">{{ f.size }}</span>
                               <button type="button" onClick="{{ f.remove }}" aria-label="remove"
-                                style="border:0;background:transparent;color:var(--color-accent-700);cursor:pointer;padding:4px 8px;font-size:16px;line-height:1;font-weight:700;border-radius:4px"
+                                style="border:0;background:transparent;color:var(--color-accent-700);cursor:pointer;padding:4px 8px;font-size:16px;line-height:1;font-weight:700;border-radius:var(--radius-xs)"
                                 title="ลบไฟล์">✕</button>
                             </div>
                           </div>
@@ -1054,12 +1066,12 @@
                       </sc-if>
                       <sc-if value="{{ hasFileWarnMsg }}" hint-placeholder-val="{{ false }}">
                         <div
-                          style="font-size:12.5px;color:#ae1800;background:#ffeaea;border:1px solid #ffc4b8;padding:8px 12px;margin-top:10px;border-radius:6px">
+                          style="font-size:12.5px;color:#ae1800;background:#ffeaea;border:1px solid #ffc4b8;padding:8px 12px;margin-top:10px;border-radius:var(--radius-xs)">
                           {{ fileWarnMsg }}</div>
                       </sc-if>
                       <sc-if value="{{ isUploadingFiles }}" hint-placeholder-val="{{ false }}">
                         <div
-                          style="font-size:13px;color:var(--color-accent-800);background:var(--color-accent-100);border:1px solid var(--color-accent);padding:10px 14px;margin-top:10px;border-radius:6px;display:flex;align-items:center;gap:8px">
+                          style="font-size:13px;color:var(--color-accent-800);background:var(--color-accent-100);border:1px solid var(--color-accent);padding:10px 14px;margin-top:10px;border-radius:var(--radius-xs);display:flex;align-items:center;gap:8px">
                           <span
                             style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--color-accent)"></span>
                           <span>{{ uploadProgressText }}</span>
@@ -1141,7 +1153,7 @@
 
             <!-- กล่องค้นหาและเลือกอีเมลจาก Google Sheet (Zero LocalStorage) -->
             <div
-              style="background:var(--color-band);border:1px solid var(--color-line);border-radius:14px;padding:16px 18px;margin-bottom:22px">
+              style="background:var(--color-band);border:1px solid var(--color-line);border-radius:var(--radius-card);padding:16px 18px;margin-bottom:22px">
               <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between">
                 <div style="display:flex;gap:10px;align-items:center;flex:1;min-width:280px;flex-wrap:wrap">
                   <span style="font-size:13.5px;font-weight:700;color:var(--color-text);white-space:nowrap">🔍 {{
@@ -1185,7 +1197,7 @@
             <!-- กรณีที่ยังไม่ได้เลือกอีเมล: แสดงคำแนะนำและรายชื่ออีเมลในระบบ -->
             <sc-if value="{{ hasNoSelectedEmail }}" hint-placeholder-val="{{ true }}">
               <div
-                style="border:1px dashed var(--color-line);background:#fff;border-radius:16px;padding:44px 20px;text-align:center;margin-bottom:24px">
+                style="border:1px dashed var(--color-line);background:#fff;border-radius:var(--radius-card);padding:44px 20px;text-align:center;margin-bottom:24px">
                 <div style="font-size:40px;margin-bottom:12px">👤</div>
                 <div style="font-size:18px;font-weight:800;color:var(--color-text)">{{ mineSelectPromptTitle }}</div>
                 <div
@@ -1198,7 +1210,7 @@
                   <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:640px;margin:0 auto">
                     <sc-for list="{{ requesterEmailOptions }}" as="opt">
                       <button type="button" onClick="{{ opt.selectMe }}"
-                        style="padding:7px 16px;border-radius:999px;border:1px solid var(--color-line);background:var(--color-band);color:var(--color-text);font-size:13px;font-weight:600;cursor:pointer">
+                        style="padding:7px 16px;border-radius:var(--radius-pill);border:1px solid var(--color-line);background:var(--color-band);color:var(--color-text);font-size:13px;font-weight:600;cursor:pointer">
                         📧 {{ opt.label }}
                       </button>
                     </sc-for>
@@ -1216,7 +1228,7 @@
             <!-- กรณีเลือกอีเมลแล้ว แต่ไม่พบประวัติในระบบ -->
             <sc-if value="{{ hasSelectedEmailNoJobs }}" hint-placeholder-val="{{ false }}">
               <div
-                style="border:1px dashed var(--color-line);background:#fff;border-radius:16px;padding:44px 20px;text-align:center;margin-bottom:24px">
+                style="border:1px dashed var(--color-line);background:#fff;border-radius:var(--radius-card);padding:44px 20px;text-align:center;margin-bottom:24px">
                 <div style="font-size:36px;margin-bottom:10px">📥</div>
                 <div style="font-size:17px;font-weight:800;color:var(--color-text)">{{ notFoundMineTitle }}</div>
                 <div
@@ -1232,11 +1244,11 @@
               <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px">
                 <sc-for list="{{ myCards }}" as="j" hint-placeholder-count="5">
                   <div
-                    style="display:flex;flex-direction:column;background:#fff;border:1px solid var(--color-line);border-radius:22px;box-shadow:0 2px 4px rgba(16,24,40,.05),0 16px 34px -22px rgba(16,24,40,.28);overflow:hidden">
+                    style="display:flex;flex-direction:column;background:#fff;border:1px solid var(--color-line);border-radius:var(--radius-card);box-shadow:0 2px 4px rgba(16,24,40,.05),0 16px 34px -22px rgba(16,24,40,.28);overflow:hidden">
                     <div
                       style="min-height:96px;background:{{ j.mediaBg }};display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 18px">
                       <div
-                        style="width:46px;height:46px;border-radius:16px;background:#fff;display:grid;place-items:center;color:{{ j.hue }};flex:none">
+                        style="width:46px;height:46px;border-radius:var(--radius-card);background:#fff;display:grid;place-items:center;color:{{ j.hue }};flex:none">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                           <path
@@ -1246,7 +1258,7 @@
                         </svg>
                       </div>
                       <span
-                        style="padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;background:#fff;color:{{ j.hue }};text-align:right;line-height:1.4">{{
+                        style="padding:5px 12px;border-radius:var(--radius-pill);font-size:12px;font-weight:700;background:#fff;color:{{ j.hue }};text-align:right;line-height:1.4">{{
                         j.statusLabel }}</span>
                     </div>
                     <div style="padding:16px 18px 4px">
@@ -1271,14 +1283,14 @@
                     <div
                       style="display:flex;align-items:center;gap:8px;padding:16px 18px 0;font-size:12px;line-height:1.5;flex-wrap:wrap;color:var(--color-neutral-600)">
                       <span
-                        style="width:22px;height:22px;border-radius:999px;background:{{ j.mediaBg }};color:{{ j.hue }};display:grid;place-items:center;font-size:10px;font-weight:800">{{
+                        style="width:22px;height:22px;border-radius:var(--radius-pill);background:{{ j.mediaBg }};color:{{ j.hue }};display:grid;place-items:center;font-size:10px;font-weight:800">{{
                         j.initials }}</span>
                       <span>{{ viewedLabel }}</span>
                       <time style="font-weight:600">{{ viewedDate }}</time>
                     </div>
                     <div style="margin-top:14px;padding:14px 18px;border-top:1px solid var(--color-line)">
                       <button type="button" onClick="{{ j.open }}"
-                        style="width:100%;min-height:44px;border:0;border-radius:999px;background:{{ j.hue }};color:#fff;font-size:14px;font-weight:700;font-family:inherit">{{
+                        style="width:100%;min-height:44px;border:0;border-radius:var(--radius-pill);background:{{ j.hue }};color:#fff;font-size:14px;font-weight:700;font-family:inherit">{{
                         t.tabTrack }}</button>
                     </div>
                   </div>
@@ -1593,9 +1605,9 @@
                         <td>
                           <button type="button" onClick="{{ p.toggle }}" role="switch" aria-checked="{{ p.onStr }}"
                             aria-label="{{ p.toggleAria }}"
-                            style="width:46px;height:26px;border-radius:999px;border:0;padding:3px;background:{{ p.swBg }};display:flex;justify-content:{{ p.swJustify }};align-items:center;cursor:pointer">
+                            style="width:46px;height:26px;border-radius:var(--radius-pill);border:0;padding:3px;background:{{ p.swBg }};display:flex;justify-content:{{ p.swJustify }};align-items:center;cursor:pointer">
                             <span
-                              style="width:20px;height:20px;border-radius:999px;background:#fff;display:block;box-shadow:0 1px 3px rgba(16,24,40,.3)"></span>
+                              style="width:20px;height:20px;border-radius:var(--radius-pill);background:#fff;display:block;box-shadow:0 1px 3px rgba(16,24,40,.3)"></span>
                           </button>
                         </td>
                       </tr>
@@ -1861,7 +1873,7 @@
                 <sc-if value="{{ repShowCal }}" hint-placeholder-val="{{ false }}">
                   <div style="position:relative">
                     <button type="button" onClick="{{ toggleRange }}" aria-expanded="{{ rangeExpanded }}"
-                      style="min-height:44px;display:flex;align-items:center;gap:10px;padding:0 16px;border:1px solid var(--color-line);border-radius:999px;background:#fff;font-size:14px;font-weight:600;color:var(--color-text)">
+                      style="min-height:44px;display:flex;align-items:center;gap:10px;padding:0 16px;border:1px solid var(--color-line);border-radius:var(--radius-pill);background:#fff;font-size:14px;font-weight:600;color:var(--color-text)">
                       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <rect x="3" y="4" width="18" height="18" rx="2"></rect>
@@ -1871,11 +1883,11 @@
                     </button>
                     <sc-if value="{{ rangeOpen }}" hint-placeholder-val="{{ false }}">
                       <div
-                        style="position:absolute;right:0;top:100%;z-index:40;margin-top:8px;width:308px;background:#fff;border:1px solid var(--color-line);border-radius:16px;box-shadow:0 18px 40px -18px rgba(16,24,40,.35);padding:14px;text-align:left">
+                        style="position:absolute;right:0;top:100%;z-index:40;margin-top:8px;width:308px;background:#fff;border:1px solid var(--color-line);border-radius:var(--radius-card);box-shadow:0 18px 40px -18px rgba(16,24,40,.35);padding:14px;text-align:left">
                         <div
                           style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
                           <button type="button" aria-label="{{ calRange.prevLabel }}" onClick="{{ calRange.prev }}"
-                            style="width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--color-line);border-radius:999px;background:#fff;color:var(--color-text)">
+                            style="width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--color-line);border-radius:var(--radius-pill);background:#fff;color:var(--color-text)">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                               <path d="m15 18-6-6 6-6"></path>
@@ -1883,7 +1895,7 @@
                           </button>
                           <div style="font-weight:700;font-size:14.5px">{{ calRange.title }}</div>
                           <button type="button" aria-label="{{ calRange.nextLabel }}" onClick="{{ calRange.next }}"
-                            style="width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--color-line);border-radius:999px;background:#fff;color:var(--color-text)">
+                            style="width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--color-line);border-radius:var(--radius-pill);background:#fff;color:var(--color-text)">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                               <path d="m9 18 6-6-6-6"></path>
@@ -1913,7 +1925,7 @@
                             style="border:0;background:transparent;color:var(--color-accent-700);font-weight:700;font-size:13px;padding:6px 4px">{{
                             calRange.todayLabel }}</button>
                           <button type="button" onClick="{{ calRange.close }}"
-                            style="border:0;background:var(--color-accent);color:#fff;font-weight:700;font-size:13px;padding:8px 16px;border-radius:999px">{{
+                            style="border:0;background:var(--color-accent);color:#fff;font-weight:700;font-size:13px;padding:8px 16px;border-radius:var(--radius-pill)">{{
                             calRange.doneLabel }}</button>
                         </div>
                       </div>
@@ -1925,7 +1937,7 @@
                     style="min-height:44px">{{ t.sendEmail }}</button>
                   <sc-if value="{{ reportEmailOpen }}" hint-placeholder-val="{{ false }}">
                     <div
-                      style="position:absolute;right:0;top:100%;z-index:40;margin-top:8px;width:280px;background:#fff;border:1px solid var(--color-line);border-radius:16px;box-shadow:0 18px 40px -18px rgba(16,24,40,.35);padding:14px;text-align:left">
+                      style="position:absolute;right:0;top:100%;z-index:40;margin-top:8px;width:280px;background:#fff;border:1px solid var(--color-line);border-radius:var(--radius-card);box-shadow:0 18px 40px -18px rgba(16,24,40,.35);padding:14px;text-align:left">
                       <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
                         t.reportEmailToLabel }}</label>
                       <input class="input" value="{{ reportEmailTo }}" onChange="{{ setReportEmailTo }}"
@@ -1972,7 +1984,7 @@
                   <div class="no-print"
                     style="margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px">
                     <span
-                      style="font-size:11.5px;background:#dcf6e9;color:#0f7a4c;padding:3px 12px;border-radius:999px;font-weight:700;display:inline-flex;align-items:center;gap:6px">
+                      style="font-size:11.5px;background:#dcf6e9;color:#0f7a4c;padding:3px 12px;border-radius:var(--radius-pill);font-weight:700;display:inline-flex;align-items:center;gap:6px">
                       <span
                         style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#0f7a4c"></span>
                       <span>{{ liveJobReportBadge }}</span>
@@ -2248,7 +2260,7 @@
         <div class="no-print" onClick="{{ closeJobDetail }}"
           style="position:fixed;inset:0;z-index:70;background:rgba(16,24,40,.45);display:flex;align-items:center;justify-content:center;padding:20px">
           <div onClick="{{ stopJobDetailClick }}"
-            style="background:#fff;border-radius:16px;box-shadow:var(--shadow-lg);width:100%;max-width:560px;max-height:86vh;overflow-y:auto">
+            style="background:#fff;border-radius:var(--radius-card);box-shadow:var(--shadow-lg);width:100%;max-width:560px;max-height:86vh;overflow-y:auto">
             <div
               style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:20px 22px;border-bottom:1px solid var(--color-line)">
               <div>
@@ -2262,7 +2274,7 @@
             <div style="padding:18px 22px;display:flex;flex-direction:column;gap:18px">
               <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
                 <span
-                  style="display:inline-block;padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:700;background:{{ jobDetailTagBg }};color:{{ jobDetailTagFg }}">{{
+                  style="display:inline-block;padding:4px 10px;border-radius:var(--radius-pill);font-size:12.5px;font-weight:700;background:{{ jobDetailTagBg }};color:{{ jobDetailTagFg }}">{{
                   jobDetailStatusLabel }}</span>
                 <span style="font-size:13.5px;color:var(--color-neutral-700)">{{ t.needBy }} {{ jobDetailNeed }}</span>
                 <span style="font-size:13.5px;color:var(--color-neutral-700)">· {{ t.budgetTitle }} {{
@@ -2298,7 +2310,7 @@
                       <sc-if value="{{ f.showImg }}" hint-placeholder-val="{{ true }}">
                         <a href="{{ f.link }}" target="_blank" rel="noopener" style="display:block">
                           <img src="{{ f.imgSrc }}" onError="{{ f.onImgError }}" alt="{{ f.name }}"
-                            style="width:100%;max-width:320px;border-radius:10px;border:1px solid var(--color-line);display:block">
+                            style="width:100%;max-width:320px;border-radius:var(--radius-input);border:1px solid var(--color-line);display:block">
                         </a>
                         <div
                           style="font-size:12.5px;color:var(--color-neutral-700);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
@@ -2306,7 +2318,7 @@
                       </sc-if>
                       <sc-if value="{{ f.showFallback }}" hint-placeholder-val="{{ false }}">
                         <a href="{{ f.link }}" target="_blank" rel="noopener"
-                          style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--color-line);border-radius:10px;background:var(--color-band);text-decoration:none;color:var(--color-text)">
+                          style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--color-line);border-radius:var(--radius-input);background:var(--color-band);text-decoration:none;color:var(--color-text)">
                           <span style="font-size:20px">🧾</span>
                           <span
                             style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
@@ -2374,7 +2386,7 @@
         <div class="no-print"
           style="position:fixed;inset:0;z-index:80;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px">
           <div
-            style="background:#fff;border:1px solid var(--color-line);border-radius:18px;box-shadow:0 24px 60px -12px rgba(16,24,40,0.35);max-width:440px;width:100%;overflow:hidden">
+            style="background:#fff;border:1px solid var(--color-line);border-radius:var(--radius-card);box-shadow:0 24px 60px -12px rgba(16,24,40,0.35);max-width:440px;width:100%;overflow:hidden">
             <div
               style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--color-line);background:var(--color-band)">
               <div style="display:flex;align-items:center;gap:10px">
@@ -2518,6 +2530,7 @@ class Component extends DCLogic {
     const start=new Date(y,m-1,1-first.getDay());
     const today=this._today();
     const AC="var(--color-accent)", AC1="var(--color-accent-100)", AC8="var(--color-accent-800)";
+    const R_INPUT="var(--radius-input)";   // ใช้ตัวแปรกลางเดียวกับช่องกรอก มุมปฏิทินจะเปลี่ยนตามทั้งระบบ
     const weeks=[];
     for(let w=0; w<6; w++){
       const days=[];
@@ -2525,14 +2538,14 @@ class Component extends DCLogic {
         const dt=new Date(start.getFullYear(),start.getMonth(),start.getDate()+w*7+i);
         const iso=this._iso(dt), out=dt.getMonth()!==m-1;
         let bg="transparent", fg=out?"var(--color-neutral-400)":"var(--color-text)",
-          bd="1px solid transparent", r="10px", fw="500", sel="false";
+          bd="1px solid transparent", r=R_INPUT, fw="500", sel="false";
         if(kind==="need"){
           if(iso===S.needByISO){ bg=AC; fg="#fff"; fw="700"; sel="true"; }
         } else {
           const a=S.rgStart, b=S.rgEnd;
           if(a&&b&&iso>a&&iso<b){ bg=AC1; fg=AC8; r="0"; }
           if(iso===a||iso===b){ bg=AC; fg="#fff"; fw="700"; sel="true";
-            r=(a&&b&&a!==b)?(iso===a?"10px 0 0 10px":"0 10px 10px 0"):"10px"; }
+            r=(a&&b&&a!==b)?(iso===a?R_INPUT+" 0 0 "+R_INPUT:"0 "+R_INPUT+" "+R_INPUT+" 0"):R_INPUT; }
         }
         if(bg==="transparent"&&iso===today){ bd="1px solid "+AC; fg="var(--color-accent-700)"; fw="700"; }
         days.push({ label:String(dt.getDate()), bg, fg, bd, r, fw, sel,
@@ -3062,6 +3075,10 @@ class Component extends DCLogic {
     const sidesFg={ one:S.prodSides==="one"?BG:INK, two:S.prodSides==="two"?BG:INK };
     const setSides={ one:mkToggle("prodSides")("one"), two:mkToggle("prodSides")("two") };
     const setProdPaperType=e=>this.setState({ prodPaperType:e.target.value });
+    // ตัวเลือกประเภทกระดาษของงานผลิต — ตัวแรกเป็นค่าว่างไว้เป็น placeholder เพราะช่องนี้ไม่บังคับกรอกมาแต่เดิม
+    const prodPaperOpts=[["",t.prodPaperPick],[t.prodPaperBondWhite,t.prodPaperBondWhite],
+      [t.prodPaperBondColor,t.prodPaperBondColor],[t.prodPaperCardColor,t.prodPaperCardColor]]
+      .map(([v,label])=>({ v, label }));
     const setProdQtyOrig=e=>this.setState({ prodQtyOrig:e.target.value });
     const setProdQtySets=e=>this.setState({ prodQtySets:e.target.value });
     const toggleOwnPaper=()=>this.setState(st=>({ prodOwnPaper:!st.prodOwnPaper }));
@@ -4191,7 +4208,7 @@ class Component extends DCLogic {
       emailGateBtnLabel:S.gateBusy?(S.lang==="th"?"กำลังตรวจสอบ…":"Checking…"):t.emailGateBtn,
       svcGroups, hasGroup, groupItems:groupItemsOut, isProdGroup,
       colorBg, colorFg, setColor, sizeOpts, sidesBg, sidesFg, setSides,
-      prodPaperType:S.prodPaperType, setProdPaperType,
+      prodPaperType:S.prodPaperType, setProdPaperType, prodPaperOpts,
       prodQtyOrig:S.prodQtyOrig, setProdQtyOrig, prodQtySets:S.prodQtySets, setProdQtySets,
       stapleOpts, prodOwnPaper:S.prodOwnPaper, toggleOwnPaper,
       isExam, examTypeOpts, examSubject:S.examSubject, setExamSubject,
