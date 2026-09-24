@@ -79,7 +79,7 @@ export const TH = {
   prodQty: "จำนวน (แผ่น)",
   prodQtyOriginal: "จำนวนต้นฉบับ (แผ่น)", prodQtySets: "จำนวนชุดที่ต้องการ",
   stapleLabel: "การเย็บชุด", stapleCorner: "เย็บมุม", stapleSide2: "เย็บข้าง 2 จุด", stapleNone: "ไม่เย็บชุด",
-  examTitle: "รายละเอียดข้อสอบ", examType: "ประเภทการสอบ", examMid: "สอบกลางภาค", examOut: "สอบนอกตาราง",
+  examTitle: "รายละเอียดข้อสอบ", examType: "ประเภทการสอบ", examMid: "สอบปลายภาค", examOut: "สอบนอกตาราง",
   examSubject: "รายวิชา (รหัสวิชา + ชื่อวิชา)", examSubjectPh: "เช่น BUS201 หลักการตลาด",
   examNote: "ทางคณะส่งไฟล์ข้อสอบมาให้โรงพิมพ์ กรอกรายละเอียดตามงานพิมพ์สำเนา และระบุรายวิชา",
   dupCoverLabel: "มีปกสี 180 แกรม", dupCoverYes: "มีปก", dupCoverNo: "ไม่มีปก",
@@ -90,7 +90,7 @@ export const TH = {
   layoutRangeWarn: "งาน 4 สี ราคาต่อหน้าอยู่ในช่วง 100–200 บาท ขึ้นกับความซับซ้อน แอดมินจะยืนยันราคาให้หลังประเมินงาน",
   a4Title: "รายละเอียดพริ้นท์สี A4", a3Title: "รายละเอียดพริ้นท์สี A3", paperTypeLabel: "ชนิดกระดาษ", sheetQtyLabel: "จำนวน (แผ่น)",
   a4PaperBond70: "ปอนด์ 70 แกรม", a4PaperSimbo250: "ซิมโบแมทพลัส 250 แกรม",
-  a4PaperMouColor: "MOU สลิ่ม 180 แกรม หน้าโลโก้ 4 สี", a4PaperMouBlack: "MOU สลิ่ม 180 แกรม หน้าอักษรดำ", a4PaperF4Own: "F4 นำกระดาษเอง",
+  a4PaperMouColor: "MOU สีครีม 180 แกรม หน้าโลโก้ 4 สี", a4PaperMouBlack: "MOU สีครีม 180 แกรม หน้าอักษรสีดำ", a4PaperF4Own: "F4 นำกระดาษเอง",
   a3PaperBond80: "ปอนด์ 80 แกรม", a3PaperSimbo250: "ซิมโบแมทพลัส 250 แกรม",
   a3RangeWarn: "กระดาษปอนด์ 80 แกรม ราคาต่อแผ่นอยู่ในช่วง 30–50 บาท ขึ้นกับความซับซ้อน แอดมินจะยืนยันราคาให้หลังประเมินงาน",
   a5Title: "รายละเอียดพริ้นท์สี A5", bindTitle: "รายละเอียดเข้าเล่ม",
@@ -246,7 +246,7 @@ export const EN = {
   prodQty: "Quantity (sheets)",
   prodQtyOriginal: "Original pages (sheets)", prodQtySets: "Number of sets",
   stapleLabel: "Stapling", stapleCorner: "Corner staple", stapleSide2: "Side staple, 2 points", stapleNone: "No staple",
-  examTitle: "Exam paper details", examType: "Exam type", examMid: "Midterm", examOut: "Off-schedule exam",
+  examTitle: "Exam paper details", examType: "Exam type", examMid: "Final exam", examOut: "Off-schedule exam",
   examSubject: "Course (code + title)", examSubjectPh: "e.g. BUS201 Principles of Marketing",
   examNote: "The faculty sends the exam file to the print shop. Fill in the duplicate-print details and name the course.",
   dupCoverLabel: "Has a 180gsm colour cover", dupCoverYes: "With cover", dupCoverNo: "No cover",
@@ -257,7 +257,7 @@ export const EN = {
   layoutRangeWarn: "4-colour layout is priced at 100–200 THB per page depending on complexity. Staff will confirm the exact price after review.",
   a4Title: "Colour print A4 details", a3Title: "Colour print A3 details", paperTypeLabel: "Paper type", sheetQtyLabel: "Quantity (sheets)",
   a4PaperBond70: "Bond 70 gsm", a4PaperSimbo250: "Simbo Matt Plus 250 gsm",
-  a4PaperMouColor: "MOU, Scream 180gsm, 4-colour logo page", a4PaperMouBlack: "MOU, Scream 180gsm, black text page", a4PaperF4Own: "F4, own paper",
+  a4PaperMouColor: "MOU, Cream 180 gsm, 4-colour logo page", a4PaperMouBlack: "MOU, Cream 180 gsm, black text page", a4PaperF4Own: "F4, own paper",
   a3PaperBond80: "Bond 80 gsm", a3PaperSimbo250: "Simbo Matt Plus 250 gsm",
   a3RangeWarn: "Bond 80gsm is priced at 30–50 THB per sheet depending on complexity. Staff will confirm the exact price after review.",
   a5Title: "Colour print A5 details", bindTitle: "Binding details",
@@ -291,7 +291,7 @@ export const CATS = [
     no: "01", th: "งานผลิต", en: "Production", items: [
       { id: "copy", th: "ถ่ายเอกสาร", en: "Photocopying", unitTh: "แผ่น", unitEn: "sheets", price: 0.5, spec: { th: "A4 ปอนด์ 70 แกรม ขาวดำ", en: "A4 bond 70 gsm, B/W" } },
       { id: "dup", th: "พิมพ์สำเนา (ขาวดำ)", en: "Duplicate printing (B/W)", unitTh: "แผ่น", unitEn: "sheets", price: 2, spec: { th: "A4 ปอนด์ 70 แกรม / ปอนด์สี 80 แกรม / การ์ดสี 180 แกรม", en: "A4 bond 70 gsm / coloured bond 80 gsm / 180 gsm card" } },
-      { id: "exam", th: "ข้อสอบ", en: "Exam papers", unitTh: "แผ่น", unitEn: "sheets", price: 2, spec: { th: "สอบกลางภาค / สอบนอกตาราง · ใช้เงื่อนไขเดียวกับงานพิมพ์สำเนา", en: "Midterm / off-schedule; priced like duplicate printing" } },
+      { id: "exam", th: "ข้อสอบ", en: "Exam papers", unitTh: "แผ่น", unitEn: "sheets", price: 2, spec: { th: "สอบปลายภาค / สอบนอกตาราง · ใช้เงื่อนไขเดียวกับงานพิมพ์สำเนา", en: "Final exam / off-schedule; priced like duplicate printing" } },
       { id: "bind", th: "เข้าเล่ม", en: "Binding", unitTh: "เล่ม", unitEn: "books", manual: true, spec: { th: "ยังไม่มีราคาในตารางปัจจุบัน", en: "No rule in the current price master" } }
     ]
   },
@@ -314,7 +314,7 @@ export const CATS = [
 export const DYN = {
   copy: [["ขนาดกระดาษ", "Paper size", "A4"], ["ประเภทกระดาษ / แกรม", "Paper / gsm", "ปอนด์ 70 แกรม|Bond 70 gsm"], ["ขาวดำ หรือ สี", "Colour mode", "ขาวดำ|Black & white"], ["หน้าเดียว / สองหน้า", "Sides", "สองหน้า|Double sided"], ["จำนวนต้นฉบับ (แผ่น)", "Original pages", "10"], ["จำนวนชุดที่ต้องการ", "Sets", "5"], ["นำกระดาษมาเอง", "Own paper", "ไม่|No"]],
   dup: [["ขนาดกระดาษ", "Paper size", "A4"], ["ประเภทกระดาษ / แกรม", "Paper / gsm", "ปอนด์สี 80 แกรม|Coloured bond 80 gsm"], ["จำนวนต้นฉบับ (แผ่น)", "Original pages", "12"], ["จำนวนชุดที่ต้องการ", "Sets", "20"], ["การเย็บชุด", "Stapling", "เย็บข้าง 2 จุด|Side staple, 2 points"]],
-  exam: [["ประเภทการสอบ", "Exam type", "สอบกลางภาค|Midterm"], ["รายวิชา (รหัสวิชา + ชื่อวิชา)", "Course (code + title)", "BUS201 หลักการตลาด|BUS201 Principles of Marketing"], ["จำนวนต้นฉบับ (แผ่น)", "Original pages", "8"], ["จำนวนชุดที่ต้องการ", "Sets", "120"], ["การเย็บชุด", "Stapling", "เย็บมุม|Corner staple"]],
+  exam: [["ประเภทการสอบ", "Exam type", "สอบปลายภาค|Final exam"], ["รายวิชา (รหัสวิชา + ชื่อวิชา)", "Course (code + title)", "BUS201 หลักการตลาด|BUS201 Principles of Marketing"], ["จำนวนต้นฉบับ (แผ่น)", "Original pages", "8"], ["จำนวนชุดที่ต้องการ", "Sets", "120"], ["การเย็บชุด", "Stapling", "เย็บมุม|Corner staple"]],
   bind: [["ประเภทการเข้าเล่ม", "Binding type", "ไสกาว|Perfect bound"], ["จำนวนหน้าต่อเล่ม", "Pages per book", "180"]],
   card: [["หน้าเดียว / สองด้าน", "Sides", "สองด้าน|Double sided"], ["แบบ", "Template", "แบบมหาวิทยาลัย|University template"], ["ข้อความบนบัตร", "Card text", "ตามไฟล์แนบ|As attached"]],
   cert: [["รูปแบบโลโก้", "Logo option", "โลโก้ SPU + อักษรสีดำ|SPU logo + black text"], ["เจียนขอบ 4 ด้าน", "Trim 4 edges", "ใช่ +3 บาท|Yes, +3 THB"]],
