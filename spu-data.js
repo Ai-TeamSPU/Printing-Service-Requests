@@ -81,7 +81,8 @@ export const TH = {
   prodQty: "จำนวน (แผ่น)",
   prodQtyOriginal: "จำนวนต้นฉบับ (แผ่น)", prodQtySets: "จำนวนชุดที่ต้องการ",
   stapleLabel: "การเย็บชุด", stapleCorner: "เย็บมุม", stapleSide2: "เย็บข้าง 2 จุด", stapleNone: "ไม่เย็บชุด",
-  examTitle: "รายละเอียดข้อสอบ", examType: "ประเภทการสอบ", examMid: "สอบปลายภาค", examOut: "สอบนอกตาราง",
+  examTitle: "รายละเอียดข้อสอบ", examType: "ประเภทการสอบ", examMid: "สอบกลางภาค", examFinal: "สอบปลายภาค", examOut: "สอบนอกตาราง",
+  fillRequired: "กรุณาเลือกหรือกรอกให้ครบก่อนส่งคำขอ — ",
   examSubject: "รายวิชา (รหัสวิชา + ชื่อวิชา)", examSubjectPh: "เช่น BUS201 หลักการตลาด",
   examNote: "ทางคณะส่งไฟล์ข้อสอบมาให้โรงพิมพ์ กรอกรายละเอียดตามงานพิมพ์สำเนา และระบุรายวิชา",
   dupCoverLabel: "มีปกสี 180 แกรม", dupCoverYes: "มีปก", dupCoverNo: "ไม่มีปก",
@@ -250,7 +251,8 @@ export const EN = {
   prodQty: "Quantity (sheets)",
   prodQtyOriginal: "Original pages (sheets)", prodQtySets: "Number of sets",
   stapleLabel: "Stapling", stapleCorner: "Corner staple", stapleSide2: "Side staple, 2 points", stapleNone: "No staple",
-  examTitle: "Exam paper details", examType: "Exam type", examMid: "Final exam", examOut: "Off-schedule exam",
+  examTitle: "Exam paper details", examType: "Exam type", examMid: "Midterm", examFinal: "Final exam", examOut: "Off-schedule exam",
+  fillRequired: "Please complete these before submitting — ",
   examSubject: "Course (code + title)", examSubjectPh: "e.g. BUS201 Principles of Marketing",
   examNote: "The faculty sends the exam file to the print shop. Fill in the duplicate-print details and name the course.",
   dupCoverLabel: "Has a 180gsm colour cover", dupCoverYes: "With cover", dupCoverNo: "No cover",
@@ -295,7 +297,7 @@ export const CATS = [
     no: "01", th: "งานผลิต", en: "Production", items: [
       { id: "copy", th: "ถ่ายเอกสาร", en: "Photocopying", unitTh: "แผ่น", unitEn: "sheets", price: 0.5, spec: { th: "A4 ปอนด์ 70 แกรม ขาวดำ", en: "A4 bond 70 gsm, B/W" } },
       { id: "dup", th: "พิมพ์สำเนา (ขาวดำ)", en: "Duplicate printing (B/W)", unitTh: "แผ่น", unitEn: "sheets", price: 2, spec: { th: "A4 ปอนด์ 70 แกรม / ปอนด์สี 80 แกรม / การ์ดสี 180 แกรม", en: "A4 bond 70 gsm / coloured bond 80 gsm / 180 gsm card" } },
-      { id: "exam", th: "ข้อสอบ", en: "Exam papers", unitTh: "แผ่น", unitEn: "sheets", price: 2, spec: { th: "สอบปลายภาค / สอบนอกตาราง · ใช้เงื่อนไขเดียวกับงานพิมพ์สำเนา", en: "Final exam / off-schedule; priced like duplicate printing" } },
+      { id: "exam", th: "ข้อสอบ", en: "Exam papers", unitTh: "แผ่น", unitEn: "sheets", price: 2, spec: { th: "สอบกลางภาค / สอบปลายภาค / สอบนอกตาราง · ใช้เงื่อนไขเดียวกับงานพิมพ์สำเนา", en: "Midterm / final / off-schedule; priced like duplicate printing" } },
       { id: "bind", th: "เข้าเล่ม", en: "Binding", unitTh: "เล่ม", unitEn: "books", manual: true, spec: { th: "ยังไม่มีราคาในตารางปัจจุบัน", en: "No rule in the current price master" } }
     ]
   },

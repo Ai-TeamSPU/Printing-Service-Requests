@@ -645,7 +645,7 @@
                             <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
                               t.examType }}</label>
                             <div style="display:flex;border:1px solid var(--color-line)">
-                              <sc-for list="{{ examTypeOpts }}" as="o" hint-placeholder-count="2">
+                              <sc-for list="{{ examTypeOpts }}" as="o" hint-placeholder-count="3">
                                 <button onClick="{{ o.go }}"
                                   style="flex:1;padding:10px 6px;border:0;border-right:1px solid var(--color-line);background:{{ o.bg }};color:{{ o.fg }};font-weight:700;font-size:13px;min-height:44px">{{
                                   o.label }}</button>
@@ -2441,9 +2441,9 @@ class Component extends DCLogic {
   state = { d:null, lang:this.props.defaultLang==="en"?"en":"th", role:"REQ", page:"landing",
     isAdminLoggedIn:false, adminLoginOpen:false, adminEmailInput:"", adminPassInput:"", adminLoginBusy:false, adminLoginError:"", adminUserObj:null,
     gateOpen:false, gateEmail:"", gateErr:false, gateMsg:"", gateVerified:false, gateBusy:false,
-    svcGroup:null, sel:{}, prodColor:"bw", prodSize:"A4", prodPaperType:"", prodSides:"two", prodOwnPaper:false,
-    prodQtyOrig:1, prodQtySets:1, staple:"corner",
-    examType:"mid", examSubject:"", budget:"has", budgetAcct:"",
+    svcGroup:null, sel:{}, prodColor:"", prodSize:"", prodPaperType:"", prodSides:"", prodOwnPaper:false,
+    prodQtyOrig:"", prodQtySets:"", staple:"",
+    examType:"", examSubject:"", budget:"has", budgetAcct:"",
     dupHasCover:false,
     cardSides:"one", cardQty:"",
     certLogo:"black", certTrim:false, certQty:"",
@@ -3084,12 +3084,21 @@ class Component extends DCLogic {
     const toggleOwnPaper=()=>this.setState(st=>({ prodOwnPaper:!st.prodOwnPaper }));
     const stapleOpts=[["corner",t.stapleCorner],["side2",t.stapleSide2],["none",t.stapleNone]].map(([k,label])=>({ label,
       bg:S.staple===k?INK:"transparent", fg:S.staple===k?BG:INK, go:()=>this.setState({ staple:k }) }));
-    const stapleLabelNow=(S.staple==="corner"?t.stapleCorner:S.staple==="side2"?t.stapleSide2:t.stapleNone);
+    // ตารางเทียบรหัส -> ข้อความ ใช้แทน ternary เดิม เพราะตอนนี้ "ยังไม่เลือก" เป็นสถานะที่เกิดขึ้นได้
+    const PROD_LABELS={ color:{ color:t.prodColorColor, bw:t.prodColorBw },
+      sides:{ one:t.prodSidesOne, two:t.prodSidesTwo },
+      staple:{ corner:t.stapleCorner, side2:t.stapleSide2, none:t.stapleNone } };
+    const prodColorLabel=PROD_LABELS.color[S.prodColor]||"";
+    const prodSidesLabel=PROD_LABELS.sides[S.prodSides]||"";
+    const stapleLabelNow=PROD_LABELS.staple[S.staple]||"";
 
     // — exam paper details —
     const isExam=S.sel.exam!==undefined;
-    const examTypeOpts=[["mid",t.examMid],["out",t.examOut]].map(([k,label])=>({ label,
+    const EXAM_LABELS={ mid:t.examMid, final:t.examFinal, out:t.examOut };
+    const examTypeOpts=[["mid",t.examMid],["final",t.examFinal],["out",t.examOut]].map(([k,label])=>({ label,
       bg:S.examType===k?INK:"transparent", fg:S.examType===k?BG:INK, go:()=>this.setState({ examType:k }) }));
+    // ค่าเริ่มต้นเป็นค่าว่าง (ยังไม่เลือก) จึงต้องเผื่อกรณีหาไม่เจอไว้ด้วย
+    const examTypeLabel=EXAM_LABELS[S.examType]||"";
     const setExamSubject=e=>this.setState({ examSubject:e.target.value });
 
     // — พิมพ์สำเนา: มีปกสี 180 แกรม หรือไม่ (R04/R05) —
@@ -3193,14 +3202,14 @@ class Component extends DCLogic {
       [S.lang==="th"?"ไฟล์แนบ":"Files", filesText]
     ];
     if(isProdGroup){
-      reviewRows.splice(2,0,[t.prodColor, S.prodColor==="color"?t.prodColorColor:t.prodColorBw]);
-      reviewRows.splice(3,0,[t.prodSize, S.prodSize]);
+      reviewRows.splice(2,0,[t.prodColor, prodColorLabel||"—"]);
+      reviewRows.splice(3,0,[t.prodSize, S.prodSize||"—"]);
       reviewRows.splice(4,0,[t.prodQtyOriginal, S.prodQtyOrig]);
       reviewRows.splice(5,0,[t.prodQtySets, S.prodQtySets]);
       reviewRows.splice(6,0,[t.stapleLabel, stapleLabelNow]);
     }
     if(isExam){
-      reviewRows.push([t.examType, S.examType==="mid"?t.examMid:t.examOut]);
+      reviewRows.push([t.examType, examTypeLabel||"—"]);
       reviewRows.push([t.examSubject, S.examSubject||"—"]);
     }
     if(isDup){
@@ -3979,17 +3988,17 @@ class Component extends DCLogic {
     const buildItemDetails=svcId=>{
       const det={ colorMode:"", paperSize:"", paperType:"", sides:"", staple:"", ownPaper:"", qtyOriginal:"", qtySets:"", examType:"", examSubject:"" };
       if(isProdGroup){
-        det.colorMode=S.prodColor==="color"?t.prodColorColor:t.prodColorBw;
+        det.colorMode=prodColorLabel;
         det.paperSize=S.prodSize;
         det.paperType=S.prodPaperType||"";
-        det.sides=S.prodSides==="one"?t.prodSidesOne:t.prodSidesTwo;
+        det.sides=prodSidesLabel;
         det.staple=stapleLabelNow;
         det.ownPaper=S.prodOwnPaper?(S.lang==="th"?"ใช่":"Yes"):(S.lang==="th"?"ไม่":"No");
         det.qtyOriginal=S.prodQtyOrig;
         det.qtySets=S.prodQtySets;
       }
       if(svcId==="exam"){
-        det.examType=S.examType==="mid"?t.examMid:t.examOut;
+        det.examType=examTypeLabel;
         det.examSubject=S.examSubject||"";
       }
       if(svcId==="dup"){
@@ -4069,6 +4078,18 @@ class Component extends DCLogic {
       if(!gasReady){ this.setState({ submitError:S.lang==="th"
         ?"ยังไม่ได้ตั้งค่าเชื่อมต่อ Google Sheet กรุณาไปที่แท็บ \"ตั้งค่าเชื่อมต่อ\" ก่อน"
         :"Google Sheet isn't connected yet — set it up on the Settings tab first." }); return; }
+      // ไม่มีค่าตั้งต้นให้แล้ว จึงต้องกันไม่ให้ส่งช่องว่างลงชีตโดยไม่ตั้งใจ
+      const missing=[];
+      if(isProdGroup){
+        if(!S.prodColor) missing.push(t.prodColor);
+        if(!S.prodSize) missing.push(t.prodSize);
+        if(!S.prodSides) missing.push(t.prodSides);
+        if(!S.staple) missing.push(t.stapleLabel);
+        if(!(Number(S.prodQtyOrig)>0)) missing.push(t.prodQtyOriginal);
+        if(!(Number(S.prodQtySets)>0)) missing.push(t.prodQtySets);
+      }
+      if(isExam&&!S.examType) missing.push(t.examType);
+      if(missing.length){ this.setState({ submitError:t.fillRequired+missing.join(" · ") }); return; }
       this.setState({ submitBusy:true, submitError:null, uploadProgressText:"" });
       const designQtyBySvc={ card:S.cardQty, cert:S.certQty, layout:S.layoutPages, a4:S.a4Qty, a3:S.a3Qty, a5:S.a5Qty };
       const items=selected.map(s=>{
@@ -4148,9 +4169,9 @@ class Component extends DCLogic {
           mineSelectedEmail:(S.gateEmail||"").trim().toLowerCase(),
           mineEmailInput:(S.gateEmail||"").trim().toLowerCase(),
           svcGroup:null, sel:{},
-          prodColor:"bw", prodSize:"A4", prodPaperType:"", prodSides:"two", prodOwnPaper:false,
-          prodQtyOrig:1, prodQtySets:1, staple:"corner",
-          examType:"mid", examSubject:"",
+          prodColor:"", prodSize:"", prodPaperType:"", prodSides:"", prodOwnPaper:false,
+          prodQtyOrig:"", prodQtySets:"", staple:"",
+          examType:"", examSubject:"",
           budget:"has", budgetAcct:"",
           dupHasCover:false,
           cardSides:"one", cardQty:"",
