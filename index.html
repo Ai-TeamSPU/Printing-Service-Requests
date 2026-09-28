@@ -1174,13 +1174,21 @@
                       </sc-for>
                     </select>
                   </sc-if>
-                  <div style="display:flex;gap:6px;align-items:center">
-                    <input class="input" value="{{ mineEmailInput }}" onChange="{{ setMineEmailInput }}"
-                      onKeyDown="{{ onMineEmailKeyDown }}" placeholder="พิมพ์อีเมล @spu.ac.th"
-                      style="min-height:40px;font-size:13.5px;width:210px;background:#fff">
-                    <button type="button" class="btn btn-secondary" onClick="{{ applyMineEmailSearch }}"
-                      style="min-height:40px;font-size:13px;padding:0 14px;white-space:nowrap">{{ mineSearchBtn
-                      }}</button>
+                  <div>
+                    <div style="display:flex;gap:6px;align-items:center">
+                      <input class="input" value="{{ mineEmailInput }}" onChange="{{ setMineEmailInput }}"
+                        onKeyDown="{{ onMineEmailKeyDown }}" placeholder="พิมพ์อีเมล @spu.ac.th"
+                        style="min-height:40px;font-size:13.5px;width:210px;background:#fff">
+                      <button type="button" class="btn btn-secondary" onClick="{{ applyMineEmailSearch }}"
+                        style="min-height:40px;font-size:13px;padding:0 14px;white-space:nowrap">{{ mineSearchBtn
+                        }}</button>
+                    </div>
+                    <sc-if value="{{ mineSearchError }}" hint-placeholder-val="{{ false }}">
+                      <div
+                        style="margin-top:7px;font-size:12.5px;font-weight:600;color:#ae1800;display:flex;align-items:flex-start;gap:6px;max-width:300px;line-height:1.45">
+                        <span style="flex:none">⚠</span><span>{{ mineSearchError }}</span>
+                      </div>
+                    </sc-if>
                   </div>
                 </div>
                 <sc-if value="{{ hasSelectedMineEmail }}" hint-placeholder-val="{{ false }}">
@@ -2478,7 +2486,7 @@ class Component extends DCLogic {
     uploadedFiles:[], uploadProgressText:"", isDragOver:false, fileWarnMsg:"", lastUploadedCount:0,
     paymentSlipFiles:[], paymentSlipWarnMsg:"",
     jobDetailOpen:false, jobDetailJobNo:null, jobDetailFiles:[], jobDetailFilesLoading:false, slipImgErrors:{},
-    mineEmailInput:"", mineSelectedEmail:"",
+    mineEmailInput:"", mineSelectedEmail:"", mineSearchError:"",
     connResults:{
       sheet:{ ok:true, name:"SPU-Printing-Service-DB", at:new Date().toISOString() },
       drive:{ ok:true, name:"Printing-Service", at:new Date().toISOString() },
@@ -3350,6 +3358,17 @@ class Component extends DCLogic {
       const p = PAL[j.code] || PAL.RECEIVED;
       return { ...j, hue: p.fg, mediaBg: p.grad, initials: (j.requester || "").trim().slice(0, 1) || "P" };
     });
+
+    // อีเมลที่ "มีคิวงานจริง" คือชุดเดียวกับที่อยู่ใน dropdown ใช้เป็นตัวตัดสินว่าค้นเจอหรือไม่
+    const knownMineEmails = new Set(requesterEmailOptions.map(o => String(o.email || "").trim().toLowerCase()));
+    const runMineSearch = () => {
+      const em = (this.state.mineEmailInput || "").trim().toLowerCase();
+      // ไม่ครบรูปอีเมล (ขาด @ หรือขาดโดเมน) -> บอกให้พิมพ์ให้ครบ ยังไม่ต้องไปค้น
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { this.setState({ mineSearchError: t.mineSearchIncomplete }); return; }
+      // ครบรูปแล้วแต่ไม่มีคิวงานในระบบ -> แจ้งแล้วคงผลค้นหาเดิมไว้ ไม่ล้างหน้าจอทิ้ง
+      if (!knownMineEmails.has(em)) { this.setState({ mineSearchError: t.mineSearchNotFound }); return; }
+      this.setState({ mineSelectedEmail: em, mineEmailInput: em, mineSearchError: "" });
+    };
 
     const hasNoSelectedEmail = !hasSelectedMineEmail;
     const hasSelectedEmailNoJobs = hasSelectedMineEmail && myCards.length === 0;
@@ -4305,22 +4324,16 @@ class Component extends DCLogic {
       activeMineEmail, hasSelectedMineEmail, hasNoSelectedEmail, hasSelectedEmailNoJobs,
       requesterEmailOptions, hasRequesterEmailOptions, hasNoRequesterEmails,
       mineEmailInput:S.mineEmailInput,
-      setMineEmailInput:e=>this.setState({ mineEmailInput:e.target.value }),
-      onMineEmailKeyDown:e=>{
-        if(e.key==="Enter"){
-          const em=(this.state.mineEmailInput||"").trim().toLowerCase();
-          if(em) this.setState({ mineSelectedEmail:em, mineEmailInput:em });
-        }
-      },
-      applyMineEmailSearch:()=>{
-        const em=(this.state.mineEmailInput||"").trim().toLowerCase();
-        if(em) this.setState({ mineSelectedEmail:em, mineEmailInput:em });
-      },
+      // พิมพ์แก้เมื่อไหร่ ข้อความเตือนหายทันที จะได้ไม่ค้างอยู่ทั้งที่แก้ไปแล้ว
+      setMineEmailInput:e=>this.setState({ mineEmailInput:e.target.value, mineSearchError:"" }),
+      onMineEmailKeyDown:e=>{ if(e.key==="Enter") runMineSearch(); },
+      applyMineEmailSearch:runMineSearch,
       onSelectMineEmail:e=>{
         const em=(e.target.value||"").trim().toLowerCase();
-        this.setState({ mineSelectedEmail:em, mineEmailInput:em });
+        this.setState({ mineSelectedEmail:em, mineEmailInput:em, mineSearchError:"" });
       },
-      clearMineEmail:()=>this.setState({ mineSelectedEmail:"", mineEmailInput:"" }),
+      clearMineEmail:()=>this.setState({ mineSelectedEmail:"", mineEmailInput:"", mineSearchError:"" }),
+      mineSearchError:S.mineSearchError,
       isAdminLoggedIn:S.isAdminLoggedIn,
       isNormalUser:!S.isAdminLoggedIn,
       adminLoginOpen:S.adminLoginOpen,
