@@ -770,7 +770,7 @@
                             <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
                               t.paperTypeLabel }}</label>
                             <div style="display:flex;flex-wrap:wrap;border:1px solid var(--color-line)">
-                              <sc-for list="{{ a4PaperOpts }}" as="o" hint-placeholder-count="5">
+                              <sc-for list="{{ a4PaperOpts }}" as="o" hint-placeholder-count="4">
                                 <button onClick="{{ o.go }}"
                                   style="flex:1;min-width:140px;padding:10px 6px;border:0;border-right:1px solid var(--color-line);background:{{ o.bg }};color:{{ o.fg }};font-weight:700;font-size:12.5px;min-height:44px">{{
                                   o.label }}</button>
@@ -1562,7 +1562,10 @@
                 <p style="font-size:15px;color:var(--color-neutral-700);margin:8px 0 0;max-width:66ch">{{
                   t.priceMasterSub }}</p>
               </div>
+              <!-- ปิดไว้ชั่วคราว: ปุ่ม "เพิ่มรายการราคา" ยังไม่มี onClick จึงกดแล้วไม่เกิดอะไรขึ้น
+                   ตอนนี้แอดมินแก้ราคาผ่านชีต PRICE_RULES โดยตรง เปิดคืนเมื่อทำหน้าจอเพิ่มกฎราคาเสร็จ
               <button class="btn btn-primary" style="min-height:44px">{{ t.addRule }}</button>
+              -->
             </div>
             <sc-if value="{{ priceRulesNotSeeded }}" hint-placeholder-val="{{ false }}">
               <div
@@ -2443,13 +2446,13 @@ class Component extends DCLogic {
     gateOpen:false, gateEmail:"", gateErr:false, gateMsg:"", gateVerified:false, gateBusy:false,
     svcGroup:null, sel:{}, prodColor:"", prodSize:"", prodPaperType:"", prodSides:"", prodOwnPaper:false,
     prodQtyOrig:"", prodQtySets:"", staple:"",
-    examType:"", examSubject:"", budget:"has", budgetAcct:"",
+    examType:"", examSubject:"", budget:"", budgetAcct:"",
     dupHasCover:false,
-    cardSides:"one", cardQty:"",
-    certLogo:"black", certTrim:false, certQty:"",
-    layoutColor:"bw", layoutPages:"",
-    a4PaperType:"bond70", a4Qty:"",
-    a3PaperType:"bond80", a3Qty:"",
+    cardSides:"", cardQty:"",
+    certLogo:"", certTrim:false, certQty:"",
+    layoutColor:"", layoutPages:"",
+    a4PaperType:"", a4Qty:"",
+    a3PaperType:"", a3Qty:"",
     a5Qty:"",
     calcExpr:"", calcDisplay:"0", curNo:null,
     calcOpen:false, calcX:null, calcY:96, calcW:320, calcH:420,
@@ -3131,7 +3134,11 @@ class Component extends DCLogic {
     // — พริ้นท์สี A4: ชนิดกระดาษ (R12–R16) + จำนวนแผ่น —
     const isA4=S.sel.a4!==undefined;
     const a4PaperOpts=[["bond70",t.a4PaperBond70],["simbo250",t.a4PaperSimbo250],["mouColor",t.a4PaperMouColor],
-      ["mouBlack",t.a4PaperMouBlack],["f4own",t.a4PaperF4Own]].map(([k,label])=>({ label,
+      ["mouBlack",t.a4PaperMouBlack],
+      // ปิดไว้ชั่วคราว: ยังไม่เปิดให้เลือก "F4 นำกระดาษเอง" (กฎราคา R16 ในชีต PRICE_RULES ยังอยู่ ไม่ได้ลบ)
+      // เปิดคืน: ลบ // หน้าบรรทัดล่างออก แล้วแก้ hint-placeholder-count ของ a4PaperOpts ในมาร์กอัปกลับเป็น 5
+      // ["f4own",t.a4PaperF4Own],
+    ].map(([k,label])=>({ label,
       bg:S.a4PaperType===k?INK:"transparent", fg:S.a4PaperType===k?BG:INK, go:()=>this.setState({ a4PaperType:k }) }));
     const setA4Qty=e=>this.setState({ a4Qty:e.target.value });
 
@@ -3141,6 +3148,9 @@ class Component extends DCLogic {
       bg:S.a3PaperType===k?INK:"transparent", fg:S.a3PaperType===k?BG:INK, go:()=>this.setState({ a3PaperType:k }) }));
     const setA3Qty=e=>this.setState({ a3Qty:e.target.value });
     const isA3RangeMode=S.a3PaperType==="bond80";
+    const cardSidesLabel={ one:t.cardSidesOne, two:t.cardSidesTwo }[S.cardSides]||"";
+    const certLogoLabel={ black:t.certLogoBlack, color:t.certLogoColor }[S.certLogo]||"";
+    const layoutColorLabel={ bw:t.prodColorBw, color:t.prodColorColor }[S.layoutColor]||"";
     const a4PaperLabel={ bond70:t.a4PaperBond70, simbo250:t.a4PaperSimbo250, mouColor:t.a4PaperMouColor,
       mouBlack:t.a4PaperMouBlack, f4own:t.a4PaperF4Own }[S.a4PaperType]||"";
     const a3PaperLabel={ bond80:t.a3PaperBond80, simbo250:t.a3PaperSimbo250 }[S.a3PaperType]||"";
@@ -3159,7 +3169,7 @@ class Component extends DCLogic {
       return { label, bg:on?AC1:"transparent", fg:on?"var(--color-accent-800)":INK,
         bd:on?AC:"var(--color-line)", dot:on?AC:"transparent", go:()=>this.setState({ budget:k }) };
     });
-    const budgetLabelNow=S.budget==="has"?t.budgetHas:S.budget==="project"?t.budgetProject:t.budgetPersonal;
+    const budgetLabelNow={ has:t.budgetHas, project:t.budgetProject, personal:t.budgetPersonal }[S.budget]||"";
     const setBudgetAcct=e=>this.setState({ budgetAcct:e.target.value });
 
     const setForm=key=>e=>this.setState(st=>({ form:{ ...st.form, [key]:e.target.value } }));
@@ -3216,16 +3226,16 @@ class Component extends DCLogic {
       reviewRows.push([t.dupCoverLabel, S.dupHasCover?t.dupCoverYes:t.dupCoverNo]);
     }
     if(isCard){
-      reviewRows.push([t.cardSidesLabel, S.cardSides==="two"?t.cardSidesTwo:t.cardSidesOne]);
+      reviewRows.push([t.cardSidesLabel, cardSidesLabel||"—"]);
       reviewRows.push([t.cardQtyLabel, S.cardQty||"—"]);
     }
     if(isCert){
-      reviewRows.push([t.certLogoLabel, S.certLogo==="color"?t.certLogoColor:t.certLogoBlack]);
+      reviewRows.push([t.certLogoLabel, certLogoLabel||"—"]);
       reviewRows.push([t.certTrimLabel, S.certTrim?(S.lang==="th"?"ใช่":"Yes"):(S.lang==="th"?"ไม่":"No")]);
       reviewRows.push([t.certQtyLabel, S.certQty||"—"]);
     }
     if(isLayout){
-      reviewRows.push([t.layoutColorLabel, S.layoutColor==="color"?t.prodColorColor:t.prodColorBw]);
+      reviewRows.push([t.layoutColorLabel, layoutColorLabel||"—"]);
       reviewRows.push([t.layoutPagesLabel, S.layoutPages||"—"]);
     }
     if(isA4){
@@ -4005,16 +4015,16 @@ class Component extends DCLogic {
         det.paperType=S.dupHasCover?t.dupCoverYes:t.dupCoverNo;
       }
       if(svcId==="card"){
-        det.sides=S.cardSides==="two"?t.cardSidesTwo:t.cardSidesOne;
+        det.sides=cardSidesLabel;
         det.qtyOriginal=S.cardQty;
       }
       if(svcId==="cert"){
-        det.colorMode=S.certLogo==="color"?t.certLogoColor:t.certLogoBlack;
+        det.colorMode=certLogoLabel;
         det.staple=S.certTrim?t.certTrimLabel:"";
         det.qtyOriginal=S.certQty;
       }
       if(svcId==="layout"){
-        det.colorMode=S.layoutColor==="color"?t.prodColorColor:t.prodColorBw;
+        det.colorMode=layoutColorLabel;
         det.qtyOriginal=S.layoutPages;
       }
       if(svcId==="a4"){
@@ -4044,16 +4054,16 @@ class Component extends DCLogic {
       } else if(svcId==="exam"){
         ruleId="R06";
       } else if(svcId==="card"){
-        ruleId=S.cardSides==="two"?"R08":"R07";
+        ruleId=S.cardSides==="two"?"R08":(S.cardSides==="one"?"R07":null);
       } else if(svcId==="cert"){
-        ruleId=S.certLogo==="color"?"R10":"R09";
+        ruleId=S.certLogo==="color"?"R10":(S.certLogo==="black"?"R09":null);
         if(S.certTrim) addOnRuleId="R11";
       } else if(svcId==="layout"){
-        ruleId=S.layoutColor==="color"?"R20":"R19";
+        ruleId=S.layoutColor==="color"?"R20":(S.layoutColor==="bw"?"R19":null);
       } else if(svcId==="a4"){
         ruleId={ bond70:"R12", simbo250:"R13", mouColor:"R14", mouBlack:"R15", f4own:"R16" }[S.a4PaperType]||null;
       } else if(svcId==="a3"){
-        ruleId=S.a3PaperType==="simbo250"?"R18":"R17";
+        ruleId=S.a3PaperType==="simbo250"?"R18":(S.a3PaperType==="bond80"?"R17":null);
       }
       // a5, bind: ไม่มีกฎราคาคงที่เลย (MANUAL_QUOTE) -> ruleId ยังเป็น null เสมอ รอแอดมินตีราคา
       if(!ruleId) return { unitPrice:"", estimatedAmount:"", priceRuleId:"", priceRuleSnapshot:"" };
@@ -4089,6 +4099,17 @@ class Component extends DCLogic {
         if(!(Number(S.prodQtySets)>0)) missing.push(t.prodQtySets);
       }
       if(isExam&&!S.examType) missing.push(t.examType);
+      // กลุ่มงานพิมพ์และออกแบบ: แต่ละบริการมีช่องของตัวเอง ตรวจเฉพาะบริการที่ถูกเลือกจริง
+      const svcName=id=>{ const v=this.svc(id); return v?this.sname(v):id; };
+      const need=(cond,label,id)=>{ if(cond) missing.push(label+" · "+svcName(id)); };
+      if(isCard){ need(!S.cardSides,t.cardSidesLabel,"card"); need(!(Number(S.cardQty)>0),t.cardQtyLabel,"card"); }
+      if(isCert){ need(!S.certLogo,t.certLogoLabel,"cert"); need(!(Number(S.certQty)>0),t.certQtyLabel,"cert"); }
+      if(isLayout){ need(!S.layoutColor,t.layoutColorLabel,"layout"); need(!(Number(S.layoutPages)>0),t.layoutPagesLabel,"layout"); }
+      if(isA4){ need(!S.a4PaperType,t.paperTypeLabel,"a4"); need(!(Number(S.a4Qty)>0),t.sheetQtyLabel,"a4"); }
+      if(isA3){ need(!S.a3PaperType,t.paperTypeLabel,"a3"); need(!(Number(S.a3Qty)>0),t.sheetQtyLabel,"a3"); }
+      if(isA5) need(!(Number(S.a5Qty)>0),t.sheetQtyLabel,"a5");
+      // แหล่งงบประมาณมีผลต่อการจัดกลุ่มรายได้ในรายงาน ห้ามปล่อยว่าง (ยกเว้นงานที่ไม่เรียกเก็บเงิน)
+      if(budgetNeeded&&!S.budget) missing.push(t.budgetTitle);
       if(missing.length){ this.setState({ submitError:t.fillRequired+missing.join(" · ") }); return; }
       this.setState({ submitBusy:true, submitError:null, uploadProgressText:"" });
       const designQtyBySvc={ card:S.cardQty, cert:S.certQty, layout:S.layoutPages, a4:S.a4Qty, a3:S.a3Qty, a5:S.a5Qty };
@@ -4171,14 +4192,13 @@ class Component extends DCLogic {
           svcGroup:null, sel:{},
           prodColor:"", prodSize:"", prodPaperType:"", prodSides:"", prodOwnPaper:false,
           prodQtyOrig:"", prodQtySets:"", staple:"",
-          examType:"", examSubject:"",
-          budget:"has", budgetAcct:"",
+          examType:"", examSubject:"", budget:"", budgetAcct:"",
           dupHasCover:false,
-          cardSides:"one", cardQty:"",
-          certLogo:"black", certTrim:false, certQty:"",
-          layoutColor:"bw", layoutPages:"",
-          a4PaperType:"bond70", a4Qty:"",
-          a3PaperType:"bond80", a3Qty:"",
+          cardSides:"", cardQty:"",
+          certLogo:"", certTrim:false, certQty:"",
+          layoutColor:"", layoutPages:"",
+          a4PaperType:"", a4Qty:"",
+          a3PaperType:"", a3Qty:"",
           a5Qty:"",
           needByISO:null, dpOpen:null,
           pdpaConsent:false,
