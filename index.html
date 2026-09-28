@@ -525,9 +525,16 @@
               <div style="min-width:0;display:flex;flex-direction:column;gap:44px;max-width:760px">
 
                 <section id="wz-service">
-                  <h2 style="font-size:20px;font-weight:800;margin:0 0 6px">{{ t.s1title }}</h2>
+                  <h2
+                    style="font-size:20px;font-weight:800;margin:0 0 6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <span>{{ t.s1title }}</span>
+                    <span
+                      style="font-size:11.5px;font-weight:700;letter-spacing:0.04em;padding:3px 11px;border-radius:var(--radius-pill);background:var(--color-accent-100);color:var(--color-accent-800)">{{
+                      t.requiredTag }}</span>
+                  </h2>
                   <p style="font-size:15px;color:var(--color-neutral-700);margin:0 0 18px">{{ t.s1sub }}</p>
-                  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px">
+                  <div
+                    style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;padding:14px;border:{{ svcPickBd }};background:{{ svcPickBg }};border-radius:var(--radius-card)">
                     <sc-for list="{{ svcGroups }}" as="g" hint-placeholder-count="2">
                       <button onClick="{{ g.go }}"
                         style="padding:14px 20px;border:1px solid var(--color-line);background:{{ g.bg }};color:{{ g.fg }};font-weight:800;font-size:15px;min-height:52px">{{
@@ -3057,6 +3064,9 @@ class Component extends DCLogic {
       bg:S.svcGroup===k?INK:"transparent", fg:S.svcGroup===k?BG:INK,
       go:()=>this.setState({ svcGroup:k, sel:{} }) }));
     const hasGroup=!!S.svcGroup;
+    // ยังไม่เลือก = ขึ้นกรอบเน้นให้สังเกตเห็น พอเลือกแล้วกรอบจางลงเป็นเส้นปกติ ขนาดกล่องคงที่ไม่กระโดด
+    const svcPickBd=hasGroup?"1px solid var(--color-line)":"1px dashed var(--color-accent)";
+    const svcPickBg=hasGroup?"transparent":"var(--color-accent-100)";
     const isProdGroup=S.svcGroup==="PROD";
     const groupItemsOut=groupItems.map(s=>{
       const on=S.sel[s.id]!==undefined;
@@ -4090,6 +4100,7 @@ class Component extends DCLogic {
         :"Google Sheet isn't connected yet — set it up on the Settings tab first." }); return; }
       // ไม่มีค่าตั้งต้นให้แล้ว จึงต้องกันไม่ให้ส่งช่องว่างลงชีตโดยไม่ตั้งใจ
       const missing=[];
+      if(!selIds.length) missing.push(t.s1title);
       if(isProdGroup){
         if(!S.prodColor) missing.push(t.prodColor);
         if(!S.prodSize) missing.push(t.prodSize);
@@ -4247,7 +4258,7 @@ class Component extends DCLogic {
       gateOpen:S.gateOpen, gateEmail:S.gateEmail, gateErr:S.gateErr, gateMsg:S.gateMsg,
       openGate, setGateEmail, submitGate, gateBusy:S.gateBusy,
       emailGateBtnLabel:S.gateBusy?(S.lang==="th"?"กำลังตรวจสอบ…":"Checking…"):t.emailGateBtn,
-      svcGroups, hasGroup, groupItems:groupItemsOut, isProdGroup,
+      svcGroups, hasGroup, svcPickBd, svcPickBg, groupItems:groupItemsOut, isProdGroup,
       colorBg, colorFg, setColor, sizeOpts, sidesBg, sidesFg, setSides,
       prodPaperType:S.prodPaperType, setProdPaperType, prodPaperOpts,
       prodQtyOrig:S.prodQtyOrig, setProdQtyOrig, prodQtySets:S.prodQtySets, setProdQtySets,
