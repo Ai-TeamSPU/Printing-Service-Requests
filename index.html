@@ -1158,7 +1158,8 @@
               </div>
             </div>
 
-            <!-- กล่องค้นหาและเลือกอีเมลจาก Google Sheet (Zero LocalStorage) -->
+            <!-- กล่องค้นหาและเลือกอีเมลจาก Google Sheet — เฉพาะแอดมิน/ผู้บริหารที่ล็อกอินแล้ว -->
+            <sc-if value="{{ mineCanBrowseAll }}" hint-placeholder-val="{{ false }}">
             <div
               style="background:var(--color-band);border:1px solid var(--color-line);border-radius:var(--radius-card);padding:16px 18px;margin-bottom:22px">
               <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between">
@@ -1208,6 +1209,7 @@
                 </div>
               </sc-if>
             </div>
+            </sc-if>
 
             <!-- กรณีที่ยังไม่ได้เลือกอีเมล: แสดงคำแนะนำและรายชื่ออีเมลในระบบ -->
             <sc-if value="{{ hasNoSelectedEmail }}" hint-placeholder-val="{{ true }}">
@@ -2315,6 +2317,43 @@
                   </div>
                 </sc-for>
               </div>
+              <!-- ข้อ 5: ช่องยืนยันราคา เห็นเฉพาะ ADMIN และเฉพาะงานที่ถึงสถานะ "งานเสร็จแล้ว" เป็นต้นไป -->
+              <sc-if value="{{ canConfirmPrice }}" hint-placeholder-val="{{ false }}">
+                <div
+                  style="border:1px solid var(--color-accent);background:var(--color-accent-100);border-radius:var(--radius-card);padding:14px 16px">
+                  <div
+                    style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-accent-800);margin-bottom:10px">
+                    {{ t.confirmPriceTitle }}</div>
+                  <sc-for list="{{ confRows }}" as="c" hint-placeholder-count="1">
+                    <div
+                      style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:9px">
+                      <div style="min-width:180px;flex:1">
+                        <div style="font-size:14px;font-weight:700">{{ c.label }}</div>
+                        <div style="font-size:12.5px;color:var(--color-neutral-700)">{{ c.hint }}</div>
+                      </div>
+                      <input class="input" type="number" step="0.01" min="0" value="{{ c.value }}"
+                        onChange="{{ c.onInput }}" aria-label="{{ c.label }}"
+                        style="width:140px;min-height:40px;font-size:14px;text-align:right">
+                    </div>
+                  </sc-for>
+                  <div
+                    style="display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--color-accent-200);padding-top:9px;margin-top:4px;font-size:14.5px;font-weight:800">
+                    <span>{{ t.confirmPriceTotal }}</span><span>{{ confTotalText }}</span>
+                  </div>
+                  <input class="input" value="{{ confReason }}" onChange="{{ setConfReason }}"
+                    placeholder="{{ t.confirmPriceReason }}"
+                    style="width:100%;min-height:40px;font-size:13.5px;margin-top:11px">
+                  <button type="button" class="btn btn-primary" onClick="{{ saveConfirmedAmount }}"
+                    disabled="{{ confBusy }}" style="min-height:42px;font-size:14px;margin-top:11px">{{
+                    t.confirmPriceSave }}</button>
+                  <sc-if value="{{ confMsg }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:9px;font-size:13px;font-weight:700;color:#0f7a4c">{{ confMsg }}</div>
+                  </sc-if>
+                  <sc-if value="{{ confErr }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:9px;font-size:13px;font-weight:700;color:#ae1800">{{ confErr }}</div>
+                  </sc-if>
+                </div>
+              </sc-if>
               <div>
                 <div
                   style="font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-neutral-700);margin-bottom:10px">
@@ -2477,7 +2516,7 @@ class Component extends DCLogic {
     dpOpen:null, dpMonthNeed:null, dpMonthRange:null, needByISO:null, rgStart:null, rgEnd:null,
     repMode:"month", repYear:"", repMonth:"",
     dashYearMode:"be", dashYear:String(new Date().getFullYear()+543), dashMonth:"8", dashUnit:"",
-    gasUrl:"https://script.google.com/macros/s/AKfycbwpY8vYxUWH6aWzS7sRVytFzfr2xkT0mjpOiUnyUQLIVY2Pn9gENSC5DqD8xRM9P31s/exec",
+    gasUrl:"https://script.google.com/macros/s/AKfycby618vDm0bcSD-_ru-nm2KWVaSwY3vs5DAk742oyZ9ZYc3PgCNc1oUJEBizAI9OAl3X/exec",
     gasToken:"6552b83f-9a7a-4dd1-8169-05193c6744e3",
     spreadsheetId:"1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
     folderId:"1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L",
@@ -2486,6 +2525,7 @@ class Component extends DCLogic {
     uploadedFiles:[], uploadProgressText:"", isDragOver:false, fileWarnMsg:"", lastUploadedCount:0,
     paymentSlipFiles:[], paymentSlipWarnMsg:"",
     jobDetailOpen:false, jobDetailJobNo:null, jobDetailFiles:[], jobDetailFilesLoading:false, slipImgErrors:{},
+    confAmt:{}, confReason:"", confBusy:false, confMsg:"", confErr:"",
     mineEmailInput:"", mineSelectedEmail:"", mineSearchError:"",
     connResults:{
       sheet:{ ok:true, name:"SPU-Printing-Service-DB", at:new Date().toISOString() },
@@ -2587,7 +2627,7 @@ class Component extends DCLogic {
   componentDidMount() {
     import("./spu-data.js").then(d => this.setState({ d }));
     const defaultGas = {
-      gasUrl: "https://script.google.com/macros/s/AKfycbwpY8vYxUWH6aWzS7sRVytFzfr2xkT0mjpOiUnyUQLIVY2Pn9gENSC5DqD8xRM9P31s/exec",
+      gasUrl: "https://script.google.com/macros/s/AKfycby618vDm0bcSD-_ru-nm2KWVaSwY3vs5DAk742oyZ9ZYc3PgCNc1oUJEBizAI9OAl3X/exec",
       gasToken: "6552b83f-9a7a-4dd1-8169-05193c6744e3",
       spreadsheetId: "1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
       folderId: "1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L"
@@ -2925,7 +2965,7 @@ class Component extends DCLogic {
         let r = await this._gasCall("checkAdminUser", { email, password: pass });
         // Fallback: If unknown_action occurs, it means the browser contacted an older deployment URL.
         // Force retry directly using the updated active Web App URL:
-        const activeUrl = "https://script.google.com/macros/s/AKfycbwpY8vYxUWH6aWzS7sRVytFzfr2xkT0mjpOiUnyUQLIVY2Pn9gENSC5DqD8xRM9P31s/exec";
+        const activeUrl = "https://script.google.com/macros/s/AKfycby618vDm0bcSD-_ru-nm2KWVaSwY3vs5DAk742oyZ9ZYc3PgCNc1oUJEBizAI9OAl3X/exec";
         if (r && (r.error === "unknown_action" || r.error === "missing_url")) {
           this.setState({ gasUrl: activeUrl });
           try {
@@ -3319,6 +3359,44 @@ class Component extends DCLogic {
         onImgError: () => this.setState(st=>({ slipImgErrors:{ ...st.slipImgErrors, [f.file_id]:true } }))
       };
     });
+    // ---- ข้อ 5: แอดมินใส่ราคายืนยัน ----
+    // เปิดให้เฉพาะ ADMIN ที่ล็อกอินแล้ว และเฉพาะงานที่ถึงสถานะ "งานเสร็จแล้ว" เป็นต้นไป
+    // (ฝั่ง Apps Script ตรวจซ้ำอีกชั้นใน setConfirmedAmount_ จะได้ไม่พึ่งการตรวจในเบราว์เซอร์อย่างเดียว)
+    const isAdminRole = !!(S.isAdminLoggedIn && S.adminUserObj && S.adminUserObj.role === "ADMIN");
+    const CONFIRMABLE = { PROD_DONE:1, SERVICE_DONE:1 };
+    const canConfirmPrice = isAdminRole && !!jobDetail && !!CONFIRMABLE[jobDetail.code];
+    const confRows = canConfirmPrice ? (S.liveItems||[])
+      .filter(it => String(it.job_no) === String(S.jobDetailJobNo))
+      .map(it => {
+        const svc = this.svc(it.service_code);
+        const cur = S.confAmt[it.item_id];
+        return {
+          itemId: it.item_id,
+          label: (svc ? this.sname(svc) : (it.service_code||"—")) + " · " + (it.quantity||"—") + " " + (it.unit||""),
+          hint: (S.lang==="th"?"ประมาณการ ":"Estimate ") + (Number(it.estimated_amount)>0 ? this.N(it.estimated_amount) : "—"),
+          value: cur !== undefined ? cur : (it.confirmed_amount === "" || it.confirmed_amount === undefined ? "" : String(it.confirmed_amount)),
+          onInput: e => { const v = e.target.value; this.setState(st => ({ confAmt:{ ...st.confAmt, [it.item_id]:v }, confMsg:"", confErr:"" })); }
+        };
+      }) : [];
+    const confTotal = confRows.reduce((sum, r) => sum + (Number(r.value)||0), 0);
+    const saveConfirmedAmount = async () => {
+      if (S.confBusy || !jobDetail) return;
+      const items = confRows.filter(r => String(r.value).trim() !== "" && isFinite(Number(r.value)))
+        .map(r => ({ itemId:r.itemId, amount:Number(r.value) }));
+      if (!items.length) { this.setState({ confErr:S.lang==="th"?"กรุณากรอกราคายืนยันอย่างน้อย 1 รายการ":"Enter at least one confirmed amount." }); return; }
+      this.setState({ confBusy:true, confErr:"", confMsg:"" });
+      const r = await this._gasCall("setConfirmedAmount", { jobNo:jobDetail.no, items,
+        reason:S.confReason||"", by:(S.adminUserObj&&S.adminUserObj.email)||"" });
+      if (r && r.ok) {
+        this.setState({ confBusy:false, confAmt:{}, confReason:"",
+          confMsg:(S.lang==="th"?"บันทึกราคายืนยันแล้ว รวม ":"Saved. Total ")+this.N(r.jobTotal) });
+        this._loadLiveJobs();   // ดึงข้อมูลใหม่ให้ยอดในคิวงานและรายงานตรงกันทันที
+      } else {
+        this.setState({ confBusy:false, confErr:(r&&(r.message||r.error))||(S.lang==="th"?"บันทึกไม่สำเร็จ":"Save failed") });
+      }
+    };
+    const setConfReason = e => this.setState({ confReason:e.target.value });
+
     const jobDetailBudgetLabel = jobDetail
       ? ({ has:t.budgetHas, project:t.budgetProject, personal:t.budgetPersonal, internal:S.lang==="th"?"บริการภายใน (ไม่เรียกเก็บ)":"Internal (not charged)" }[(jobDetail.raw&&jobDetail.raw.budgetSource)||""] || "—")
       : "—";
@@ -3328,7 +3406,10 @@ class Component extends DCLogic {
     const jobDetailNoSlipShown = !S.jobDetailFilesLoading && jobDetailSlipFiles.length===0;
 
     const PAL = this.statusPalette();
-    const activeMineEmail = (S.mineSelectedEmail || S.gateEmail || "").trim().toLowerCase();
+    const gateEmailLower = (S.gateEmail || "").trim().toLowerCase();
+    const activeMineEmail = S.isAdminLoggedIn
+      ? (S.mineSelectedEmail || gateEmailLower).trim().toLowerCase()
+      : gateEmailLower;
     const hasSelectedMineEmail = !!activeMineEmail;
 
     // รวบรวมเฉพาะอีเมลที่เคยยื่นคำขอใน Google Sheet (JOBS)
@@ -3343,8 +3424,12 @@ class Component extends DCLogic {
       label: em + " (" + emailCounts[em] + (S.lang === "th" ? " รายการ)" : " requests)"),
       selectMe: () => this.setState({ mineSelectedEmail: em, mineEmailInput: em })
     }));
-    const hasRequesterEmailOptions = requesterEmailOptions.length > 0;
-    const hasNoRequesterEmails = requesterEmailOptions.length === 0;
+    // ผู้ใช้ทั่วไปดูได้เฉพาะอีเมลที่ตัวเองกรอกตอนผ่านประตู ส่วนแอดมิน/ผู้บริหารที่ล็อกอินแล้วยังค้นของทุกคนได้
+    // ข้อจำกัด: ประตูอีเมลยังไม่ยืนยันตัวตน (ข้อ 3 ในแผนพัฒนา ตัดสินใจว่ายังไม่ทำ) คนที่ตั้งใจจะดู
+    // ยังกรอกอีเมลคนอื่นตั้งแต่หน้าประตูได้อยู่ ตรงนี้กันได้แค่การเปิดดูเล่น ๆ ของคนทั่วไป
+    const mineCanBrowseAll = !!S.isAdminLoggedIn;
+    const hasRequesterEmailOptions = mineCanBrowseAll && requesterEmailOptions.length > 0;
+    const hasNoRequesterEmails = mineCanBrowseAll && requesterEmailOptions.length === 0;
 
     // กรองแสดงเฉพาะงานของอีเมลที่เลือก แล้วเรียงวันที่ส่งล่าสุดขึ้นก่อน (เลขที่งาน PRN-YYYYMM-NNNN เรียงตามลำดับเวลาส่งอยู่แล้ว)
     const userMatchedJobs = hasSelectedMineEmail
@@ -4153,6 +4238,9 @@ class Component extends DCLogic {
           colorMode:det.colorMode, paperSize:det.paperSize, paperType:det.paperType, sides:det.sides,
           staple:det.staple, ownPaper:det.ownPaper, qtyOriginal:det.qtyOriginal, qtySets:det.qtySets,
           examType:det.examType, examSubject:det.examSubject,
+          // ข้อสอบแบบ "สอบนอกตาราง" ให้ Apps Script ประทับวันเวลาที่กดส่งลงคอลัมน์ note
+          // ส่งเป็นธงไปอย่างเดียว ไม่ส่งเวลาจากเบราว์เซอร์ เพราะนาฬิกาเครื่องผู้ใช้อาจไม่ตรง
+          stampNote: s.id==="exam" && S.examType==="out",
           serviceGroup:S.svcGroup==="PROD"?t.svcGroupProd:(S.svcGroup==="DESIGN"?t.svcGroupDesign:"") };
       });
       // ยอดรวมทั้งงานจะคำนวณให้ก็ต่อเมื่อ "ทุกรายการ" มีราคาแน่ชัดแล้วเท่านั้น — ถ้ามีรายการใดยัง pending อยู่ ปล่อยยอดรวมว่างไว้เช่นกัน กันเข้าใจผิดว่าเป็นยอดเต็ม
@@ -4321,7 +4409,7 @@ class Component extends DCLogic {
       pdpaConsent:S.pdpaConsent, togglePdpaConsent:e=>this.setState({ pdpaConsent:e.target.checked }),
       submitDisabled:!S.pdpaConsent||S.submitBusy,
       submitJob:doSubmitJob, submitLabel, submitError:S.submitError, submitted:S.submitted, newJobNo:S.newJobNo,
-      activeMineEmail, hasSelectedMineEmail, hasNoSelectedEmail, hasSelectedEmailNoJobs,
+      activeMineEmail, hasSelectedMineEmail, hasNoSelectedEmail, hasSelectedEmailNoJobs, mineCanBrowseAll,
       requesterEmailOptions, hasRequesterEmailOptions, hasNoRequesterEmails,
       mineEmailInput:S.mineEmailInput,
       // พิมพ์แก้เมื่อไหร่ ข้อความเตือนหายทันที จะได้ไม่ค้างอยู่ทั้งที่แก้ไปแล้ว
@@ -4381,6 +4469,9 @@ class Component extends DCLogic {
       notFoundMineSub:S.lang==="th"?"อีเมลนี้ยังไม่มีการบันทึกคำขอในชีต JOBS สามารถกดยื่นคำขอรับบริการพิมพ์งานได้ทันที":"This email has no requests in the JOBS sheet yet. You can submit a new printing request now.",
       myJobs:jobsAll.slice(0,5), myCards:myCards, filteredJobs, queueKpis,
       jobDetailOpen:S.jobDetailOpen,
+      canConfirmPrice, confRows, confTotalText:this.N(Math.round(confTotal*100)/100),
+      confReason:S.confReason, setConfReason, saveConfirmedAmount, confBusy:S.confBusy,
+      confMsg:S.confMsg, confErr:S.confErr,
       jobDetailNo:jobDetail?jobDetail.no:"—", jobDetailRequester:jobDetail?jobDetail.requester:"—",
       jobDetailUnit:jobDetail?jobDetail.unit:"—", jobDetailService:jobDetail?jobDetail.service:"—",
       jobDetailNeed:jobDetail?jobDetail.need:"—", jobDetailStatusLabel:jobDetail?jobDetail.statusLabel:"—",

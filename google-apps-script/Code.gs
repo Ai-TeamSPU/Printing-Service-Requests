@@ -11,7 +11,7 @@
 var SHEET_SCHEMA = {
   JOBS: ["job_no","submitted_at","requester_email","requester_name","position_type","phone","unit_code","required_date","purpose","status","estimated_amount","confirmed_amount","completed_at","drive_folder_id","budget_source","budget_acct"],
   // variant_snapshot (คอลัมน์ D): เลิกเขียนค่าใหม่แล้ว (ทางเลือก A — เก็บคอลัมน์ไว้ ไม่ลบ ข้อมูลเก่าไม่หาย) ใช้คอลัมน์แยกท้ายแถวแทน
-  JOB_ITEMS: ["item_id","job_no","service_code","variant_snapshot","quantity","unit","unit_price","estimated_amount","confirmed_amount","price_rule_id","price_rule_snapshot","override_reason","color_mode","paper_size","paper_type","sides","staple","own_paper","qty_original","qty_sets","exam_type","exam_subject","service_group"],
+  JOB_ITEMS: ["item_id","job_no","service_code","variant_snapshot","quantity","unit","unit_price","estimated_amount","confirmed_amount","price_rule_id","price_rule_snapshot","override_reason","color_mode","paper_size","paper_type","sides","staple","own_paper","qty_original","qty_sets","exam_type","exam_subject","service_group","note"],
   PRICE_RULES: ["rule_id","service_code","condition","price_type","price","min_price","max_price","effective_from","effective_to","active","note"],
   UNITS: ["unit_code","unit_name","parent_group","display_order","active"],
   USERS: ["email","full_name","role","unit_code","phone","active","password"],
@@ -159,6 +159,10 @@ function handle_(p) {
     if (!token || p.token !== token) {
       return json_({ ok: false, error: "unauthorized" });
     }
+    if (BULK_ACTIONS_[p.action]) {
+      var ba = bulkAuthorized_(p);
+      if (!ba.ok) return json_(ba);
+    }
     switch (p.action) {
       case "testSheet": return json_(testSheet_(p));
       case "testDrive": return json_(testDrive_(p));
@@ -176,6 +180,7 @@ function handle_(p) {
       case "listPriceRules": return json_(listPriceRules_(p));
       case "togglePriceRule": return json_(togglePriceRule_(p));
       case "listFilesForJob": return json_(listFilesForJob_(p));
+      case "setConfirmedAmount": return json_(setConfirmedAmount_(p));
       default: return json_({ ok: false, error: "unknown_action" });
     }
   } catch (err) {
@@ -191,6 +196,25 @@ function json_(obj) {
 // รหัสลับที่หน้าเว็บต้องส่งมาด้วยทุกคำขอ ตั้งค่าใน Project Settings > Script properties คีย์ CONNECT_TOKEN
 function getToken_() {
   return PropertiesService.getScriptProperties().getProperty("CONNECT_TOKEN") || "";
+}
+
+// โทเคนตัวที่ 2 สำหรับคำสั่งที่แก้ข้อมูลทีละหลายแถว (importJobs, patchJobDates)
+// ตั้งใน Project Settings > Script properties คีย์ ADMIN_TOKEN และ "ห้าม" ใส่ไว้ในหน้าเว็บเด็ดขาด
+// เพราะ CONNECT_TOKEN ฝังอยู่ใน index.html ใครเปิด View Source ก็เห็น จึงกันคำสั่งอันตรายไม่ได้
+function getAdminToken_() {
+  return PropertiesService.getScriptProperties().getProperty("ADMIN_TOKEN") || "";
+}
+
+// คำสั่งที่ลบ/เขียนทับข้อมูลเป็นชุด ต้องผ่านโทเคนตัวที่ 2 เสมอ
+// ถ้ายังไม่ได้ตั้ง ADMIN_TOKEN ให้ปฏิเสธไว้ก่อน (fail closed) ไม่ใช่ปล่อยผ่าน
+var BULK_ACTIONS_ = { importJobs: true, patchJobDates: true };
+function bulkAuthorized_(p) {
+  var need = getAdminToken_();
+  if (!need) return { ok: false, error: "admin_token_not_set",
+    message: "ยังไม่ได้ตั้ง ADMIN_TOKEN ใน Script properties จึงใช้คำสั่งนี้ไม่ได้" };
+  if (String(p.adminToken || "") !== need) return { ok: false, error: "admin_unauthorized",
+    message: "adminToken ไม่ถูกต้อง" };
+  return { ok: true };
 }
 
 // เผื่อมีคนส่ง URL เต็มหรือ "ID/edit?gid=..." มาแทนตัว ID ล้วน ๆ (เช่น เรียก API ตรง ๆ ไม่ผ่านหน้าเว็บ) ตัดส่วนเกินออกให้
@@ -253,6 +277,13 @@ function nextJobNo_(sheet) {
   return ymPrefix + "-" + ("0000" + (max + 1)).slice(-4);
 }
 
+// จัดรูปแบบวันเวลาให้อ่านง่ายแบบไทย (พ.ศ. เขตเวลา Asia/Bangkok) ใช้กับคอลัมน์ note
+function stampThai_(d) {
+  var tz = "Asia/Bangkok";
+  var be = Number(Utilities.formatDate(d, tz, "yyyy")) + 543;
+  return Utilities.formatDate(d, tz, "d/M/") + be + Utilities.formatDate(d, tz, " HH:mm") + " น.";
+}
+
 function logStatus_(ss, jobNo, oldStatus, newStatus, by, channel, note) {
   ss.getSheetByName("STATUS_LOG").appendRow([
     Utilities.getUuid(), jobNo, oldStatus || "", newStatus, by || "", new Date(), note || "", channel || "web"
@@ -281,8 +312,9 @@ function submitJob_(p) {
     }
   }
 
+  var now = new Date();
   jobsSh.appendRow([
-    jobNo, new Date(), p.email || "", p.name || "", p.position || "", p.phone || "",
+    jobNo, now, p.email || "", p.name || "", p.position || "", p.phone || "",
     p.unit || "", p.needBy || "", p.purpose || "", "RECEIVED",
     p.estimatedAmount || "", "", "", jobFolderId, p.budgetSource || "", p.budgetAcct || ""
   ]);
@@ -293,7 +325,10 @@ function submitJob_(p) {
       "", it.priceRuleId || "", it.priceRuleSnapshot || "", "",
       it.colorMode || "", it.paperSize || "", it.paperType || "", it.sides || "",
       it.staple || "", it.ownPaper || "", it.qtyOriginal || "", it.qtySets || "",
-      it.examType || "", it.examSubject || "", it.serviceGroup || ""
+      it.examType || "", it.examSubject || "", it.serviceGroup || "",
+      // note: ประทับเวลาที่กดส่งคำขอ เฉพาะรายการที่ฝั่งเว็บสั่งมา (ตอนนี้คือข้อสอบแบบ "สอบนอกตาราง")
+      // สร้างเวลาที่ฝั่งเซิร์ฟเวอร์ ไม่ใช่เอาจากเบราว์เซอร์ จะได้ตรงกับ submitted_at เสมอ
+      it.stampNote ? stampThai_(now) : (it.note || "")
     ]);
   });
   logStatus_(ss, jobNo, "", "RECEIVED", p.email || "system", "web", "ส่งคำขอใหม่ผ่านเว็บ");
@@ -378,7 +413,7 @@ function importJobs_(p) {
         it.confirmedAmount === undefined ? "" : it.confirmedAmount, "", "", "",
         it.colorMode || "", it.paperSize || "", it.paperType || "", it.sides || "", it.staple || "", it.ownPaper || "",
         it.qtyOriginal === undefined ? "" : it.qtyOriginal, it.qtySets === undefined ? "" : it.qtySets,
-        it.examType || "", it.examSubject || "", it.serviceGroup || ""]);
+        it.examType || "", it.examSubject || "", it.serviceGroup || "", it.note || ""]);
       var by = j.importBy || "นำเข้าข้อมูลย้อนหลัง";
       logRows.push([Utilities.getUuid(), jobNo, "", "RECEIVED", j.email || by, when, by, "import"]);
       if (status !== "RECEIVED") logRows.push([Utilities.getUuid(), jobNo, "RECEIVED", status, by, done, by, "import"]);
@@ -449,6 +484,130 @@ function patchJobDates_(p) {
   } finally {
     lock.releaseLock();
   }
+}
+
+// ---------- รหัสผ่าน ----------
+// เก็บในชีตเป็น "sha256:<salt>:<hash>" แทนรหัสจริง คนเปิดชีตจะเห็นเป็นตัวอักษรสุ่ม อ่านย้อนกลับไม่ได้
+// ยังรองรับรหัสแบบข้อความธรรมดาไว้ชั่วคราว เพื่อไม่ให้แอดมินที่ยังไม่ได้แปลงล็อกอินไม่ได้
+// *** เมื่อแปลงครบทุกคนแล้ว ควรลบ 2 บรรทัดที่ทำ fallback ออก ไม่งั้นแถวที่ยังเป็นข้อความธรรมดาก็ยังใช้ได้อยู่ ***
+function hashPassword_(plain, salt) {
+  var raw = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, salt + ":" + plain, Utilities.Charset.UTF_8);
+  return Utilities.base64Encode(raw);
+}
+
+function passwordMatches_(input, stored) {
+  var st = String(stored || "");
+  if (st.indexOf("sha256:") === 0) {
+    var parts = st.split(":");
+    if (parts.length !== 3) return false;
+    return hashPassword_(String(input || ""), parts[1]) === parts[2];
+  }
+  return String(input || "") === st;   // fallback: รหัสแบบข้อความธรรมดาที่ยังไม่ได้แปลง
+}
+
+/**
+ * เครื่องมือสำหรับแอดมิน — รันในหน้าต่าง Apps Script Editor เท่านั้น ไม่ได้เปิดเป็น action ทางเว็บ
+ * ตั้งใจให้รหัสผ่านจริงไม่ต้องวิ่งผ่านอินเทอร์เน็ตเลย
+ *
+ * วิธีใช้
+ *   1. แก้บรรทัด PLAIN ข้างล่างเป็นรหัสผ่านที่ต้องการ
+ *   2. กด Run แล้วเปิด Execution log
+ *   3. คัดลอกข้อความที่ขึ้นต้นด้วย sha256: ไปวางทับคอลัมน์ password ของคนนั้นในแท็บ USERS
+ *   4. ลบรหัสผ่านที่พิมพ์ไว้ในบรรทัด PLAIN ออก แล้วบันทึก
+ */
+function makePasswordHash() {
+  var PLAIN = "ใส่รหัสผ่านที่ต้องการตรงนี้";
+  var salt = Utilities.getUuid().replace(/-/g, "").slice(0, 16);
+  var out = "sha256:" + salt + ":" + hashPassword_(PLAIN, salt);
+  Logger.log("คัดลอกบรรทัดล่างนี้ไปวางในคอลัมน์ password ของแท็บ USERS");
+  Logger.log(out);
+  return out;
+}
+
+// ---------- ราคายืนยันโดยแอดมิน ----------
+// เขียน confirmed_amount ลงทั้ง JOB_ITEMS (รายบรรทัด) และ JOBS (ยอดรวมของใบ) พร้อมเหตุผลใน override_reason
+// เงื่อนไข: ผู้บันทึกต้องเป็น ADMIN ที่ active อยู่ในแท็บ USERS และงานต้องถึงสถานะ "ผลิตเสร็จ" แล้ว
+//
+// ข้อจำกัดที่ต้องรู้: ตรวจได้แค่ว่า "อีเมลนี้เป็น ADMIN จริงหรือไม่" แต่ยืนยันไม่ได้ว่าคนส่งคำสั่งคือเจ้าของอีเมล
+// เพราะระบบยังไม่มีการยืนยันตัวตน (ข้อ 3 ในแผนพัฒนา ซึ่งตัดสินใจว่ายังไม่ทำ)
+function setConfirmedAmount_(p) {
+  var ALLOWED_STATUS = { PROD_DONE: true, SERVICE_DONE: true };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    var ss = openSheet_(p);
+    var by = String(p.by || "").trim().toLowerCase();
+    if (!isActiveAdmin_(ss, by)) return { ok: false, error: "not_admin", message: "ต้องเป็นผู้ดูแลระบบ (ADMIN) เท่านั้นจึงจะยืนยันราคาได้" };
+
+    // ต้องมีรายการที่ใช้ได้อย่างน้อย 1 รายการ ก่อนจะแตะข้อมูลใด ๆ
+    // ถ้าไม่กันตรงนี้ คำสั่งที่ส่งรายการว่างมาจะเขียนยอดรวมเป็น 0 ทับของเดิมทันที
+    var incoming = p.items || [];
+    var valid = [];
+    for (var v = 0; v < incoming.length; v++) {
+      var amt = Number(incoming[v].amount);
+      if (incoming[v].itemId && isFinite(amt) && amt >= 0) valid.push(incoming[v]);
+    }
+    if (!valid.length) return { ok: false, error: "no_items",
+      message: "ต้องส่งราคายืนยันอย่างน้อย 1 รายการ (ไม่มีการแก้ไขข้อมูลใด ๆ)" };
+
+    var jobsSh = ss.getSheetByName("JOBS");
+    var jv = jobsSh.getDataRange().getValues();
+    var jh = jv[0];
+    var cNo = jh.indexOf("job_no"), cStatus = jh.indexOf("status"), cConf = jh.indexOf("confirmed_amount");
+    if (cNo < 0 || cStatus < 0 || cConf < 0) return { ok: false, error: "missing_columns" };
+
+    var row = -1;
+    for (var i = 1; i < jv.length; i++) if (String(jv[i][cNo]) === String(p.jobNo)) { row = i + 1; break; }
+    if (row < 0) return { ok: false, error: "job_not_found", message: "ไม่พบเลขที่งาน " + p.jobNo };
+
+    var status = String(jv[row - 1][cStatus] || "");
+    if (!ALLOWED_STATUS[status]) return { ok: false, error: "status_not_allowed",
+      message: "ยืนยันราคาได้เมื่องานถึงสถานะ \"งานเสร็จแล้ว\" เป็นต้นไปเท่านั้น (สถานะปัจจุบัน: " + status + ")" };
+
+    // รายบรรทัดใน JOB_ITEMS — p.items = [{ itemId, amount }]
+    var itemsSh = ss.getSheetByName("JOB_ITEMS");
+    var iv = itemsSh.getDataRange().getValues();
+    var ih = iv[0];
+    var cItemId = ih.indexOf("item_id"), cJobNo = ih.indexOf("job_no");
+    var cIConf = ih.indexOf("confirmed_amount"), cReason = ih.indexOf("override_reason");
+    var wanted = {};
+    for (var k = 0; k < valid.length; k++) wanted[String(valid[k].itemId)] = valid[k].amount;
+
+    var updated = 0, sum = 0, touched = [];
+    for (var r = 1; r < iv.length; r++) {
+      if (String(iv[r][cJobNo]) !== String(p.jobNo)) continue;
+      var id = String(iv[r][cItemId]);
+      var val = wanted.hasOwnProperty(id) ? Number(wanted[id]) : Number(iv[r][cIConf]);
+      if (wanted.hasOwnProperty(id) && isFinite(Number(wanted[id]))) {
+        itemsSh.getRange(r + 1, cIConf + 1).setValue(Number(wanted[id]));
+        if (cReason >= 0 && p.reason) itemsSh.getRange(r + 1, cReason + 1).setValue(String(p.reason));
+        updated++; touched.push(id);
+      }
+      if (isFinite(val)) sum += val;
+    }
+    sum = Math.round(sum * 100) / 100;
+    jobsSh.getRange(row, cConf + 1).setValue(sum);
+    logStatus_(ss, p.jobNo, status, status, by, "web",
+      "ยืนยันราคา " + sum.toFixed(2) + " บาท" + (p.reason ? (" — " + p.reason) : ""));
+    return { ok: true, jobNo: p.jobNo, itemsUpdated: updated, jobTotal: sum, itemIds: touched };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// ตรวจว่าอีเมลนี้เป็น ADMIN ที่ยังใช้งานอยู่หรือไม่ (ไม่ตรวจรหัสผ่าน ดูหมายเหตุใน setConfirmedAmount_)
+function isActiveAdmin_(ss, email) {
+  var sh = ss.getSheetByName("USERS");
+  if (!sh || !email) return false;
+  var v = sh.getDataRange().getValues(), h = v[0];
+  var cEm = h.indexOf("email"), cRole = h.indexOf("role"), cAct = h.indexOf("active");
+  if (cEm < 0 || cRole < 0) return false;
+  for (var i = 1; i < v.length; i++) {
+    if (String(v[i][cEm] || "").trim().toLowerCase() !== email) continue;
+    var act = cAct < 0 ? true : (v[i][cAct] === true || String(v[i][cAct]).toUpperCase() === "TRUE" || v[i][cAct] === 1 || v[i][cAct] === "1");
+    return act && String(v[i][cRole] || "").trim().toUpperCase() === "ADMIN";
+  }
+  return false;
 }
 
 function uploadFile_(p) {
@@ -597,7 +756,7 @@ function checkAdminUser_(p) {
   }
 
   // 5. ตรวจสอบรหัสผ่านที่ผู้ใช้ส่งมา
-  if (!expectedPass || targetPass !== expectedPass) {
+  if (!expectedPass || !passwordMatches_(targetPass, expectedPass)) {
     return { ok: false, error: "invalid_password", message: "รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง" };
   }
 
