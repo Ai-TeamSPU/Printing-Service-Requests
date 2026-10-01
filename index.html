@@ -466,6 +466,16 @@
                 style="width:100%;height:340px;object-fit:cover;display:block">
             </div>
 
+            <!-- ============================================================================
+                 ปิดไว้ชั่วคราว: แถบ "ผู้ช่วยที่ทำงานอยู่เบื้องหลัง" (การ์ด 5 ใบในหน้าแรก)
+                 ตัวเลขบนการ์ด (~6 นาที, 100%, -80%, 2 วัน -> 5 นาที, -45%) เป็นค่าที่เขียนไว้ตายตัว
+                 ยังไม่ได้วัดจากข้อมูลจริง และผู้ช่วยบางตัวยังไม่ได้ทำงานจริง เช่น "ผู้ช่วยแจ้งสถานะ"
+                 ที่อ้างถึง NOTIFY_LOG ซึ่งยังไม่มีโค้ดเขียนลง (ข้อ 6 ในแผนพัฒนา ตัดสินใจว่ายังไม่ทำ)
+
+                 เปิดคืน: ลบบรรทัดนี้กับบรรทัดปิดคอมเมนต์ท้ายบล็อก
+                 ข้อมูลต้นทางยังอยู่ครบใน spu-data.js (AGENTS) และ index.html (agentCards) ไม่ได้ลบอะไร
+            ============================================================================ -->
+            <!--
             <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--color-line)">
               <h2 style="font-size:22px;font-weight:800;margin:0 0 4px">{{ t.agentStripTitle }}</h2>
               <p style="font-size:15px;color:var(--color-neutral-700);margin:0 0 22px;max-width:66ch">{{ t.agentStripSub
@@ -509,6 +519,7 @@
                 </sc-for>
               </div>
             </div>
+            -->
           </section>
         </sc-if>
 
@@ -2801,18 +2812,12 @@ class Component extends DCLogic {
               sent=!isNaN(dt.getTime())?this._fmt(this._iso(dt)):String(row.submitted_at);
             }catch(e){ sent=String(row.submitted_at); }
           }
-          let need="";
-          if(row.required_date){
-            try{
-              const str=String(row.required_date);
-              if(str.length>=10&&str.charAt(4)==="-") need=this._fmt(str.slice(0,10));
-              else{
-                const dt=new Date(str);
-                need=!isNaN(dt.getTime())?this._fmt(this._iso(dt)):str;
-              }
-            }catch(e){ need=String(row.required_date); }
-          }
-          const isOver=!!(row.required_date&&String(row.required_date).slice(0,10)<this._today()&&status!=="SERVICE_DONE");
+          // วันที่ต้องการรับงานถูกเก็บในชีตเป็นวันที่จริง (เที่ยงคืนตามเวลาไทย) เวลาส่งกลับมาเป็น JSON
+          // จึงกลายเป็น ISO แบบ UTC เช่น "2026-09-24T17:00:00.000Z" ซึ่งคือ 25 ก.ย. ตามเวลาไทย
+          // ถ้าตัดเอา 10 ตัวแรกตรง ๆ จะได้วันที่ย้อนไป 1 วัน ต้องแปลงเขตเวลาก่อนเสมอ
+          const needISO=this._bkkDate(row.required_date);
+          const need=needISO?this._fmt(needISO):"";
+          const isOver=!!(needISO&&needISO<this._today()&&status!=="SERVICE_DONE");
           return {
             no, reqTh:req, reqEn:req, unitTh:unit, unitEn:unit,
             email:row.requester_email||"", phone:row.phone||"", svc:"a4",
