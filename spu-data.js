@@ -2,7 +2,7 @@
 export const TH = {
   appName: "ระบบใช้บริการโรงพิมพ์", org: "โรงพิมพ์ กลุ่มงานโครงสร้างพื้นฐาน", tel: "โทร. 02 579 1111 ต่อ 1114, 1552",
   roleReq: "ผู้รับบริการ", roleAdmin: "แอดมินโรงพิมพ์", roleExec: "ผู้บริหาร",
-  tabLanding: "รับบริการ", tabWizard: "แบบฟอร์มบริการ", tabMine: "งานของฉัน", tabTrack: "ติดตามสถานะ",
+  tabLanding: "รับบริการ", tabWizard: "แบบฟอร์มบริการ", tabMine: "งานของฉัน", tabTrack: "ติดตามสถานะ", tabChat: "แชทติดตาม",
   tabQueue: "คิวงาน", tabMobile: "อัปเดตจากมือถือ", tabPrice: "ตารางราคา", tabRaw: "รายการคำขอรับบริการ",
   tabSheet: "โครงสร้างชีต", tabSettings: "ตั้งค่าเชื่อมต่อ", tabDash: "แดชบอร์ด", tabReport: "เอกสารสรุปรายงาน",
   kicker: "โรงพิมพ์ให้บริการ งานผลิต งานพิมพ์และออกแบบ",
@@ -154,7 +154,7 @@ export const TH = {
 export const EN = {
   appName: "Printing Service Requests", org: "Printing House, Infrastructure Group", tel: "Tel. 02 579 1111 ext. 1114, 1552",
   roleReq: "Requester", roleAdmin: "Print shop admin", roleExec: "Executive",
-  tabLanding: "Get service", tabWizard: "Service form", tabMine: "My requests", tabTrack: "Track job",
+  tabLanding: "Get service", tabWizard: "Service form", tabMine: "My requests", tabTrack: "Track job", tabChat: "Job chat",
   tabQueue: "Job queue", tabMobile: "Mobile update", tabPrice: "Price master", tabRaw: "Raw data",
   tabSheet: "Sheet schema", tabSettings: "Connections", tabDash: "Dashboard", tabReport: "A4 report",
   kicker: "The printing house provides production and print & design services",
@@ -438,7 +438,8 @@ export const SHEET_TABS = [
       ["F", "file_category", "TEXT", "requester / admin / proof / final", "requester / admin / proof / final"],
       ["G", "uploaded_by", "TEXT", "อีเมลผู้อัปโหลด", "Uploader email"],
       ["H", "uploaded_at", "DATETIME", "เวลาอัปโหลด", "Upload time"],
-      ["I", "web_view_link", "TEXT", "ลิงก์เปิดไฟล์แบบจำกัดสิทธิ์ ไม่ใช่ลิงก์สาธารณะ", "Permissioned view link, never public"]
+      ["I", "web_view_link", "TEXT", "ลิงก์เปิดไฟล์แบบจำกัดสิทธิ์ ไม่ใช่ลิงก์สาธารณะ", "Permissioned view link, never public"],
+      ["J", "client_upload_id", "TEXT", "รหัสป้องกันไฟล์แชทซ้ำเมื่อส่งใหม่หลังเครือข่ายสะดุด", "Idempotency key preventing duplicate chat uploads on retry"]
     ]
   },
   {
@@ -451,6 +452,30 @@ export const SHEET_TABS = [
       ["F", "changed_at", "DATETIME", "เวลาที่เปลี่ยน", "When"],
       ["G", "note", "TEXT", "หมายเหตุสั้น ๆ จากเจ้าหน้าที่", "Short staff note"],
       ["H", "channel", "TEXT", "web / mobile ใช้ดูว่าอัปเดตจากไหน", "web / mobile origin"]
+    ]
+  },
+  {
+    name: "JOB_MESSAGES", cols: [
+      ["A", "message_id", "TEXT", "รหัสข้อความ ห้ามซ้ำ", "Unique message id"],
+      ["B", "job_no", "TEXT", "เลขที่งาน ห้องสนทนาหนึ่งห้องต่อหนึ่งงาน", "Job number; one conversation per job"],
+      ["C", "sequence", "NUMBER", "ลำดับข้อความภายในงาน เริ่มจาก 1", "Per-job message sequence starting at 1"],
+      ["D", "sender_email", "TEXT", "อีเมลผู้ส่งข้อความ", "Message sender email"],
+      ["E", "sender_role", "TEXT", "REQUESTER / ADMIN / EXECUTIVE / SYSTEM", "REQUESTER / ADMIN / EXECUTIVE / SYSTEM"],
+      ["F", "message_type", "TEXT", "USER หรือ SYSTEM", "USER or SYSTEM"],
+      ["G", "message_text", "TEXT", "เนื้อหาข้อความ สูงสุด 5,000 ตัวอักษร", "Message body, up to 5,000 characters"],
+      ["H", "attachment_file_ids", "TEXT", "JSON array ของ file_id ในแท็บ FILES", "JSON array of FILES.file_id values"],
+      ["I", "created_at", "DATETIME", "เวลาฝั่งเซิร์ฟเวอร์ที่สร้างข้อความ", "Server-side creation time"],
+      ["J", "client_message_id", "TEXT", "รหัสจากเบราว์เซอร์ ใช้ป้องกันการส่งซ้ำ", "Browser idempotency key used to prevent duplicate sends"]
+    ]
+  },
+  {
+    name: "CHAT_READS", cols: [
+      ["A", "job_no", "TEXT", "เลขที่งานของสถานะอ่าน", "Job whose read state is tracked"],
+      ["B", "reader_email", "TEXT", "อีเมลผู้อ่าน", "Reader email"],
+      ["C", "reader_role", "TEXT", "บทบาทขณะอ่าน", "Reader role"],
+      ["D", "last_read_at", "DATETIME", "เวลาอ่านข้อความล่าสุด", "Last read time"],
+      ["E", "last_read_message_id", "TEXT", "ข้อความล่าสุดที่แสดงสำเร็จแล้ว", "Last successfully rendered message"],
+      ["F", "updated_at", "DATETIME", "เวลาที่อัปเดตสถานะอ่าน", "Read-state update time"]
     ]
   },
   {

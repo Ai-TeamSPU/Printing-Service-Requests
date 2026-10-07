@@ -153,7 +153,7 @@
         }
 
         .mq-track {
-          animation: mq-scroll 42s linear infinite;
+          animation: mq-scroll 100s linear infinite;
         }
 
         .mq-strip:hover .mq-track {
@@ -225,6 +225,99 @@
 
           .price-grid aside {
             position: static !important;
+          }
+        }
+
+        .job-chat-shell {
+          display: grid;
+          grid-template-columns: minmax(230px, 285px) minmax(360px, 1fr) minmax(220px, 270px);
+          height: min(690px, calc(100vh - 235px));
+          min-height: 560px;
+          overflow: hidden;
+          border: 1px solid var(--color-line);
+          border-radius: var(--radius-card);
+          background: #fff;
+          box-shadow: 0 2px 4px rgba(16, 24, 40, .05), 0 18px 38px -24px rgba(16, 24, 40, .28);
+        }
+
+        .job-chat-inbox,
+        .job-chat-thread {
+          min-width: 0;
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .job-chat-inbox {
+          border-right: 1px solid var(--color-line);
+          background: #fbfcfe;
+        }
+
+        .job-chat-thread-list,
+        .job-chat-messages,
+        .job-chat-detail {
+          overflow: auto;
+          overscroll-behavior: contain;
+        }
+
+        .job-chat-thread-button:hover {
+          background: var(--color-accent-100) !important;
+        }
+
+        .job-chat-messages {
+          flex: 1;
+          min-height: 0;
+          padding: 22px 20px;
+          background: linear-gradient(180deg, #fff 0%, #fbfcff 100%);
+          scroll-behavior: smooth;
+        }
+
+        .job-chat-composer {
+          border-top: 1px solid var(--color-line);
+          padding: 12px 16px 13px;
+          background: #fff;
+        }
+
+        .job-chat-detail {
+          border-left: 1px solid var(--color-line);
+          background: #fbfcfe;
+          padding: 19px 17px;
+        }
+
+        @media (max-width: 1060px) {
+          .job-chat-shell {
+            grid-template-columns: minmax(220px, 270px) minmax(0, 1fr);
+          }
+
+          .job-chat-detail {
+            display: none;
+          }
+        }
+
+        @media (max-width: 720px) {
+          .job-chat-shell {
+            display: flex;
+            flex-direction: column;
+            height: auto;
+            min-height: 0;
+          }
+
+          .job-chat-inbox {
+            border-right: 0;
+            border-bottom: 1px solid var(--color-line);
+          }
+
+          .job-chat-thread-list {
+            max-height: 230px;
+          }
+
+          .job-chat-thread {
+            min-height: 600px;
+          }
+
+          .job-chat-messages {
+            min-height: 390px;
+            max-height: 58vh;
           }
         }
 
@@ -871,7 +964,8 @@
                                 style="width:100%;text-align:left;display:flex;gap:12px;align-items:center;padding:12px 14px;border:1px solid {{ b.bd }};background:{{ b.bg }};color:{{ b.fg }};min-height:48px;font-size:15px;font-weight:600">
                                 <span
                                   style="width:18px;height:18px;border-radius:var(--radius-pill);border:2px solid currentColor;flex:none;display:grid;place-items:center">
-                                  <span style="width:8px;height:8px;border-radius:var(--radius-pill);background:{{ b.dot }}"></span>
+                                  <span
+                                    style="width:8px;height:8px;border-radius:var(--radius-pill);background:{{ b.dot }}"></span>
                                 </span>
                                 <span>{{ b.label }}</span>
                               </button>
@@ -1171,55 +1265,55 @@
 
             <!-- กล่องค้นหาและเลือกอีเมลจาก Google Sheet — เฉพาะแอดมิน/ผู้บริหารที่ล็อกอินแล้ว -->
             <sc-if value="{{ mineCanBrowseAll }}" hint-placeholder-val="{{ false }}">
-            <div
-              style="background:var(--color-band);border:1px solid var(--color-line);border-radius:var(--radius-card);padding:16px 18px;margin-bottom:22px">
-              <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between">
-                <div style="display:flex;gap:10px;align-items:center;flex:1;min-width:280px;flex-wrap:wrap">
-                  <span style="font-size:13.5px;font-weight:700;color:var(--color-text);white-space:nowrap">🔍 {{
-                    mineFilterLabel }}</span>
-                  <sc-if value="{{ hasRequesterEmailOptions }}" hint-placeholder-val="{{ false }}">
-                    <select class="input" value="{{ mineSelectedEmail }}" onChange="{{ onSelectMineEmail }}"
-                      style="min-height:40px;font-size:13.5px;max-width:320px;background:#fff">
-                      <option value="">{{ mineEmailSelectPlaceholder }}</option>
-                      <sc-for list="{{ requesterEmailOptions }}" as="opt">
-                        <option value="{{ opt.email }}">{{ opt.label }}</option>
-                      </sc-for>
-                    </select>
-                  </sc-if>
-                  <div>
-                    <div style="display:flex;gap:6px;align-items:center">
-                      <input class="input" value="{{ mineEmailInput }}" onChange="{{ setMineEmailInput }}"
-                        onKeyDown="{{ onMineEmailKeyDown }}" placeholder="พิมพ์อีเมล @spu.ac.th"
-                        style="min-height:40px;font-size:13.5px;width:210px;background:#fff">
-                      <button type="button" class="btn btn-secondary" onClick="{{ applyMineEmailSearch }}"
-                        style="min-height:40px;font-size:13px;padding:0 14px;white-space:nowrap">{{ mineSearchBtn
-                        }}</button>
-                    </div>
-                    <sc-if value="{{ mineSearchError }}" hint-placeholder-val="{{ false }}">
-                      <div
-                        style="margin-top:7px;font-size:12.5px;font-weight:600;color:#ae1800;display:flex;align-items:flex-start;gap:6px;max-width:300px;line-height:1.45">
-                        <span style="flex:none">⚠</span><span>{{ mineSearchError }}</span>
-                      </div>
+              <div
+                style="background:var(--color-band);border:1px solid var(--color-line);border-radius:var(--radius-card);padding:16px 18px;margin-bottom:22px">
+                <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between">
+                  <div style="display:flex;gap:10px;align-items:center;flex:1;min-width:280px;flex-wrap:wrap">
+                    <span style="font-size:13.5px;font-weight:700;color:var(--color-text);white-space:nowrap">🔍 {{
+                      mineFilterLabel }}</span>
+                    <sc-if value="{{ hasRequesterEmailOptions }}" hint-placeholder-val="{{ false }}">
+                      <select class="input" value="{{ mineSelectedEmail }}" onChange="{{ onSelectMineEmail }}"
+                        style="min-height:40px;font-size:13.5px;max-width:320px;background:#fff">
+                        <option value="">{{ mineEmailSelectPlaceholder }}</option>
+                        <sc-for list="{{ requesterEmailOptions }}" as="opt">
+                          <option value="{{ opt.email }}">{{ opt.label }}</option>
+                        </sc-for>
+                      </select>
                     </sc-if>
+                    <div>
+                      <div style="display:flex;gap:6px;align-items:center">
+                        <input class="input" value="{{ mineEmailInput }}" onChange="{{ setMineEmailInput }}"
+                          onKeyDown="{{ onMineEmailKeyDown }}" placeholder="พิมพ์อีเมล @spu.ac.th"
+                          style="min-height:40px;font-size:13.5px;width:210px;background:#fff">
+                        <button type="button" class="btn btn-secondary" onClick="{{ applyMineEmailSearch }}"
+                          style="min-height:40px;font-size:13px;padding:0 14px;white-space:nowrap">{{ mineSearchBtn
+                          }}</button>
+                      </div>
+                      <sc-if value="{{ mineSearchError }}" hint-placeholder-val="{{ false }}">
+                        <div
+                          style="margin-top:7px;font-size:12.5px;font-weight:600;color:#ae1800;display:flex;align-items:flex-start;gap:6px;max-width:300px;line-height:1.45">
+                          <span style="flex:none">⚠</span><span>{{ mineSearchError }}</span>
+                        </div>
+                      </sc-if>
+                    </div>
                   </div>
+                  <sc-if value="{{ hasSelectedMineEmail }}" hint-placeholder-val="{{ false }}">
+                    <button type="button" class="btn btn-ghost" onClick="{{ clearMineEmail }}"
+                      style="min-height:36px;font-size:12.5px;color:var(--color-accent-700)">✕ {{ clearFilterLabel
+                      }}</button>
+                  </sc-if>
                 </div>
+
                 <sc-if value="{{ hasSelectedMineEmail }}" hint-placeholder-val="{{ false }}">
-                  <button type="button" class="btn btn-ghost" onClick="{{ clearMineEmail }}"
-                    style="min-height:36px;font-size:12.5px;color:var(--color-accent-700)">✕ {{ clearFilterLabel
-                    }}</button>
+                  <div
+                    style="display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--color-line);font-size:13px">
+                    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#0f7a4c"></span>
+                    <span style="color:var(--color-text)">กำลังแสดงประวัติคำขอของ: <strong>{{ activeMineEmail
+                        }}</strong></span>
+                    <span style="color:var(--color-neutral-600)">({{ mineCountFoundText }})</span>
+                  </div>
                 </sc-if>
               </div>
-
-              <sc-if value="{{ hasSelectedMineEmail }}" hint-placeholder-val="{{ false }}">
-                <div
-                  style="display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--color-line);font-size:13px">
-                  <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#0f7a4c"></span>
-                  <span style="color:var(--color-text)">กำลังแสดงประวัติคำขอของ: <strong>{{ activeMineEmail
-                      }}</strong></span>
-                  <span style="color:var(--color-neutral-600)">({{ mineCountFoundText }})</span>
-                </div>
-              </sc-if>
-            </div>
             </sc-if>
 
             <!-- กรณีที่ยังไม่ได้เลือกอีเมล: แสดงคำแนะนำและรายชื่ออีเมลในระบบ -->
@@ -1316,10 +1410,15 @@
                       <span>{{ viewedLabel }}</span>
                       <time style="font-weight:600">{{ viewedDate }}</time>
                     </div>
-                    <div style="margin-top:14px;padding:14px 18px;border-top:1px solid var(--color-line)">
+                    <div
+                      style="margin-top:14px;padding:14px 18px;border-top:1px solid var(--color-line);display:grid;grid-template-columns:1fr 1fr;gap:8px">
                       <button type="button" onClick="{{ j.open }}"
-                        style="width:100%;min-height:44px;border:0;border-radius:var(--radius-pill);background:{{ j.hue }};color:#fff;font-size:14px;font-weight:700;font-family:inherit">{{
+                        style="width:100%;min-height:44px;border:1px solid var(--color-line);border-radius:var(--radius-pill);background:#fff;color:{{ j.hue }};font-size:12.5px;font-weight:700;font-family:inherit">{{
                         t.tabTrack }}</button>
+                      <button type="button" onClick="{{ j.openChat }}"
+                        style="width:100%;min-height:44px;border:0;border-radius:var(--radius-pill);background:{{ j.hue }};color:#fff;font-size:12.5px;font-weight:700;font-family:inherit">💬
+                        {{ t.tabChat }}<sc-if value="{{ j.hasUnread }}" hint-placeholder-val="{{ false }}"> ({{ j.unread
+                          }})</sc-if></button>
                     </div>
                   </div>
                 </sc-for>
@@ -1352,6 +1451,9 @@
                       <option value="{{ o.v }}">{{ o.label }}</option>
                     </sc-for>
                   </select>
+                  <button type="button" class="btn btn-ghost" onClick="{{ openCurrentTrackChat }}"
+                    style="width:100%;min-height:40px;margin-top:8px;font-size:13px;border:1px solid var(--color-line)">💬
+                    {{ t.tabChat }}</button>
                 </div>
               </sc-if>
             </div>
@@ -1414,6 +1516,212 @@
                   <div style="font-size:12.5px;color:var(--color-neutral-600);margin-top:10px">{{ t.filesNote }}</div>
                 </div>
               </div>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ isChat }}" hint-placeholder-val="{{ false }}">
+          <section style="padding-top:32px">
+            <div
+              style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--color-line);padding-bottom:16px;margin-bottom:20px">
+              <div>
+                <div
+                  style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent-700)">
+                  PRINTING SERVICE · SPU</div>
+                <h1 style="font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-.02em;margin:6px 0 0">
+                  {{ chatPageTitle }}</h1>
+                <div style="font-size:13px;color:var(--color-neutral-700);margin-top:4px">{{ chatPageSubtitle }}</div>
+              </div>
+              <button type="button" class="btn btn-ghost" onClick="{{ refreshChat }}" disabled="{{ chatRefreshDisabled }}"
+                style="min-height:40px;font-size:13px">{{ chatRefreshLabel }}</button>
+            </div>
+
+            <sc-if value="{{ hasChatError }}" hint-placeholder-val="{{ false }}">
+              <div role="alert"
+                style="border:1px solid #ffd2ca;background:#fff4f1;color:#ae1800;padding:10px 12px;margin:-8px 0 14px;font-size:12.5px">
+                {{ chatError }}</div>
+            </sc-if>
+
+            <div class="job-chat-shell">
+              <aside class="job-chat-inbox" aria-label="{{ chatInboxLabel }}">
+                <div style="padding:16px 14px 12px;border-bottom:1px solid var(--color-line);background:#fff">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+                    <strong style="font-size:15px">{{ chatInboxLabel }}</strong>
+                    <span
+                      style="font-size:10.5px;font-weight:800;color:var(--color-accent-700);background:var(--color-accent-100);padding:3px 8px;border-radius:var(--radius-pill)">{{
+                      chatThreadCountLabel }}</span>
+                  </div>
+                  <input class="input" type="search" value="{{ chatQuery }}" onChange="{{ setChatQuery }}"
+                    placeholder="{{ chatSearchPlaceholder }}" aria-label="{{ chatSearchPlaceholder }}"
+                    style="width:100%;min-height:38px;font-size:12.5px;background:#fff">
+                </div>
+                <div class="job-chat-thread-list" style="flex:1;padding:7px">
+                  <sc-if value="{{ hasNoChatThreads }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding:34px 14px;text-align:center;color:var(--color-neutral-600);font-size:13px;line-height:1.6">
+                      {{ chatNoThreadsLabel }}</div>
+                  </sc-if>
+                  <sc-for list="{{ chatThreadRows }}" as="th" hint-placeholder-count="4">
+                    <button type="button" class="job-chat-thread-button" onClick="{{ th.open }}"
+                      disabled="{{ chatInteractionLocked }}"
+                      style="display:block;width:100%;border:1px solid {{ th.border }};border-radius:var(--radius-input);background:{{ th.bg }};padding:12px 11px;margin-bottom:5px;text-align:left;color:var(--color-text)">
+                      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+                        <span style="font-size:11.5px;font-weight:800;color:var(--color-accent-700)">{{ th.jobNo }}</span>
+                        <span style="font-size:9.5px;color:var(--color-neutral-600);white-space:nowrap">{{ th.lastAt }}</span>
+                      </div>
+                      <div style="font-size:12.5px;font-weight:700;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                        {{ th.title }}</div>
+                      <div style="display:flex;align-items:center;gap:7px;margin-top:4px">
+                        <span
+                          style="font-size:11px;color:var(--color-neutral-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0">{{
+                          th.preview }}</span>
+                        <sc-if value="{{ th.hasUnread }}" hint-placeholder-val="{{ false }}">
+                          <span
+                            style="display:grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:var(--radius-pill);background:var(--color-accent);color:#fff;font-size:10px;font-weight:800">{{
+                            th.unread }}</span>
+                        </sc-if>
+                      </div>
+                    </button>
+                  </sc-for>
+                </div>
+              </aside>
+
+              <section class="job-chat-thread" aria-label="{{ chatConversationLabel }}">
+                <sc-if value="{{ hasNoSelectedChat }}" hint-placeholder-val="{{ false }}">
+                  <div
+                    style="flex:1;display:grid;place-items:center;text-align:center;padding:40px 24px;color:var(--color-neutral-600)">
+                    <div><div style="font-size:40px;margin-bottom:10px">💬</div><strong style="color:var(--color-text)">{{
+                        chatSelectThreadTitle }}</strong><div style="font-size:13px;margin-top:6px">{{ chatSelectThreadSubtitle
+                        }}</div></div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ hasSelectedChat }}" hint-placeholder-val="{{ true }}">
+                  <div
+                    style="padding:14px 17px;border-bottom:1px solid var(--color-line);display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff">
+                    <div style="min-width:0">
+                      <div style="font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{
+                        chatSelectedJobNo }}</div>
+                      <div
+                        style="font-size:11.5px;color:var(--color-neutral-600);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                        {{ chatSelectedRequester }} · {{ chatSelectedStatus }}</div>
+                    </div>
+                    <span
+                      style="padding:4px 9px;border-radius:var(--radius-pill);background:{{ chatSelectedTagBg }};color:{{ chatSelectedTagFg }};font-size:10.5px;font-weight:800;white-space:nowrap">{{
+                      chatSelectedStatus }}</span>
+                  </div>
+
+                  <div id="spu-chat-message-list" class="job-chat-messages" role="log" aria-live="polite">
+                    <sc-if value="{{ chatHasOlder }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;justify-content:center;margin:2px 0 14px">
+                        <button type="button" class="btn btn-ghost" onClick="{{ loadOlderChat }}"
+                          disabled="{{ chatOlderDisabled }}" style="min-height:34px;font-size:11.5px;border:1px solid var(--color-line)">{{
+                          chatOlderLabel }}</button>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ chatMessagesLoading }}" hint-placeholder-val="{{ false }}">
+                      <div style="text-align:center;color:var(--color-neutral-600);font-size:12px;padding:20px">{{
+                        chatLoadingLabel }}</div>
+                    </sc-if>
+                    <sc-if value="{{ hasNoChatMessages }}" hint-placeholder-val="{{ false }}">
+                      <div style="text-align:center;color:var(--color-neutral-600);font-size:12.5px;padding:42px 18px">
+                        <div style="font-size:34px;margin-bottom:8px">💬</div>{{ chatEmptyMessagesLabel }}</div>
+                    </sc-if>
+                    <sc-for list="{{ chatMessageRows }}" as="m" hint-placeholder-count="5">
+                      <sc-if value="{{ m.isSystem }}" hint-placeholder-val="{{ false }}">
+                        <div
+                          style="display:flex;align-items:center;justify-content:center;gap:7px;color:var(--color-neutral-600);font-size:10.5px;text-align:center;margin:14px 0 18px">
+                          <span style="width:28px;height:1px;background:var(--color-divider)"></span><span>{{ m.text }} · {{
+                            m.time }}</span><span style="width:28px;height:1px;background:var(--color-divider)"></span>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ !m.isSystem }}" hint-placeholder-val="{{ true }}">
+                        <div style="display:flex;justify-content:{{ m.justify }};margin-bottom:17px">
+                          <div style="max-width:min(84%,620px);min-width:0;text-align:{{ m.align }}">
+                            <div style="font-size:9.5px;color:var(--color-neutral-600);margin:0 4px 4px">{{ m.sender }}</div>
+                            <div
+                              style="display:inline-block;max-width:100%;text-align:left;padding:10px 13px;border:1px solid {{ m.border }};border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.fg }};font-size:12.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere">{{
+                              m.text }}
+                              <sc-for list="{{ m.attachments }}" as="a" hint-placeholder-count="1">
+                                <a href="{{ a.link }}" target="_blank" rel="noopener"
+                                  style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 9px;border-radius:var(--radius-input);border:1px solid {{ m.attachmentBorder }};background:{{ m.attachmentBg }};color:{{ m.attachmentFg }};text-decoration:none">
+                                  <span>📎</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis">{{ a.name
+                                    }}</span><small style="opacity:.75;white-space:nowrap">{{ a.size }}</small>
+                                </a>
+                              </sc-for>
+                            </div>
+                            <div style="font-size:9.5px;color:var(--color-neutral-600);margin:4px 4px 0">{{ m.time }}</div>
+                          </div>
+                        </div>
+                      </sc-if>
+                    </sc-for>
+                  </div>
+
+                  <div class="job-chat-composer">
+                    <div style="display:flex;gap:6px;overflow:auto;margin-bottom:8px">
+                      <sc-for list="{{ chatQuickReplies }}" as="q" hint-placeholder-count="3">
+                        <button type="button" onClick="{{ q.use }}" disabled="{{ chatInteractionLocked }}"
+                          style="border:1px solid var(--color-line);border-radius:var(--radius-pill);background:#fff;color:var(--color-accent-700);padding:5px 9px;font-size:10.5px;white-space:nowrap">{{
+                          q.label }}</button>
+                      </sc-for>
+                    </div>
+                    <sc-if value="{{ hasChatDraftFiles }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+                        <sc-for list="{{ chatDraftFileRows }}" as="f" hint-placeholder-count="2">
+                          <span
+                            style="display:flex;align-items:center;gap:6px;max-width:100%;border:1px solid var(--color-accent-200);background:var(--color-accent-100);color:var(--color-accent-700);border-radius:var(--radius-input);padding:5px 7px;font-size:10.5px">
+                            <span>📎</span><span style="max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{
+                              f.name }}</span><button type="button" onClick="{{ f.remove }}" aria-label="remove"
+                              disabled="{{ chatInteractionLocked }}"
+                              style="border:0;background:transparent;color:inherit;padding:0;font-size:15px;line-height:1">×</button>
+                          </span>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <input id="spu-chat-file-input" type="file" multiple
+                      accept="image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.docx,.xlsx" onChange="{{ onChatFileChange }}"
+                      style="display:none">
+                    <div
+                      style="display:flex;align-items:flex-end;gap:8px;border:1px solid var(--color-line);border-radius:var(--radius-input);padding:8px 9px;background:#fcfcfe">
+                      <button type="button" onClick="{{ chooseChatFiles }}" disabled="{{ chatInteractionLocked }}"
+                        aria-label="{{ chatAttachLabel }}" title="{{ chatAttachLabel }}"
+                        style="width:36px;height:36px;flex:none;border:0;border-radius:var(--radius-input);background:transparent;color:var(--color-accent-700);font-size:18px">📎</button>
+                      <textarea value="{{ chatDraft }}" onChange="{{ setChatDraft }}" onKeyDown="{{ onChatComposerKeyDown }}"
+                        maxlength="5000" rows="1" placeholder="{{ chatComposerPlaceholder }}" disabled="{{ chatInteractionLocked }}"
+                        style="flex:1;min-width:0;min-height:38px;max-height:110px;resize:vertical;border:0!important;outline:0;padding:7px 3px;font-size:13px;background:transparent!important"></textarea>
+                      <button type="button" class="btn btn-primary" onClick="{{ sendChat }}" disabled="{{ chatSendDisabled }}"
+                        style="min-width:42px;height:38px;padding:0 12px;font-size:13px">{{ chatSendLabel }}</button>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-size:9.5px;color:var(--color-neutral-600)">
+                      <span>{{ chatComposerHint }}</span><span>{{ chatFileLimitLabel }}</span>
+                    </div>
+                    <sc-if value="{{ hasChatWarning }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-size:11.5px;color:#a15a00;margin-top:7px">{{ chatWarning }}</div>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </section>
+
+              <aside class="job-chat-detail">
+                <div style="font-size:9.5px;font-weight:800;letter-spacing:.12em;color:var(--color-neutral-600)">{{
+                  chatDetailKicker }}</div>
+                <div style="font-size:17px;font-weight:800;margin-top:5px;overflow-wrap:anywhere">{{ chatSelectedJobNo
+                  }}</div>
+                <div style="font-size:12px;color:var(--color-neutral-700);line-height:1.6;margin-top:8px">{{
+                  chatSelectedService }}</div>
+                <div style="border-top:1px solid var(--color-line);margin-top:17px;padding-top:15px">
+                  <sc-for list="{{ chatDetailRows }}" as="d" hint-placeholder-count="4">
+                    <div style="margin-bottom:12px"><div style="font-size:10px;color:var(--color-neutral-600)">{{ d.k
+                        }}</div><div style="font-size:12px;font-weight:600;margin-top:2px;overflow-wrap:anywhere">{{ d.v
+                        }}</div></div>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ hasSelectedChat }}" hint-placeholder-val="{{ true }}">
+                  <button type="button" class="btn btn-ghost" onClick="{{ openSelectedChatTrack }}"
+                    disabled="{{ chatInteractionLocked }}"
+                    style="width:100%;min-height:38px;font-size:11.5px;border:1px solid var(--color-line)">{{
+                    chatOpenTrackLabel }}</button>
+                </sc-if>
+              </aside>
             </div>
           </section>
         </sc-if>
@@ -1489,6 +1797,10 @@
                         <div style="display:flex;gap:6px;flex-wrap:wrap">
                           <button type="button" class="btn btn-ghost" onClick="{{ j.viewDetail }}"
                             style="min-height:40px;font-size:13px;white-space:nowrap">{{ t.viewDetailBtn }}</button>
+                          <button type="button" class="btn btn-ghost" onClick="{{ j.openChat }}"
+                            style="min-height:40px;font-size:13px;white-space:nowrap">💬 {{ t.tabChat }}<sc-if
+                              value="{{ j.hasChatUnread }}" hint-placeholder-val="{{ false }}"> ({{ j.chatUnread
+                              }})</sc-if></button>
                           <button class="btn btn-ghost" onClick="{{ j.advance }}"
                             style="min-height:40px;font-size:13px;white-space:nowrap">{{ j.nextLabel }}</button>
                         </div>
@@ -2377,7 +2689,7 @@
                     <div style="margin-bottom:14px">
                       <sc-if value="{{ f.showImg }}" hint-placeholder-val="{{ true }}">
                         <a href="{{ f.link }}" target="_blank" rel="noopener" style="display:block">
-                          <img src="{{ f.imgSrc }}" onError="{{ f.onImgError }}" alt="{{ f.name }}"
+                          <img sc-camel-src="{{ f.imgSrc }}" sc-camel-on-error="{{ f.onImgError }}" alt="{{ f.name }}"
                             style="width:100%;max-width:320px;border-radius:var(--radius-input);border:1px solid var(--color-line);display:block">
                         </a>
                         <div
@@ -2527,7 +2839,7 @@ class Component extends DCLogic {
     dpOpen:null, dpMonthNeed:null, dpMonthRange:null, needByISO:null, rgStart:null, rgEnd:null,
     repMode:"month", repYear:"", repMonth:"",
     dashYearMode:"be", dashYear:String(new Date().getFullYear()+543), dashMonth:"8", dashUnit:"",
-    gasUrl:"https://script.google.com/macros/s/AKfycby618vDm0bcSD-_ru-nm2KWVaSwY3vs5DAk742oyZ9ZYc3PgCNc1oUJEBizAI9OAl3X/exec",
+    gasUrl:"https://script.google.com/macros/s/AKfycbyWuPfkCMLmYPVk8eqirn64KlgMhEWWsSc1vUhJaVUbi2Wo4s5bEAPaRq3lZwBa6rrA/exec",
     gasToken:"6552b83f-9a7a-4dd1-8169-05193c6744e3",
     spreadsheetId:"1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
     folderId:"1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L",
@@ -2538,6 +2850,11 @@ class Component extends DCLogic {
     jobDetailOpen:false, jobDetailJobNo:null, jobDetailFiles:[], jobDetailFilesLoading:false, slipImgErrors:{},
     confAmt:{}, confReason:"", confBusy:false, confMsg:"", confErr:"",
     mineEmailInput:"", mineSelectedEmail:"", mineSearchError:"",
+    chatThreads:[], chatMessages:[], chatSelectedJobNo:"", chatDraft:"", chatDraftFiles:[],
+    chatQuery:"", chatLoading:false, chatMessagesLoading:false, chatSending:false,
+    chatError:"", chatWarning:"", chatLastSequence:0, chatTotalUnread:0, chatUnreadByJob:{},
+    chatPendingClientId:"", chatUploadedFileIds:[], chatFilesReading:0,
+    chatHistoryCursor:null, chatHasOlder:false, chatOlderLoading:false,
     connResults:{
       sheet:{ ok:true, name:"SPU-Printing-Service-DB", at:new Date().toISOString() },
       drive:{ ok:true, name:"Printing-Service", at:new Date().toISOString() },
@@ -2638,7 +2955,7 @@ class Component extends DCLogic {
   componentDidMount() {
     import("./spu-data.js").then(d => this.setState({ d }));
     const defaultGas = {
-      gasUrl: "https://script.google.com/macros/s/AKfycby618vDm0bcSD-_ru-nm2KWVaSwY3vs5DAk742oyZ9ZYc3PgCNc1oUJEBizAI9OAl3X/exec",
+      gasUrl: "https://script.google.com/macros/s/AKfycbyWuPfkCMLmYPVk8eqirn64KlgMhEWWsSc1vUhJaVUbi2Wo4s5bEAPaRq3lZwBa6rrA/exec",
       gasToken: "6552b83f-9a7a-4dd1-8169-05193c6744e3",
       spreadsheetId: "1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
       folderId: "1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L"
@@ -2656,6 +2973,9 @@ class Component extends DCLogic {
       });
       // Always enforce the latest active Apps Script Web App URL
       patch.gasUrl = defaultGas.gasUrl;
+      // Always enforce the latest spreadsheet and token (SPU-Printing-Service-DB)
+      patch.gasToken = defaultGas.gasToken;
+      patch.spreadsheetId = defaultGas.spreadsheetId;
       const savedConn = JSON.parse(localStorage.getItem("spuGasConnResults") || "null");
       patch.connResults = (savedConn && savedConn.sheet && savedConn.drive && savedConn.access) ? savedConn : defaultConnResults;
       this.setState(patch, () => { this._loadLiveJobs(); this._loadPriceRules(); });
@@ -2664,6 +2984,30 @@ class Component extends DCLogic {
     } catch (e) {
       this.setState({ ...defaultGas, connResults: defaultConnResults }, () => { this._loadLiveJobs(); this._loadPriceRules(); });
     }
+    this._chatVisibility = async () => {
+      if (document.visibilityState === "hidden") {
+        this._stopChatPolling();
+        return;
+      }
+      if (this.state.page === "chat") {
+        this._startChatPolling();
+        if(this._chatPollBusy||this.state.chatLoading||this.state.chatMessagesLoading||this.state.chatSending||this.state.chatOlderLoading||this.state.chatFilesReading>0) return;
+        const generation=this._chatPollGeneration||0;
+        this._chatPollBusy=true;
+        this._chatPollBusyGeneration=generation;
+        try{
+          const selected=await this._loadChatThreads(true);
+          if(generation===(this._chatPollGeneration||0)&&selected) await this._loadChatMessages(selected,true);
+        }finally{
+          if(generation===(this._chatPollGeneration||0)&&this._chatPollBusyGeneration===generation){
+            this._chatPollBusy=false; this._chatPollBusyGeneration=null;
+          }
+        }
+      }else{
+        this._loadChatUnreadCounts(true);
+      }
+    };
+    document.addEventListener("visibilitychange", this._chatVisibility);
     this._calcKey = e => {
       if (!this.state.calcOpen) return;
       const tag = (e.target && e.target.tagName) || "";
@@ -2688,6 +3032,9 @@ class Component extends DCLogic {
 
   componentWillUnmount() {
     if (this._calcKey) document.removeEventListener("keydown", this._calcKey);
+    if (this._chatVisibility) document.removeEventListener("visibilitychange", this._chatVisibility);
+    this._stopChatPolling();
+    this._bumpChatEpoch();
   }
 
   calcApply(k) {
@@ -2721,6 +3068,360 @@ class Component extends DCLogic {
         body:JSON.stringify({ action, token:S.gasToken, spreadsheetId:S.spreadsheetId, folderId:S.folderId, ...extra }) });
       return await res.json();
     }catch(e){ return { ok:false, error:String((e&&e.message)||e) }; }
+  }
+
+  // — แชทติดตามงาน: หนึ่งห้องต่อหนึ่ง job_no —
+  _chatActor(){
+    const S=this.state;
+    if(S.isAdminLoggedIn && S.role==="ADMIN" && S.adminUserObj){
+      return { email:String(S.adminUserObj.email||"").trim().toLowerCase(), role:"ADMIN", name:S.adminUserObj.name||"" };
+    }
+    if(S.isAdminLoggedIn && S.role==="EXEC" && S.adminUserObj){
+      return { email:String(S.adminUserObj.email||"").trim().toLowerCase(), role:"EXECUTIVE", name:S.adminUserObj.name||"" };
+    }
+    return {
+      email:String(S.gateEmail||S.mineSelectedEmail||"").trim().toLowerCase(),
+      role:"REQUESTER",
+      name:(S.form&&S.form.name)||""
+    };
+  }
+  _chatClientId(){
+    return window.crypto&&window.crypto.randomUUID
+      ? window.crypto.randomUUID()
+      : "chat-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2);
+  }
+  _chatActorKey(actor){
+    const a=actor||this._chatActor();
+    return String(a.email||"").trim().toLowerCase()+"|"+String(a.role||"").toUpperCase();
+  }
+  _bumpChatEpoch(){
+    this._chatEpoch=(this._chatEpoch||0)+1;
+    this._chatThreadRequestId=(this._chatThreadRequestId||0)+1;
+    this._chatMessageRequestId=(this._chatMessageRequestId||0)+1;
+    this._chatHistoryRequestId=(this._chatHistoryRequestId||0)+1;
+    this._chatSendToken=null;
+    return this._chatEpoch;
+  }
+  _isCurrentChatRequest(epoch,actorKey){
+    return epoch===(this._chatEpoch||0)&&actorKey===this._chatActorKey();
+  }
+  _scrollChatToBottom(){
+    requestAnimationFrame(()=>{
+      const el=document.getElementById("spu-chat-message-list");
+      if(el) el.scrollTop=el.scrollHeight;
+    });
+  }
+  async _loadChatUnreadCounts(silent){
+    const actor=this._chatActor();
+    if(!actor.email) return false;
+    const epoch=this._chatEpoch||0, actorKey=this._chatActorKey(actor);
+    const r=await this._gasCall("getUnreadCounts", { email:actor.email, role:actor.role });
+    if(!this._isCurrentChatRequest(epoch,actorKey)) return false;
+    if(!r||!r.ok){
+      if(!silent) this.setState({ chatError:(r&&(r.message||r.error))||"chat_unread_load_failed" });
+      return false;
+    }
+    const byJob=(r.byJob&&typeof r.byJob==="object")?r.byJob:((r.counts&&typeof r.counts==="object")?r.counts:{});
+    const apiTotal=Number(r.totalUnread);
+    const total=Number.isFinite(apiTotal)?apiTotal:Object.values(byJob).reduce((sum,value)=>sum+(Number(value)||0),0);
+    this.setState({ chatUnreadByJob:{...byJob}, chatTotalUnread:total });
+    return true;
+  }
+  async _loadChatThreads(silent){
+    const actor=this._chatActor();
+    if(!actor.email){
+      if(!silent) this.setState({ chatLoading:false, chatError:this.state.lang==="th"?"ไม่พบอีเมลสำหรับเปิดห้องสนทนา":"No email is available for chat." });
+      return "";
+    }
+    if(!silent) this.setState({ chatLoading:true, chatError:"" });
+    const epoch=this._chatEpoch||0, actorKey=this._chatActorKey(actor);
+    const requestId=(this._chatThreadRequestId||0)+1;
+    this._chatThreadRequestId=requestId;
+    const r=await this._gasCall("listChatThreads", { email:actor.email, role:actor.role });
+    if(!this._isCurrentChatRequest(epoch,actorKey)||requestId!==this._chatThreadRequestId) return this.state.chatSelectedJobNo||"";
+    if(!r||!r.ok||!Array.isArray(r.threads)){
+      if(!silent) this.setState({ chatLoading:false, chatError:(r&&(r.message||r.error))||"chat_threads_load_failed" });
+      return "";
+    }
+    const threads=r.threads;
+    const unreadFromRows=threads.reduce((sum,row)=>sum+(Number(row.unread_count||row.unreadCount)||0),0);
+    const unreadByJob={};
+    threads.forEach(row=>{ unreadByJob[String(row.job_no||row.jobNo||"")]=Number(row.unread_count||row.unreadCount)||0; });
+    const previousSelected=String(this.state.chatSelectedJobNo||"");
+    let selected=previousSelected;
+    if(!selected && threads.length) selected=String(threads[0].job_no||threads[0].jobNo||"");
+    if(selected&&!threads.some(row=>String(row.job_no||row.jobNo||"")===String(selected))){
+      selected=threads.length?String(threads[0].job_no||threads[0].jobNo||""):"";
+    }
+    const apiUnread=Number(r.totalUnread);
+    const patch={
+      chatThreads:threads,
+      chatSelectedJobNo:selected,
+      chatTotalUnread:Number.isFinite(apiUnread)?apiUnread:unreadFromRows,
+      chatUnreadByJob:unreadByJob,
+      chatLoading:false
+    };
+    if(String(selected)!==previousSelected){
+      patch.chatMessages=[]; patch.chatLastSequence=0; patch.chatHistoryCursor=null; patch.chatHasOlder=false;
+      patch.chatDraft=""; patch.chatDraftFiles=[]; patch.chatPendingClientId=""; patch.chatUploadedFileIds=[]; patch.chatFilesReading=0;
+    }
+    if(!silent) patch.chatError="";
+    this.setState(patch);
+    return selected;
+  }
+  async _loadChatMessages(jobNo, incremental){
+    const target=String(jobNo||this.state.chatSelectedJobNo||"");
+    const actor=this._chatActor();
+    if(!target||!actor.email) return false;
+    const epoch=this._chatEpoch||0, actorKey=this._chatActorKey(actor);
+    const requestId=(this._chatMessageRequestId||0)+1;
+    this._chatMessageRequestId=requestId;
+    if(!incremental) this._chatHistoryRequestId=(this._chatHistoryRequestId||0)+1;
+    const messageList=document.getElementById("spu-chat-message-list");
+    const stickToBottom=!incremental||!messageList||(messageList.scrollHeight-messageList.scrollTop-messageList.clientHeight<72);
+    if(!incremental) this.setState({ chatMessagesLoading:true, chatError:"" });
+    const payload={ jobNo:target, email:actor.email, role:actor.role, limit:100 };
+    if(incremental&&target===this.state.chatSelectedJobNo) payload.afterSequence=Number(this.state.chatLastSequence||0);
+    const r=await this._gasCall("listMessages", payload);
+    if(!this._isCurrentChatRequest(epoch,actorKey)||requestId!==this._chatMessageRequestId||target!==this.state.chatSelectedJobNo) return false;
+    if(!r||!r.ok||!Array.isArray(r.messages)){
+      if(!incremental) this.setState({ chatMessagesLoading:false, chatError:(r&&(r.message||r.error))||"chat_messages_load_failed" });
+      return false;
+    }
+    const incoming=r.messages;
+    const merged=(incremental
+      ? [...this.state.chatMessages,...incoming].filter((row,index,all)=>{
+          const id=String(row.message_id||row.messageId||"");
+          return all.findIndex(x=>String(x.message_id||x.messageId||"")===id)===index;
+        })
+      : incoming).slice().sort((a,b)=>{
+        const seqA=Number(a.sequence||a.sequence_no||a.sequenceNo)||0;
+        const seqB=Number(b.sequence||b.sequence_no||b.sequenceNo)||0;
+        if(seqA!==seqB) return seqA-seqB;
+        const timeA=new Date(a.created_at||a.createdAt||0).getTime()||0;
+        const timeB=new Date(b.created_at||b.createdAt||0).getTime()||0;
+        if(timeA!==timeB) return timeA-timeB;
+        return String(a.message_id||a.messageId||"").localeCompare(String(b.message_id||b.messageId||""));
+      });
+    const lastSequence=merged.reduce((max,row)=>Math.max(max,Number(row.sequence||row.sequence_no||row.sequenceNo)||0),Number(r.lastSequence)||0);
+    const messagePatch={ chatMessages:merged, chatLastSequence:lastSequence, chatMessagesLoading:false };
+    if(!incremental){
+      messagePatch.chatHistoryCursor=r.nextCursor===undefined?null:r.nextCursor;
+      messagePatch.chatHasOlder=!!r.hasMore;
+    }
+    this.setState(messagePatch,()=>{
+      if(!incremental||(incoming.length&&stickToBottom)) this._scrollChatToBottom();
+    });
+    const threadBeforeRead=(this.state.chatThreads||[]).find(row=>String(row.job_no||row.jobNo)===target);
+    const unreadBeforeRead=threadBeforeRead?(Number(threadBeforeRead.unread_count||threadBeforeRead.unreadCount)||0):0;
+    const hasNewMessageFromOther=incoming.some(row=>{
+      const sender=String(row.sender_email||row.senderEmail||"").trim().toLowerCase();
+      return sender&&sender!==String(actor.email||"").toLowerCase();
+    });
+    if(merged.length&&(unreadBeforeRead>0||hasNewMessageFromOther)&&(!incremental||stickToBottom)&&this.state.page==="chat"&&document.visibilityState!=="hidden"){
+      const last=merged[merged.length-1];
+      const marked=await this._gasCall("markChatRead", {
+        jobNo:target, email:actor.email, role:actor.role,
+        lastReadMessageId:last.message_id||last.messageId||"",
+        lastSequence
+      });
+      if(marked&&marked.ok&&this._isCurrentChatRequest(epoch,actorKey)&&requestId===this._chatMessageRequestId&&target===this.state.chatSelectedJobNo){
+        this.setState(st=>{
+          const before=(st.chatThreads||[]).find(row=>String(row.job_no||row.jobNo)===target);
+          const cleared=before?(Number(before.unread_count||before.unreadCount)||0):0;
+          const remaining=Math.max(0,Number(marked.unreadCount)||0);
+          return {
+            chatThreads:(st.chatThreads||[]).map(row=>String(row.job_no||row.jobNo)===target?{...row,unread_count:remaining,unreadCount:remaining}:row),
+            chatTotalUnread:Math.max(0,Number(st.chatTotalUnread||0)-cleared+remaining),
+            chatUnreadByJob:{ ...(st.chatUnreadByJob||{}), [target]:remaining }
+          };
+        });
+      }
+    }
+    return true;
+  }
+  async _loadOlderChatMessages(){
+    const target=String(this.state.chatSelectedJobNo||""), cursor=this.state.chatHistoryCursor;
+    const actor=this._chatActor();
+    if(!target||!actor.email||!this.state.chatHasOlder||this.state.chatOlderLoading||this.state.chatLoading||this.state.chatMessagesLoading||this.state.chatSending||this.state.chatFilesReading>0) return false;
+    const epoch=this._chatEpoch||0, actorKey=this._chatActorKey(actor);
+    const historyRequestId=(this._chatHistoryRequestId||0)+1;
+    this._chatHistoryRequestId=historyRequestId;
+    const before=document.getElementById("spu-chat-message-list");
+    const oldHeight=before?before.scrollHeight:0, oldTop=before?before.scrollTop:0;
+    this.setState({ chatOlderLoading:true });
+    const r=await this._gasCall("listMessages", { jobNo:target, email:actor.email, role:actor.role, cursor, limit:100 });
+    if(!this._isCurrentChatRequest(epoch,actorKey)||historyRequestId!==this._chatHistoryRequestId||target!==this.state.chatSelectedJobNo||cursor!==this.state.chatHistoryCursor) return false;
+    if(!r||!r.ok||!Array.isArray(r.messages)){
+      this.setState({ chatOlderLoading:false, chatError:(r&&(r.message||r.error))||"chat_history_load_failed" });
+      return false;
+    }
+    this.setState(st=>({
+      chatMessages:[...r.messages,...(st.chatMessages||[])].filter((row,index,all)=>{
+        const id=String(row.message_id||row.messageId||"");
+        return all.findIndex(x=>String(x.message_id||x.messageId||"")===id)===index;
+      }),
+      chatHistoryCursor:r.nextCursor===undefined?null:r.nextCursor,
+      chatHasOlder:!!r.hasMore,
+      chatOlderLoading:false
+    }),()=>requestAnimationFrame(()=>{
+      const el=document.getElementById("spu-chat-message-list");
+      if(el) el.scrollTop=Math.max(0,el.scrollHeight-oldHeight+oldTop);
+    }));
+    return true;
+  }
+  _selectChatThread(jobNo){
+    const target=String(jobNo||"");
+    if(!target||target===this.state.chatSelectedJobNo||this.state.chatSending||this.state.chatFilesReading>0||this.state.chatMessagesLoading||this.state.chatOlderLoading) return;
+    this._bumpChatEpoch();
+    this.setState({ chatSelectedJobNo:target, chatMessages:[], chatLastSequence:0, chatDraft:"", chatDraftFiles:[], chatWarning:"", chatError:"", chatPendingClientId:"", chatUploadedFileIds:[], chatFilesReading:0, chatHistoryCursor:null, chatHasOlder:false, chatOlderLoading:false },()=>{
+      this._loadChatMessages(target,false);
+    });
+  }
+  _openChat(jobNo){
+    const target=String(jobNo||this.state.chatSelectedJobNo||"");
+    if(this.state.chatSending||this.state.chatFilesReading>0||this.state.chatOlderLoading) return;
+    this._stopChatPolling();
+    const epoch=this._bumpChatEpoch();
+    this.setState(st=>{
+      const switching=!!target&&target!==String(st.chatSelectedJobNo||"");
+      return {
+        page:"chat", chatSelectedJobNo:target, chatMessages:[], chatLastSequence:0, chatError:"", chatWarning:"", chatFilesReading:0,
+        chatHistoryCursor:null, chatHasOlder:false, chatOlderLoading:false,
+        ...(switching?{ chatDraft:"", chatDraftFiles:[], chatPendingClientId:"", chatUploadedFileIds:[] }:{})
+      };
+    },async()=>{
+      const selected=await this._loadChatThreads(false);
+      if(epoch!==(this._chatEpoch||0)||this.state.page!=="chat") return;
+      if(selected) await this._loadChatMessages(selected,false);
+      if(epoch!==(this._chatEpoch||0)||this.state.page!=="chat") return;
+      this._startChatPolling();
+    });
+  }
+  _startChatPolling(){
+    this._stopChatPolling();
+    const generation=this._chatPollGeneration||0;
+    this._chatPollTimer=setInterval(async()=>{
+      if(this.state.page!=="chat"||document.visibilityState==="hidden"||this._chatPollBusy||this.state.chatLoading||this.state.chatMessagesLoading||this.state.chatSending||this.state.chatOlderLoading||this.state.chatFilesReading>0) return;
+      this._chatPollBusy=true;
+      this._chatPollBusyGeneration=generation;
+      try{
+        const selected=await this._loadChatThreads(true);
+        if(generation===(this._chatPollGeneration||0)&&selected) await this._loadChatMessages(selected,true);
+      }finally{
+        if(generation===(this._chatPollGeneration||0)&&this._chatPollBusyGeneration===generation){
+          this._chatPollBusy=false; this._chatPollBusyGeneration=null;
+        }
+      }
+    },8000);
+  }
+  _stopChatPolling(){
+    this._chatPollGeneration=(this._chatPollGeneration||0)+1;
+    if(this._chatPollTimer){ clearInterval(this._chatPollTimer); this._chatPollTimer=null; }
+    this._chatPollBusy=false;
+    this._chatPollBusyGeneration=null;
+  }
+  _triggerChatFileSelect(){
+    const el=document.getElementById("spu-chat-file-input");
+    if(el) el.click();
+  }
+  _handleChatFiles(fileList){
+    if(this.state.chatSending||this.state.chatLoading||this.state.chatMessagesLoading||this.state.chatOlderLoading) return;
+    const list=Array.from(fileList||[]), current=this.state.chatDraftFiles||[];
+    const remaining=Math.max(0,5-current.length);
+    const epoch=this._chatEpoch||0, actorKey=this._chatActorKey(), target=String(this.state.chatSelectedJobNo||"");
+    let warning="", accepted=[];
+    if(list.length>remaining) warning=this.state.lang==="th"?"แนบได้สูงสุด 5 ไฟล์ต่อข้อความ":"Up to 5 files can be attached to one message.";
+    list.slice(0,remaining).forEach(file=>{
+      if(file.size>2*1024*1024){
+        warning=this.state.lang==="th"?("ไฟล์ \""+file.name+"\" เกิน 2 MB"):("File \""+file.name+"\" exceeds 2 MB.");
+        return;
+      }
+      if(!/\.(png|jpe?g|webp|gif|pdf|txt|docx|xlsx)$/i.test(file.name)){
+        warning=this.state.lang==="th"?("ไม่รองรับไฟล์ \""+file.name+"\""):("Unsupported file: \""+file.name+"\"");
+        return;
+      }
+      accepted.push({ file, id:this._chatClientId() });
+    });
+    if(accepted.length) this.setState(st=>({ chatFilesReading:Number(st.chatFilesReading||0)+accepted.length, chatWarning:warning, chatPendingClientId:"" }));
+    accepted.forEach(entry=>{
+      const file=entry.file;
+      const reader=new FileReader();
+      reader.onload=()=>{
+        if(!this._isCurrentChatRequest(epoch,actorKey)||target!==String(this.state.chatSelectedJobNo||"")) return;
+        const raw=String(reader.result||""), base64=raw.includes(",")?raw.split(",")[1]:"";
+        const item={ id:entry.id, name:file.name.slice(0,180), size:file.size,
+          sizeStr:this._formatFileSize(file.size), mimeType:file.type||"application/octet-stream", base64 };
+        this.setState(st=>({
+          chatDraftFiles:[...(st.chatDraftFiles||[]),item].slice(0,5),
+          chatFilesReading:Math.max(0,Number(st.chatFilesReading||0)-1),
+          chatWarning:warning, chatError:"", chatPendingClientId:""
+        }));
+      };
+      reader.onerror=()=>{
+        if(!this._isCurrentChatRequest(epoch,actorKey)||target!==String(this.state.chatSelectedJobNo||"")) return;
+        this.setState(st=>({
+          chatFilesReading:Math.max(0,Number(st.chatFilesReading||0)-1),
+          chatWarning:this.state.lang==="th"?("อ่านไฟล์ไม่สำเร็จ: "+file.name):("Unable to read file: "+file.name)
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+    if(warning) this.setState({ chatWarning:warning });
+  }
+  _removeChatFile(id){
+    if(this.state.chatSending||this.state.chatFilesReading>0||this.state.chatLoading||this.state.chatMessagesLoading||this.state.chatOlderLoading) return;
+    this.setState(st=>({ chatDraftFiles:(st.chatDraftFiles||[]).filter(file=>file.id!==id), chatWarning:"", chatPendingClientId:"" }));
+  }
+  async _sendChatMessage(){
+    const S=this.state, actor=this._chatActor(), jobNo=String(S.chatSelectedJobNo||"");
+    const rawText=String(S.chatDraft||""), text=rawText.trim()?rawText:"", files=(S.chatDraftFiles||[]).map(file=>({...file}));
+    if(this._chatSendToken||S.chatSending||S.chatFilesReading>0||S.chatLoading||S.chatMessagesLoading||S.chatOlderLoading||!jobNo||!actor.email||(!text&&!files.length)) return;
+    const clientMessageId=S.chatPendingClientId||this._chatClientId();
+    const epoch=this._chatEpoch||0, actorKey=this._chatActorKey(actor);
+    const attachmentFileIds=[];
+    this._chatSendToken=clientMessageId;
+    this.setState({ chatSending:true, chatError:"", chatWarning:"", chatPendingClientId:clientMessageId });
+    try{
+      for(let i=0;i<files.length;i++){
+        const file=files[i];
+        let fileId=String(file.uploadedFileId||"");
+        if(!fileId){
+          this.setState({ chatWarning:(this.state.lang==="th"?"กำลังอัปโหลดไฟล์ ":"Uploading file ")+(i+1)+"/"+files.length+"…" });
+          const uploaded=await this._gasCall("uploadFile", {
+            jobNo, fileName:file.name, mimeType:file.mimeType, base64:file.base64,
+            category:"chat-attachments", email:actor.email, role:actor.role,
+            clientUploadId:file.id
+          });
+          if(!this._isCurrentChatRequest(epoch,actorKey)||jobNo!==String(this.state.chatSelectedJobNo||"")) return false;
+          if(!uploaded||!uploaded.ok||!uploaded.fileId) throw new Error((uploaded&&(uploaded.message||uploaded.error))||"chat_file_upload_failed");
+          fileId=String(uploaded.fileId);
+          file.uploadedFileId=fileId;
+          this.setState(st=>({
+            chatDraftFiles:(st.chatDraftFiles||[]).map(item=>item.id===file.id?{...item,uploadedFileId:fileId}:item)
+          }));
+        }
+        attachmentFileIds.push(fileId);
+      }
+      const r=await this._gasCall("sendMessage", {
+        jobNo, email:actor.email, role:actor.role, senderName:actor.name,
+        messageText:text, text, messageType:attachmentFileIds.length?(text?"text_with_attachments":"attachments"):"text",
+        clientMessageId, attachmentFileIds
+      });
+      if(!this._isCurrentChatRequest(epoch,actorKey)||jobNo!==String(this.state.chatSelectedJobNo||"")) return false;
+      if(!r||!r.ok) throw new Error((r&&(r.message||r.error))||"chat_send_failed");
+      this.setState({ chatDraft:"", chatDraftFiles:[], chatSending:false, chatWarning:"", chatError:"", chatPendingClientId:"", chatUploadedFileIds:[] });
+      await this._loadChatMessages(jobNo,false);
+      await this._loadChatThreads(true);
+      return true;
+    }catch(err){
+      if(this._isCurrentChatRequest(epoch,actorKey)&&jobNo===String(this.state.chatSelectedJobNo||"")){
+        this.setState({ chatSending:false, chatWarning:"", chatError:String((err&&err.message)||err) });
+      }
+      return false;
+    }finally{
+      if(this._chatSendToken===clientMessageId) this._chatSendToken=null;
+    }
   }
   async _runConnTest(kind, action){
     this.setState(st=>({ connBusy:{ ...st.connBusy, [kind]:true } }));
@@ -2837,7 +3538,7 @@ class Component extends DCLogic {
           if(!this._dashTouched){ patch.dashYear=String(ly+543); patch.dashMonth=String(lm); patch.dashYearMode="be"; }
           if(!this._repTouched){ patch.repYear=String(ly+543); patch.repMonth=String(lm); patch.repMode="month"; }
         }
-        this.setState(patch);
+        this.setState(patch,()=>this._loadChatUnreadCounts(true));
       }else{
         this.setState({ jobsLoading:false, liveSyncError:(r&&r.error)||"load_failed" });
       }
@@ -2929,7 +3630,13 @@ class Component extends DCLogic {
         this.setState({ adminLoginOpen: true, adminPassInput: "", adminLoginError: "" });
         return;
       }
-      this.setState({ page });
+      if(page==="chat"){
+        this._openChat(this.state.chatSelectedJobNo);
+        return;
+      }
+      this._stopChatPolling();
+      this._bumpChatEpoch();
+      this.setState({ page, chatLoading:false, chatMessagesLoading:false, chatSending:false, chatFilesReading:0, chatOlderLoading:false });
     };
   }
 
@@ -2970,7 +3677,7 @@ class Component extends DCLogic {
         let r = await this._gasCall("checkAdminUser", { email, password: pass });
         // Fallback: If unknown_action occurs, it means the browser contacted an older deployment URL.
         // Force retry directly using the updated active Web App URL:
-        const activeUrl = "https://script.google.com/macros/s/AKfycby618vDm0bcSD-_ru-nm2KWVaSwY3vs5DAk742oyZ9ZYc3PgCNc1oUJEBizAI9OAl3X/exec";
+        const activeUrl = "https://script.google.com/macros/s/AKfycbyWuPfkCMLmYPVk8eqirn64KlgMhEWWsSc1vUhJaVUbi2Wo4s5bEAPaRq3lZwBa6rrA/exec";
         if (r && (r.error === "unknown_action" || r.error === "missing_url")) {
           this.setState({ gasUrl: activeUrl });
           try {
@@ -2996,6 +3703,7 @@ class Component extends DCLogic {
         if (r && r.ok && r.isAdmin) {
           const userRole = r.role || "ADMIN";
           const isExec = userRole === "EXECUTIVE";
+          this._bumpChatEpoch();
           this.setState({
             isAdminLoggedIn: true,
             adminLoginOpen: false,
@@ -3005,8 +3713,11 @@ class Component extends DCLogic {
             adminLoginError: "",
             adminUserObj: { name: r.name || email, email: r.email || email, role: userRole },
             role: isExec ? "EXEC" : "ADMIN",
-            page: isExec ? "dash" : "queue"
-          });
+            page: isExec ? "dash" : "queue",
+            chatThreads:[], chatMessages:[], chatSelectedJobNo:"", chatTotalUnread:0, chatUnreadByJob:{},
+            chatDraft:"", chatDraftFiles:[], chatPendingClientId:"", chatUploadedFileIds:[],
+            chatLoading:false, chatMessagesLoading:false, chatSending:false, chatFilesReading:0, chatHistoryCursor:null, chatHasOlder:false, chatOlderLoading:false
+          },()=>this._loadChatUnreadCounts(true));
           return;
         } else {
           let errMsg = (r && r.message) || "";
@@ -3029,6 +3740,8 @@ class Component extends DCLogic {
     };
 
     const adminLogout = () => {
+      this._stopChatPolling();
+      this._bumpChatEpoch();
       this.setState({
         isAdminLoggedIn: false,
         adminLoginOpen: false,
@@ -3038,7 +3751,10 @@ class Component extends DCLogic {
         adminLoginBusy: false,
         adminUserObj: null,
         role: "REQ",
-        page: "landing"
+        page: "landing",
+        chatThreads:[], chatMessages:[], chatSelectedJobNo:"", chatTotalUnread:0, chatUnreadByJob:{},
+        chatDraft:"", chatDraftFiles:[], chatPendingClientId:"", chatUploadedFileIds:[],
+        chatLoading:false, chatMessagesLoading:false, chatSending:false, chatFilesReading:0, chatHistoryCursor:null, chatHasOlder:false, chatOlderLoading:false
       });
     };
 
@@ -3052,7 +3768,16 @@ class Component extends DCLogic {
 
     const roleBtns = availableRoleDefs.map(([k, label], i) => ({
       label, br: i < availableRoleDefs.length - 1 ? "1px solid var(--color-line)" : "0", bg: S.role === k ? AC : "transparent", fg: S.role === k ? "#fff" : INK,
-      go: () => this.setState({ role: k, page: k === "REQ" ? "landing" : (k === "ADMIN" ? "queue" : "dash") })
+      go: () => {
+        this._stopChatPolling();
+        this._bumpChatEpoch();
+        this.setState({
+          role:k, page:k==="REQ"?"landing":(k==="ADMIN"?"queue":"dash"),
+          chatThreads:[], chatMessages:[], chatSelectedJobNo:"", chatTotalUnread:0, chatUnreadByJob:{},
+          chatDraft:"", chatDraftFiles:[], chatPendingClientId:"", chatUploadedFileIds:[],
+          chatLoading:false, chatMessagesLoading:false, chatSending:false, chatFilesReading:0, chatHistoryCursor:null, chatHasOlder:false, chatOlderLoading:false
+        },()=>this._loadChatUnreadCounts(true));
+      }
     }));
 
     const langBtns = [["th", "ไทย"], ["en", "EN"]].map(([k, label], i) => ({
@@ -3072,11 +3797,12 @@ class Component extends DCLogic {
     // แสดง 3 เมนู แบบฟอร์มบริการ/งานของฉัน/ติดตามสถานะ ก็ต่อเมื่อกด "ขอรับบริการ" ผ่านด้วยอีเมล @spu.ac.th สำเร็จแล้วเท่านั้น
     // (เช็คจาก flag ที่ตั้งตอนกดปุ่มสำเร็จ ไม่ใช่เช็คจากค่าที่พิมพ์ในช่องอีเมลสด ๆ — กันเมนูโผล่ก่อนกดปุ่ม)
     const gateVerified = !!S.gateVerified;
+    const chatTabLabel=t.tabChat+(S.chatTotalUnread>0?" ("+S.chatTotalUnread+")":"");
     const tabDefs = {
       REQ: gateVerified
-        ? [["landing", t.tabLanding], ["wizard", t.tabWizard], ["mine", t.tabMine], ["track", t.tabTrack]]
+        ? [["landing", t.tabLanding], ["wizard", t.tabWizard], ["mine", t.tabMine], ["track", t.tabTrack], ["chat", chatTabLabel]]
         : [["landing", t.tabLanding]],
-      ADMIN: [["queue", t.tabQueue], ["mobile", t.tabMobile], ["price", t.tabPrice], ["raw", t.tabRaw], ["sheet", t.tabSheet], ["report", t.tabReport], ["settings", t.tabSettings]],
+      ADMIN: [["queue", t.tabQueue], ["chat", chatTabLabel], ["mobile", t.tabMobile], ["price", t.tabPrice], ["raw", t.tabRaw], ["sheet", t.tabSheet], ["report", t.tabReport], ["settings", t.tabSettings]],
       EXEC: [["dash", t.tabDash], ["report", t.tabReport], ["raw", t.tabRaw]]
     };
     const tabs = tabDefs[effectiveRole].map(([k, label]) => ({
@@ -3105,9 +3831,14 @@ class Component extends DCLogic {
         if(prof){ name=S.lang==="th"?prof.nameTh:prof.nameEn; pos=S.lang==="th"?prof.posTh:prof.posEn;
           unit=S.lang==="th"?prof.unitTh:prof.unitEn; phone=prof.phone; }
       }
+      this._bumpChatEpoch();
       this.setState({ form:{ name, pos, unit, phone, needBy:"", purpose:"", note:"" },
         page:"wizard", gateOpen:false, gateErr:false, gateVerified:true, gateBusy:false,
-        mineSelectedEmail:email, mineEmailInput:email });
+        mineSelectedEmail:email, mineEmailInput:email,
+        chatThreads:[], chatMessages:[], chatSelectedJobNo:"", chatTotalUnread:0, chatUnreadByJob:{},
+        chatDraft:"", chatDraftFiles:[], chatPendingClientId:"", chatUploadedFileIds:[],
+        chatLoading:false, chatMessagesLoading:false, chatSending:false, chatFilesReading:0, chatHistoryCursor:null, chatHasOlder:false, chatOlderLoading:false
+      },()=>this._loadChatUnreadCounts(true));
     };
 
     // — wizard: service group + item selection —
@@ -3327,6 +4058,7 @@ class Component extends DCLogic {
       const nextIdx = d.FLOW.indexOf(code);
       const next = nextIdx >= 0 && nextIdx < d.FLOW.length - 1 ? d.FLOW[nextIdx + 1] : null;
       const serviceName = j.purpose || (j.svc ? this.sname(this.svc(j.svc)) : (S.lang === "th" ? "งานพิมพ์ทั่วไป" : "General printing"));
+      const chatUnread=Number((S.chatUnreadByJob||{})[String(j.no)])||0;
       return {
         raw: j, no: j.no, email: j.email || "", requester: this.L(j, "req") || j.reqTh || "—", unit: this.L(j, "unit") || j.unitTh || "—",
         service: serviceName, sent: j.sent || "—", need: j.need || "—",
@@ -3336,6 +4068,8 @@ class Component extends DCLogic {
         nextLabel: next ? ("→ " + this.status(next)) : (S.lang === "th" ? "สิ้นสุด" : "final"),
         advance: next ? () => this._advanceStatus(j.no, next) : () => {},
         open: () => this.setState({ page: "track", curNo: j.no }),
+        openChat: () => this._openChat(j.no),
+        chatUnread, hasChatUnread:chatUnread>0,
         viewDetail: () => this._openJobDetail(j.no),
         folderId: j.folderId || "",
         rawSubmittedAt: j.rawSubmittedAt || "", rawCompletedAt: j.rawCompletedAt || "",
@@ -3446,8 +4180,117 @@ class Component extends DCLogic {
 
     const myCards = userMatchedJobs.map(j => {
       const p = PAL[j.code] || PAL.RECEIVED;
-      return { ...j, hue: p.fg, mediaBg: p.grad, initials: (j.requester || "").trim().slice(0, 1) || "P" };
+      const thread=(S.chatThreads||[]).find(row=>String(row.job_no||row.jobNo)===String(j.no));
+      const unreadMap=S.chatUnreadByJob||{}, unreadKey=String(j.no);
+      const unread=Object.prototype.hasOwnProperty.call(unreadMap,unreadKey)
+        ?(Number(unreadMap[unreadKey])||0)
+        :(Number(thread&&(thread.unread_count||thread.unreadCount))||0);
+      return { ...j, hue: p.fg, mediaBg: p.grad, initials: (j.requester || "").trim().slice(0, 1) || "P",
+        unread, hasUnread:unread>0 };
     });
+
+    // — chat view models —
+    const chatActor=this._chatActor();
+    const chatDateTime=value=>{
+      const dt=new Date(value);
+      if(isNaN(dt.getTime())) return "";
+      try{
+        return new Intl.DateTimeFormat(S.lang==="th"?"th-TH":"en-GB", {
+          day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Asia/Bangkok"
+        }).format(dt);
+      }catch(e){ return String(value||""); }
+    };
+    const chatQueryLower=String(S.chatQuery||"").trim().toLowerCase();
+    const chatThreadRows=(S.chatThreads||[]).map(row=>{
+      const jobNo=String(row.job_no||row.jobNo||"");
+      const job=jobsAll.find(item=>String(item.no)===jobNo);
+      const lastMessage=row.last_message||row.lastMessage||null;
+      const title=String(row.title||row.purpose||(job&&job.service)||jobNo||"—");
+      const requester=String(row.requester_name||row.requesterName||(job&&job.requester)||"");
+      const preview=String(row.last_message_text||row.lastMessageText||row.last_text||row.preview||(lastMessage&&(lastMessage.text||lastMessage.messageText))||(S.lang==="th"?"ยังไม่มีข้อความ":"No messages yet"));
+      const unread=Number(row.unread_count||row.unreadCount)||0;
+      const active=jobNo===String(S.chatSelectedJobNo||"");
+      return {
+        raw:row, jobNo, title, requester, preview,
+        lastAt:chatDateTime(row.last_message_at||row.lastMessageAt||(lastMessage&&(lastMessage.created_at||lastMessage.createdAt))||row.updated_at||""),
+        unread, hasUnread:unread>0,
+        bg:active?"var(--color-accent-100)":"#fff",
+        border:active?"var(--color-accent-200)":"transparent",
+        open:()=>this._selectChatThread(jobNo)
+      };
+    }).filter(row=>!chatQueryLower||[row.jobNo,row.title,row.requester,row.preview].join(" ").toLowerCase().includes(chatQueryLower));
+    const selectedChatThread=(S.chatThreads||[]).find(row=>String(row.job_no||row.jobNo)===String(S.chatSelectedJobNo||""))||null;
+    const selectedChatJob=jobsAll.find(item=>String(item.no)===String(S.chatSelectedJobNo||""))||null;
+    const selectedChatCode=(selectedChatJob&&selectedChatJob.code)||(selectedChatThread&&(selectedChatThread.status||selectedChatThread.job_status))||"RECEIVED";
+    const selectedChatPalette=PAL[selectedChatCode]||PAL.RECEIVED;
+    const chatMessageRows=(S.chatMessages||[]).map(row=>{
+      const role=String(row.sender_role||row.senderRole||"").toUpperCase();
+      const senderEmail=String(row.sender_email||row.senderEmail||"").trim().toLowerCase();
+      const isSystem=role==="SYSTEM"||String(row.message_type||row.messageType||"").toLowerCase()==="system";
+      const own=!isSystem&&senderEmail&&senderEmail===String(chatActor.email||"").toLowerCase();
+      const text=String(row.message_text!==undefined?row.message_text:(row.text!==undefined?row.text:(row.body||"")));
+      const rawAttachments=Array.isArray(row.attachments)?row.attachments:[];
+      const attachments=rawAttachments.map(file=>({
+        name:file.file_name||file.fileName||file.name||"file",
+        link:file.web_view_link||file.webViewLink||file.link||"#",
+        size:this._formatFileSize(Number(file.file_size||file.fileSize||file.size)||0)
+      }));
+      const senderName=row.sender_name||row.senderName||"";
+      const sender=senderName||(
+        role==="ADMIN"?(S.lang==="th"?"เจ้าหน้าที่โรงพิมพ์":"Print shop staff"):
+        role==="EXECUTIVE"?(S.lang==="th"?"ผู้บริหาร":"Executive"):
+        (S.lang==="th"?"ผู้ขอรับบริการ":"Requester")
+      );
+      return {
+        raw:row, isSystem, own, text, sender,
+        time:chatDateTime(row.created_at||row.createdAt||""), attachments,
+        justify:own?"flex-end":"flex-start", align:own?"right":"left",
+        bg:own?"var(--color-accent)":"#fff", fg:own?"#fff":"var(--color-neutral-800)",
+        border:own?"var(--color-accent)":"var(--color-line)",
+        radius:own?"15px 15px 3px 15px":"15px 15px 15px 3px",
+        attachmentBg:own?"rgba(255,255,255,.14)":"var(--color-band)",
+        attachmentBorder:own?"rgba(255,255,255,.28)":"var(--color-line)",
+        attachmentFg:own?"#fff":"var(--color-accent-700)"
+      };
+    });
+    const chatDraftFileRows=(S.chatDraftFiles||[]).map(file=>({ ...file, remove:()=>this._removeChatFile(file.id) }));
+    const quickReplyTexts=chatActor.role==="ADMIN"
+      ? (S.lang==="th"?["ได้รับไฟล์แล้ว กำลังตรวจสอบรายละเอียด","งานพร้อมรับแล้ว","รบกวนส่งข้อมูลเพิ่มเติม"]:["Files received; we are checking the details.","Your job is ready for pickup.","Please send additional information."])
+      : (S.lang==="th"?["สอบถามความคืบหน้าของงาน","ขอยืนยันกำหนดรับงาน","ต้องการแจ้งรายละเอียดเพิ่มเติม"]:["Could I have a progress update?","Please confirm the pickup date.","I would like to add more details."]);
+    const chatQuickReplies=quickReplyTexts.map(label=>({ label, use:()=>{
+      if(this.state.chatSending||this.state.chatFilesReading>0) return;
+      this.setState({ chatDraft:label, chatError:"", chatPendingClientId:"" });
+    } }));
+    const chatSelectedRequester=(selectedChatJob&&selectedChatJob.requester)||(selectedChatThread&&(selectedChatThread.requester_name||selectedChatThread.requesterName))||"—";
+    const chatSelectedService=(selectedChatJob&&selectedChatJob.service)||(selectedChatThread&&(selectedChatThread.purpose||selectedChatThread.title))||"—";
+    const chatSelectedStatus=selectedChatJob?selectedChatJob.statusLabel:this.status(selectedChatCode);
+    const chatDetailRows=selectedChatJob?[
+      { k:S.lang==="th"?"ผู้ขอรับบริการ":"Requester", v:selectedChatJob.requester||"—" },
+      { k:S.lang==="th"?"หน่วยงาน":"Unit", v:selectedChatJob.unit||"—" },
+      { k:S.lang==="th"?"วันที่ส่ง":"Submitted", v:selectedChatJob.sent||"—" },
+      { k:S.lang==="th"?"ต้องการรับ":"Needed by", v:selectedChatJob.need||"—" }
+    ]:[];
+    const hasSelectedChat=!!S.chatSelectedJobNo;
+    const refreshChat=async()=>{
+      if(this._chatPollBusy||this.state.chatLoading||this.state.chatMessagesLoading||this.state.chatSending||this.state.chatFilesReading>0||this.state.chatOlderLoading) return;
+      const generation=this._chatPollGeneration||0;
+      this._chatPollBusy=true;
+      this._chatPollBusyGeneration=generation;
+      try{
+        const selected=await this._loadChatThreads(false);
+        if(generation===(this._chatPollGeneration||0)&&selected) await this._loadChatMessages(selected,false);
+      }finally{
+        if(generation===(this._chatPollGeneration||0)&&this._chatPollBusyGeneration===generation){
+          this._chatPollBusy=false; this._chatPollBusyGeneration=null;
+        }
+      }
+    };
+    const openSelectedChatTrack=()=>{
+      if(this.state.chatSending||this.state.chatFilesReading>0) return;
+      this._stopChatPolling();
+      this._bumpChatEpoch();
+      this.setState({ page:"track", curNo:S.chatSelectedJobNo, chatLoading:false, chatMessagesLoading:false, chatSending:false, chatFilesReading:0, chatOlderLoading:false });
+    };
 
     // อีเมลที่ "มีคิวงานจริง" คือชุดเดียวกับที่อยู่ใน dropdown ใช้เป็นตัวตัดสินว่าค้นเจอหรือไม่
     const knownMineEmails = new Set(requesterEmailOptions.map(o => String(o.email || "").trim().toLowerCase()));
@@ -3504,6 +4347,7 @@ class Component extends DCLogic {
     const effectiveCurNo = (S.curNo && trackJobs.some(j => j.no === S.curNo)) ? S.curNo : (hasTrackJobs ? trackJobs[0].no : null);
     const trackJobOptions = trackJobs.map(j => ({ v: j.no, label: j.no + " · " + j.service }));
     const setTrackJob = e => this.setState({ curNo: e.target.value });
+    const openCurrentTrackChat = () => { if (effectiveCurNo) this._openChat(effectiveCurNo); };
     const cur = trackJobs.find(j => j.no === effectiveCurNo) || {
       no: "—", requester: "—", unit: "—", service: "—", sent: "—", need: "—", code: "RECEIVED", est: "—", conf: "—"
     };
@@ -4363,7 +5207,7 @@ class Component extends DCLogic {
 
     return { t, roleBtns, langBtns, tabs, two:2,
       isLanding:S.page==="landing", isWizard:S.page==="wizard", isMine:S.page==="mine",
-      isTrack:S.page==="track", isQueue:S.page==="queue", isMobile:S.page==="mobile",
+      isTrack:S.page==="track", isChat:S.page==="chat", isQueue:S.page==="queue", isMobile:S.page==="mobile",
       isPrice:S.page==="price", isRaw:S.page==="raw", isDash:S.page==="dash",
       isReport:S.page==="report", isSheet:S.page==="sheet", isSettings:S.page==="settings",
       goLanding:this.go("landing"), goWizard:this.go("wizard"), goMine:this.go("mine"), goTrack:this.go("track"),
@@ -4473,6 +5317,49 @@ class Component extends DCLogic {
       notFoundMineTitle:S.lang==="th"?("ไม่พบประวัติคำขอสำหรับ "+activeMineEmail):("No requests found for "+activeMineEmail),
       notFoundMineSub:S.lang==="th"?"อีเมลนี้ยังไม่มีการบันทึกคำขอในชีต JOBS สามารถกดยื่นคำขอรับบริการพิมพ์งานได้ทันที":"This email has no requests in the JOBS sheet yet. You can submit a new printing request now.",
       myJobs:jobsAll.slice(0,5), myCards:myCards, filteredJobs, queueKpis,
+      chatPageTitle:S.lang==="th"?"แชทติดตามงาน":"Job conversation",
+      chatPageSubtitle:S.lang==="th"?"หนึ่งงานต่อหนึ่งบทสนทนา ข้อความและไฟล์แนบเชื่อมกับเลขที่งานโดยตรง":"One conversation per job, linked directly to its job number.",
+      chatInboxLabel:chatActor.role==="ADMIN"?(S.lang==="th"?"กล่องข้อความงาน":"Job inbox"):(S.lang==="th"?"บทสนทนาของฉัน":"My conversations"),
+      chatConversationLabel:S.lang==="th"?"บทสนทนาติดตามงาน":"Job conversation",
+      chatThreadCountLabel:(S.chatThreads||[]).length+(S.lang==="th"?" งาน":" jobs"),
+      chatThreadRows, hasNoChatThreads:chatThreadRows.length===0&&!S.chatLoading,
+      chatNoThreadsLabel:S.lang==="th"?"ยังไม่มีงานสำหรับเริ่มบทสนทนา":"No jobs are available for a conversation yet.",
+      chatSearchPlaceholder:S.lang==="th"?"ค้นหาเลขงานหรือชื่องาน":"Search job number or title",
+      chatQuery:S.chatQuery, setChatQuery:e=>this.setState({ chatQuery:e.target.value }),
+      chatLoading:S.chatLoading, chatRefreshLabel:S.chatLoading?(S.lang==="th"?"กำลังโหลด…":"Loading…"):(S.lang==="th"?"🔄 รีเฟรชแชท":"🔄 Refresh chat"),
+      chatRefreshDisabled:S.chatLoading||S.chatMessagesLoading||S.chatSending||S.chatFilesReading>0||S.chatOlderLoading,
+      refreshChat,
+      hasSelectedChat, hasNoSelectedChat:!hasSelectedChat,
+      chatSelectedJobNo:S.chatSelectedJobNo||"—", chatSelectedRequester, chatSelectedService,
+      chatSelectedStatus, chatSelectedTagBg:selectedChatPalette.bg, chatSelectedTagFg:selectedChatPalette.fg,
+      chatMessagesLoading:S.chatMessagesLoading, chatLoadingLabel:S.lang==="th"?"กำลังโหลดข้อความ…":"Loading messages…",
+      chatMessageRows, hasNoChatMessages:!S.chatMessagesLoading&&chatMessageRows.length===0,
+      chatHasOlder:S.chatHasOlder, chatOlderLoading:S.chatOlderLoading,
+      loadOlderChat:()=>this._loadOlderChatMessages(),
+      chatOlderLabel:S.chatOlderLoading?(S.lang==="th"?"กำลังโหลด…":"Loading…"):(S.lang==="th"?"โหลดข้อความก่อนหน้า":"Load earlier messages"),
+      chatEmptyMessagesLabel:S.lang==="th"?"ยังไม่มีข้อความ เริ่มบทสนทนาเกี่ยวกับงานนี้ได้เลย":"No messages yet. Start this job conversation.",
+      chatSelectThreadTitle:S.lang==="th"?"เลือกงานที่ต้องการสนทนา":"Select a job conversation",
+      chatSelectThreadSubtitle:S.lang==="th"?"เลือกรายการจากกล่องข้อความด้านซ้าย":"Choose a job from the inbox.",
+      chatQuickReplies, chatDraft:S.chatDraft,
+      setChatDraft:e=>{
+        if(this.state.chatSending||this.state.chatFilesReading>0) return;
+        this.setState({ chatDraft:e.target.value, chatError:"", chatPendingClientId:"" });
+      },
+      onChatComposerKeyDown:e=>{ if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){ e.preventDefault(); this._sendChatMessage(); } },
+      chatComposerPlaceholder:S.lang==="th"?"พิมพ์ข้อความเกี่ยวกับงานนี้…":"Type a message about this job…",
+      chatComposerHint:S.lang==="th"?"Enter ส่ง · Shift + Enter ขึ้นบรรทัดใหม่":"Enter to send · Shift + Enter for a new line",
+      chatAttachLabel:S.lang==="th"?"แนบไฟล์":"Attach files", chooseChatFiles:()=>this._triggerChatFileSelect(),
+      onChatFileChange:e=>{ this._handleChatFiles(e.target.files); e.target.value=""; },
+      chatDraftFileRows, hasChatDraftFiles:chatDraftFileRows.length>0,
+      chatFileLimitLabel:S.lang==="th"?"สูงสุด 5 ไฟล์ · ไฟล์ละไม่เกิน 2 MB":"Up to 5 files · 2 MB each",
+      sendChat:()=>this._sendChatMessage(), chatSending:S.chatSending,
+      chatInteractionLocked:S.chatSending||S.chatFilesReading>0||S.chatLoading||S.chatMessagesLoading||S.chatOlderLoading,
+      chatOlderDisabled:S.chatOlderLoading||S.chatSending||S.chatFilesReading>0||S.chatLoading||S.chatMessagesLoading,
+      chatSendDisabled:S.chatSending||S.chatFilesReading>0||S.chatLoading||S.chatMessagesLoading||S.chatOlderLoading||!hasSelectedChat||(!String(S.chatDraft||"").trim()&&chatDraftFileRows.length===0),
+      chatSendLabel:S.chatFilesReading>0?(S.lang==="th"?"กำลังอ่านไฟล์…":"Reading…"):(S.chatSending?(S.lang==="th"?"กำลังส่ง…":"Sending…"):(S.lang==="th"?"ส่ง":"Send")),
+      chatError:S.chatError, hasChatError:!!S.chatError, chatWarning:S.chatWarning, hasChatWarning:!!S.chatWarning,
+      chatDetailKicker:S.lang==="th"?"รายละเอียดงาน":"JOB DETAILS", chatDetailRows,
+      openSelectedChatTrack, chatOpenTrackLabel:S.lang==="th"?"ดูสถานะและรายละเอียดงาน":"View status and job details",
       jobDetailOpen:S.jobDetailOpen,
       canConfirmPrice, confRows, confTotalText:this.N(Math.round(confTotal*100)/100),
       confReason:S.confReason, setConfReason, saveConfirmedAmount, confBusy:S.confBusy,
@@ -4489,7 +5376,7 @@ class Component extends DCLogic {
       q:S.q, setQ:e=>this.setState({ q:e.target.value }),
       mobileFilters, mobileJobs, statusLog,
       curJobNo:cur.no, curJobService:cur.service, curJobUnit:cur.unit,
-      trackJobOptions, setTrackJob, hasTrackJobs, curNoSelected:effectiveCurNo||"",
+      trackJobOptions, setTrackJob, openCurrentTrackChat, hasTrackJobs, curNoSelected:effectiveCurNo||"",
       timeline, jobDetailRows, priceRules, priceNotes,
       priceRulesNotSeeded, priceRulesLoading:S.priceRulesLoading, priceRulesError:S.priceRulesError,
       rawCols, rawRows, rawCount, doExportCsv, doExportXlsx, kpis, monthly, topServices, statusMix, yearOpts, monthOpts, unitOpts,
