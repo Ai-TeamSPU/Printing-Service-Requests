@@ -2953,7 +2953,7 @@ class Component extends DCLogic {
   }
 
   componentDidMount() {
-    import("./spu-data.js").then(d => this.setState({ d }));
+    import("./spu-data.js?v=20261007_chat").then(d => this.setState({ d }));
     const defaultGas = {
       gasUrl: "https://script.google.com/macros/s/AKfycbyWuPfkCMLmYPVk8eqirn64KlgMhEWWsSc1vUhJaVUbi2Wo4s5bEAPaRq3lZwBa6rrA/exec",
       gasToken: "6552b83f-9a7a-4dd1-8169-05193c6744e3",
@@ -3643,6 +3643,7 @@ class Component extends DCLogic {
   renderVals(){
     const d=this.state.d; if(!d) return {};
     const S=this.state, t=S.lang==="th"?d.TH:d.EN, P=x=>this.P(x);
+    if(t && !t.tabChat) t.tabChat = S.lang === "th" ? "แชทติดตาม" : "Job chat";
     const AC="var(--color-accent)", AC1="var(--color-accent-100)", AC7="var(--color-accent-700)",
       INK="var(--color-text)", BG="var(--color-bg)", N1="var(--color-neutral-100)",
       N2="var(--color-neutral-200)", N7="var(--color-neutral-700)";
@@ -3797,7 +3798,7 @@ class Component extends DCLogic {
     // แสดง 3 เมนู แบบฟอร์มบริการ/งานของฉัน/ติดตามสถานะ ก็ต่อเมื่อกด "ขอรับบริการ" ผ่านด้วยอีเมล @spu.ac.th สำเร็จแล้วเท่านั้น
     // (เช็คจาก flag ที่ตั้งตอนกดปุ่มสำเร็จ ไม่ใช่เช็คจากค่าที่พิมพ์ในช่องอีเมลสด ๆ — กันเมนูโผล่ก่อนกดปุ่ม)
     const gateVerified = !!S.gateVerified;
-    const chatTabLabel=t.tabChat+(S.chatTotalUnread>0?" ("+S.chatTotalUnread+")":"");
+    const chatTabLabel=((t&&t.tabChat)||(S.lang==="th"?"แชทติดตาม":"Job chat"))+(S.chatTotalUnread>0?" ("+S.chatTotalUnread+")":"");
     const tabDefs = {
       REQ: gateVerified
         ? [["landing", t.tabLanding], ["wizard", t.tabWizard], ["mine", t.tabMine], ["track", t.tabTrack], ["chat", chatTabLabel]]
