@@ -1210,7 +1210,12 @@ function unreadForJob_(messages, marker, readerEmail) {
       var created = parseChatDate_(messages[j].createdAt);
       if (created && created.getTime() <= readAt.getTime()) continue;
     }
-    if (normalizeChatEmail_(messages[j].senderEmail) !== readerEmail) count++;
+    var m = messages[j];
+    var mType = String(m.messageType || m.message_type || "").toUpperCase();
+    var sRole = String(m.senderRole || m.sender_role || "").toUpperCase();
+    var sEmail = normalizeChatEmail_(m.senderEmail || m.sender_email);
+    if (mType === "SYSTEM" || sRole === "SYSTEM" || sEmail === "system") continue;
+    if (sEmail !== readerEmail) count++;
   }
   return count;
 }
@@ -1262,12 +1267,20 @@ function listChatThreads_(p) {
     seen[job.jobNo] = true;
     if (jobsData.duplicates[job.jobNo]) return { ok: false, error: "duplicate_job_no", jobNo: job.jobNo };
     if (actor.role === "REQUESTER" && job.requesterEmail !== actor.email) continue;
+    if (String(job.status || "").toUpperCase() === "SERVICE_DONE") continue;
     var messages = grouped[job.jobNo] || [];
     var latest = messages.length ? messages[messages.length - 1] : null;
     var marker = reads.byKey[job.jobNo + "\n" + actor.email] || null;
     var unread = unreadForJob_(messages, marker, actor.email);
     totalUnread += unread;
-    var activity = latest ? latest.createdAt : job.submittedAt;
+    var userMessages = messages.filter(function (m) {
+      var mType = String(m.messageType || m.message_type || "").toUpperCase();
+      var sRole = String(m.senderRole || m.sender_role || "").toUpperCase();
+      var sEmail = normalizeChatEmail_(m.senderEmail || m.sender_email);
+      return mType !== "SYSTEM" && sRole !== "SYSTEM" && sEmail !== "system";
+    });
+    var latestUserMsg = userMessages.length ? userMessages[userMessages.length - 1] : null;
+    var activity = latestUserMsg ? latestUserMsg.createdAt : job.submittedAt;
     threads.push({
       jobNo: job.jobNo,
       requesterEmail: job.requesterEmail,
@@ -1276,7 +1289,7 @@ function listChatThreads_(p) {
       submittedAt: isoDate_(job.submittedAt),
       lastMessageAt: isoDate_(activity),
       lastSequence: latest ? latest.sequence : 0,
-      lastMessage: latest ? chatMessageOutput_(latest, null) : null,
+      lastMessage: latestUserMsg ? chatMessageOutput_(latestUserMsg, null) : null,
       unreadCount: unread,
       _activityMs: parseChatDate_(activity) ? parseChatDate_(activity).getTime() : 0
     });
@@ -1553,6 +1566,7 @@ function getUnreadCounts_(p) {
     seen[job.jobNo] = true;
     if (jobsData.duplicates[job.jobNo]) return { ok: false, error: "duplicate_job_no", jobNo: job.jobNo };
     if (auth.actor.role === "REQUESTER" && job.requesterEmail !== auth.actor.email) continue;
+    if (String(job.status || "").toUpperCase() === "SERVICE_DONE") continue;
     if (wanted && !wanted[job.jobNo]) continue;
     var marker = reads.byKey[job.jobNo + "\n" + auth.actor.email] || null;
     var n = unreadForJob_(grouped[job.jobNo] || [], marker, auth.actor.email);

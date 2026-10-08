@@ -1520,6 +1520,20 @@
           </section>
         </sc-if>
 
+
+        <!-- SERVICE_DONE popup: แจ้งเตือนเมื่องานที่กำลังแชทถูกปิดการสนทนา -->
+        <sc-if value="{{ chatServiceDonePopup }}" hint-placeholder-val="{{ false }}">
+          <div role="dialog" aria-modal="true" aria-label="{{ chatDonePopupTitle }}"
+            style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px">
+            <div style="background:#fff;border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.22);max-width:420px;width:100%;padding:36px 32px;text-align:center">
+              <div style="font-size:48px;margin-bottom:12px">✅</div>
+              <h2 style="font-size:20px;font-weight:800;margin:0 0 8px;color:var(--color-text)">{{ chatDonePopupTitle }}</h2>
+              <p style="font-size:14px;color:var(--color-neutral-600);margin:0 0 24px;line-height:1.6">{{ chatDonePopupBody }}</p>
+              <button type="button" class="btn btn-primary" onClick="{{ closeChatDonePopup }}"
+                style="min-width:140px;height:42px;font-size:14px;font-weight:700">{{ chatDonePopupBtn }}</button>
+            </div>
+          </div>
+        </sc-if>
         <sc-if value="{{ isChat }}" hint-placeholder-val="{{ false }}">
           <section style="padding-top:32px">
             <div
@@ -2850,7 +2864,7 @@ class Component extends DCLogic {
     jobDetailOpen:false, jobDetailJobNo:null, jobDetailFiles:[], jobDetailFilesLoading:false, slipImgErrors:{},
     confAmt:{}, confReason:"", confBusy:false, confMsg:"", confErr:"",
     mineEmailInput:"", mineSelectedEmail:"", mineSearchError:"",
-    chatThreads:[], chatMessages:[], chatSelectedJobNo:"", chatDraft:"", chatDraftFiles:[],
+    chatThreads:[], chatServiceDonePopup:false, chatServiceDoneJobNo:"", chatMessages:[], chatSelectedJobNo:"", chatDraft:"", chatDraftFiles:[],
     chatQuery:"", chatLoading:false, chatMessagesLoading:false, chatSending:false,
     chatError:"", chatWarning:"", chatLastSequence:0, chatTotalUnread:0, chatUnreadByJob:{},
     chatPendingClientId:"", chatUploadedFileIds:[], chatFilesReading:0,
@@ -3144,18 +3158,28 @@ class Component extends DCLogic {
       return "";
     }
     const threads=r.threads;
-    const unreadFromRows=threads.reduce((sum,row)=>sum+(Number(row.unread_count||row.unreadCount)||0),0);
+    // --- กรอง SERVICE_DONE ออกจากรายการแชทเสมอ ---
+    const activeThreads=threads.filter(row=>{
+      const st=String(row.status||row.job_status||row.jobStatus||"").toUpperCase();
+      return st!=="SERVICE_DONE";
+    });
+    const unreadFromRows=activeThreads.reduce((sum,row)=>sum+(Number(row.unread_count||row.unreadCount)||0),0);
     const unreadByJob={};
-    threads.forEach(row=>{ unreadByJob[String(row.job_no||row.jobNo||"")]=Number(row.unread_count||row.unreadCount)||0; });
+    activeThreads.forEach(row=>{ unreadByJob[String(row.job_no||row.jobNo||"")]=Number(row.unread_count||row.unreadCount)||0; });
     const previousSelected=String(this.state.chatSelectedJobNo||"");
+    // ตรวจว่างานที่เปิดอยู่เพิ่งเปลี่ยนเป็น SERVICE_DONE ระหว่าง polling
+    const prevRow=previousSelected?threads.find(row=>String(row.job_no||row.jobNo||"")===previousSelected):null;
+    const prevStatus=prevRow?String(prevRow.status||prevRow.job_status||prevRow.jobStatus||"").toUpperCase():"";
+    const justClosed=!!(silent&&previousSelected&&prevStatus==="SERVICE_DONE");
     let selected=previousSelected;
-    if(!selected && threads.length) selected=String(threads[0].job_no||threads[0].jobNo||"");
-    if(selected&&!threads.some(row=>String(row.job_no||row.jobNo||"")===String(selected))){
-      selected=threads.length?String(threads[0].job_no||threads[0].jobNo||""):"";
+    if(!selected&&activeThreads.length) selected=String(activeThreads[0].job_no||activeThreads[0].jobNo||"");
+    // ถ้างานปัจจุบันถูกปิด (SERVICE_DONE) ให้เปลี่ยนไปงานถัดไปหรือล้างค่า
+    if(justClosed||(selected&&!activeThreads.some(row=>String(row.job_no||row.jobNo||"")===String(selected)))){
+      selected=activeThreads.length?String(activeThreads[0].job_no||activeThreads[0].jobNo||""):"";
     }
     const apiUnread=Number(r.totalUnread);
     const patch={
-      chatThreads:threads,
+      chatThreads:activeThreads,
       chatSelectedJobNo:selected,
       chatTotalUnread:Number.isFinite(apiUnread)?apiUnread:unreadFromRows,
       chatUnreadByJob:unreadByJob,
@@ -3166,6 +3190,11 @@ class Component extends DCLogic {
       patch.chatDraft=""; patch.chatDraftFiles=[]; patch.chatPendingClientId=""; patch.chatUploadedFileIds=[]; patch.chatFilesReading=0;
     }
     if(!silent) patch.chatError="";
+    // ถ้าพึ่งตรวจพบว่างานที่กำลังสนทนาถูกปิด ให้ตั้ง flag เพื่อแสดง popup
+    if(justClosed){
+      patch.chatServiceDoneJobNo=previousSelected;
+      patch.chatServiceDonePopup=true;
+    }
     this.setState(patch);
     return selected;
   }
@@ -3215,6 +3244,9 @@ class Component extends DCLogic {
     const threadBeforeRead=(this.state.chatThreads||[]).find(row=>String(row.job_no||row.jobNo)===target);
     const unreadBeforeRead=threadBeforeRead?(Number(threadBeforeRead.unread_count||threadBeforeRead.unreadCount)||0):0;
     const hasNewMessageFromOther=incoming.some(row=>{
+      const role=String(row.sender_role||row.senderRole||"").toUpperCase();
+      const isSys=role==="SYSTEM"||String(row.message_type||row.messageType||"").toLowerCase()==="system"||String(row.message_text||row.text||"").startsWith("สถานะงานเปลี่ยนจาก");
+      if(isSys) return false;
       const sender=String(row.sender_email||row.senderEmail||"").trim().toLowerCase();
       return sender&&sender!==String(actor.email||"").toLowerCase();
     });
@@ -4202,18 +4234,30 @@ class Component extends DCLogic {
       }catch(e){ return String(value||""); }
     };
     const chatQueryLower=String(S.chatQuery||"").trim().toLowerCase();
-    const chatThreadRows=(S.chatThreads||[]).map(row=>{
+    const chatThreadRows=(S.chatThreads||[]).filter(row=>{ const _st=String(row.status||row.job_status||row.jobStatus||"").toUpperCase(); return _st!=="SERVICE_DONE"; }).map(row=>{
       const jobNo=String(row.job_no||row.jobNo||"");
       const job=jobsAll.find(item=>String(item.no)===jobNo);
-      const lastMessage=row.last_message||row.lastMessage||null;
+      const rawLastMsg=row.last_message||row.lastMessage||null;
+      const isSystemMsg=rawLastMsg&&(
+        String(rawLastMsg.message_type||rawLastMsg.messageType||"").toUpperCase()==="SYSTEM"||
+        String(rawLastMsg.sender_role||rawLastMsg.senderRole||"").toUpperCase()==="SYSTEM"||
+        String(rawLastMsg.sender_email||rawLastMsg.senderEmail||"").toLowerCase()==="system"||
+        String(rawLastMsg.text||rawLastMsg.messageText||"").startsWith("สถานะงานเปลี่ยนจาก")
+      );
+      const lastMessage=isSystemMsg?null:rawLastMsg;
+      let rawPreview=String(row.last_message_text||row.lastMessageText||row.last_text||row.preview||(lastMessage&&(lastMessage.text||lastMessage.messageText))||"");
+      if(rawPreview.startsWith("สถานะงานเปลี่ยนจาก")||isSystemMsg){
+        rawPreview="";
+      }
       const title=String(row.title||row.purpose||(job&&job.service)||jobNo||"—");
       const requester=String(row.requester_name||row.requesterName||(job&&job.requester)||"");
-      const preview=String(row.last_message_text||row.lastMessageText||row.last_text||row.preview||(lastMessage&&(lastMessage.text||lastMessage.messageText))||(S.lang==="th"?"ยังไม่มีข้อความ":"No messages yet"));
+      const preview=rawPreview||(S.lang==="th"?"ยังไม่มีข้อความ":"No messages yet");
       const unread=Number(row.unread_count||row.unreadCount)||0;
       const active=jobNo===String(S.chatSelectedJobNo||"");
+      const lastAtTime=lastMessage?(lastMessage.created_at||lastMessage.createdAt):((!isSystemMsg&&(row.last_message_at||row.lastMessageAt))||job&&job.sent||row.updated_at||"");
       return {
         raw:row, jobNo, title, requester, preview,
-        lastAt:chatDateTime(row.last_message_at||row.lastMessageAt||(lastMessage&&(lastMessage.created_at||lastMessage.createdAt))||row.updated_at||""),
+        lastAt:chatDateTime(lastAtTime),
         unread, hasUnread:unread>0,
         bg:active?"var(--color-accent-100)":"#fff",
         border:active?"var(--color-accent-200)":"transparent",
@@ -5322,7 +5366,7 @@ class Component extends DCLogic {
       chatPageSubtitle:S.lang==="th"?"หนึ่งงานต่อหนึ่งบทสนทนา ข้อความและไฟล์แนบเชื่อมกับเลขที่งานโดยตรง":"One conversation per job, linked directly to its job number.",
       chatInboxLabel:chatActor.role==="ADMIN"?(S.lang==="th"?"กล่องข้อความงาน":"Job inbox"):(S.lang==="th"?"บทสนทนาของฉัน":"My conversations"),
       chatConversationLabel:S.lang==="th"?"บทสนทนาติดตามงาน":"Job conversation",
-      chatThreadCountLabel:(S.chatThreads||[]).length+(S.lang==="th"?" งาน":" jobs"),
+      chatThreadCountLabel:chatThreadRows.length+(S.lang==="th"?" งาน":" jobs"),
       chatThreadRows, hasNoChatThreads:chatThreadRows.length===0&&!S.chatLoading,
       chatNoThreadsLabel:S.lang==="th"?"ยังไม่มีงานสำหรับเริ่มบทสนทนา":"No jobs are available for a conversation yet.",
       chatSearchPlaceholder:S.lang==="th"?"ค้นหาเลขงานหรือชื่องาน":"Search job number or title",
@@ -5361,6 +5405,13 @@ class Component extends DCLogic {
       chatError:S.chatError, hasChatError:!!S.chatError, chatWarning:S.chatWarning, hasChatWarning:!!S.chatWarning,
       chatDetailKicker:S.lang==="th"?"รายละเอียดงาน":"JOB DETAILS", chatDetailRows,
       openSelectedChatTrack, chatOpenTrackLabel:S.lang==="th"?"ดูสถานะและรายละเอียดงาน":"View status and job details",
+      chatServiceDonePopup:S.chatServiceDonePopup,
+      chatDonePopupTitle:S.lang==="th"?"งานนี้เสร็จสิ้นแล้ว":"Job completed",
+      chatDonePopupBody:S.lang==="th"
+        ?("หมายเลขงาน "+String(S.chatServiceDoneJobNo||"")+" ได้รับการดำเนินงานเสร็จสิ้นแล้ว (SERVICE DONE) ช่องแชทนี้ถูกปิดโดยอัตโนมัติ")
+        :("Job "+String(S.chatServiceDoneJobNo||"")+" has been completed (SERVICE DONE). This conversation has been closed automatically."),
+      chatDonePopupBtn:S.lang==="th"?"รับทราบ":"Understood",
+      closeChatDonePopup:()=>this.setState({ chatServiceDonePopup:false, chatServiceDoneJobNo:"" }),
       jobDetailOpen:S.jobDetailOpen,
       canConfirmPrice, confRows, confTotalText:this.N(Math.round(confTotal*100)/100),
       confReason:S.confReason, setConfReason, saveConfirmedAmount, confBusy:S.confBusy,
