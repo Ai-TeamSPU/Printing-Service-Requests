@@ -2853,7 +2853,7 @@ class Component extends DCLogic {
     dpOpen:null, dpMonthNeed:null, dpMonthRange:null, needByISO:null, rgStart:null, rgEnd:null,
     repMode:"month", repYear:"", repMonth:"",
     dashYearMode:"be", dashYear:String(new Date().getFullYear()+543), dashMonth:"8", dashUnit:"",
-    gasUrl:"https://script.google.com/macros/s/AKfycbyWuPfkCMLmYPVk8eqirn64KlgMhEWWsSc1vUhJaVUbi2Wo4s5bEAPaRq3lZwBa6rrA/exec",
+    gasUrl:"https://script.google.com/macros/s/AKfycby1LrZb8lhPA3_1sh8jCfntRmkH3tCFCO8n66vXw7Sy7bUNTivj6lzaKy-vPpKjZpKh/exec",
     gasToken:"6552b83f-9a7a-4dd1-8169-05193c6744e3",
     spreadsheetId:"1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
     folderId:"1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L",
@@ -2969,7 +2969,7 @@ class Component extends DCLogic {
   componentDidMount() {
     import("./spu-data.js?v=20261007_chat").then(d => this.setState({ d }));
     const defaultGas = {
-      gasUrl: "https://script.google.com/macros/s/AKfycbyWuPfkCMLmYPVk8eqirn64KlgMhEWWsSc1vUhJaVUbi2Wo4s5bEAPaRq3lZwBa6rrA/exec",
+      gasUrl: "https://script.google.com/macros/s/AKfycby1LrZb8lhPA3_1sh8jCfntRmkH3tCFCO8n66vXw7Sy7bUNTivj6lzaKy-vPpKjZpKh/exec",
       gasToken: "6552b83f-9a7a-4dd1-8169-05193c6744e3",
       spreadsheetId: "1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
       folderId: "1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L"
@@ -3710,7 +3710,7 @@ class Component extends DCLogic {
         let r = await this._gasCall("checkAdminUser", { email, password: pass });
         // Fallback: If unknown_action occurs, it means the browser contacted an older deployment URL.
         // Force retry directly using the updated active Web App URL:
-        const activeUrl = "https://script.google.com/macros/s/AKfycbyWuPfkCMLmYPVk8eqirn64KlgMhEWWsSc1vUhJaVUbi2Wo4s5bEAPaRq3lZwBa6rrA/exec";
+        const activeUrl = "https://script.google.com/macros/s/AKfycby1LrZb8lhPA3_1sh8jCfntRmkH3tCFCO8n66vXw7Sy7bUNTivj6lzaKy-vPpKjZpKh/exec";
         if (r && (r.error === "unknown_action" || r.error === "missing_url")) {
           this.setState({ gasUrl: activeUrl });
           try {
