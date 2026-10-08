@@ -380,6 +380,32 @@
             break-before: avoid-page;
           }
         }
+
+        /* Custom loader for submit request */
+        .loader {
+          width: 120px;
+          height: 22px;
+          border-radius: 20px;
+          color: #514b82;
+          border: 2px solid;
+          position: relative;
+        }
+
+        .loader::before {
+          content: "";
+          position: absolute;
+          margin: 2px;
+          inset: 0 100% 0 0;
+          border-radius: inherit;
+          background: currentColor;
+          animation: l6 2s infinite;
+        }
+
+        @keyframes l6 {
+          100% {
+            inset: 0
+          }
+        }
       </style>
     </helmet>
 
@@ -517,11 +543,6 @@
 
         <sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
           <section>
-            <div style="padding:10px 0 28px">
-              <div
-                style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent-700)">
-                {{ t.kicker }}</div>
-            </div>
             <div
               style="background:linear-gradient(180deg,#eaf2ff 0%,#f7faff 100%);margin:0 -20px;padding:56px 20px 64px">
               <h1 class="miranda-banner"
@@ -619,9 +640,9 @@
         <sc-if value="{{ isWizard }}" hint-placeholder-val="{{ false }}">
           <section style="padding-top:32px">
             <div style="border-bottom:1px solid var(--color-line);padding-bottom:16px">
-              <div
+              <!-- <div
                 style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent-700)">
-                {{ t.oneForm }}</div>
+                {{ t.oneForm }}</div> -->
               <h1 style="font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-0.02em;margin:8px 0 0">{{
                 t.newRequest }}</h1>
             </div>
@@ -1216,7 +1237,14 @@
                   </label>
                   <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px">
                     <button class="btn btn-primary" onClick="{{ submitJob }}" disabled="{{ submitDisabled }}"
-                      style="min-height:48px;font-size:16px">{{ submitLabel }}</button>
+                      style="min-height:48px;font-size:16px;min-width:140px;display:inline-flex;align-items:center;justify-content:center">
+                      <sc-if value="{{ submitBusy }}" hint-placeholder-val="{{ false }}">
+                        <div class="loader" style="color:#fff;width:90px;height:18px"></div>
+                      </sc-if>
+                      <sc-if value="{{ !submitBusy }}" hint-placeholder-val="{{ true }}">
+                        {{ submitLabel }}
+                      </sc-if>
+                    </button>
                     <button class="btn btn-ghost" onClick="{{ goLanding }}" style="min-height:48px">{{ t.cancel
                       }}</button>
                   </div>
@@ -1412,6 +1440,12 @@
                     </div>
                     <div
                       style="margin-top:14px;padding:14px 18px;border-top:1px solid var(--color-line);display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                      <sc-if value="{{ j.canConfirmPickup }}" hint-placeholder-val="{{ false }}">
+                        <button type="button" onClick="{{ j.confirmPickup }}"
+                          style="grid-column:1/-1;min-height:42px;border:1px solid #16a34a;border-radius:var(--radius-pill);background:#f0fdf4;color:#15803d;font-size:13px;font-weight:700;font-family:inherit;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer">
+                          <span>🤝</span><span>รับกลับเรียบร้อย</span>
+                        </button>
+                      </sc-if>
                       <button type="button" onClick="{{ j.open }}"
                         style="width:100%;min-height:44px;border:1px solid var(--color-line);border-radius:var(--radius-pill);background:#fff;color:{{ j.hue }};font-size:12.5px;font-weight:700;font-family:inherit">{{
                         t.tabTrack }}</button>
@@ -1462,6 +1496,22 @@
                 style="margin-top:20px;border:1px solid var(--color-line);background:var(--color-band);padding:16px 18px;font-size:14px">
                 {{ t.trackNoJobs }}</div>
             </sc-if>
+            <sc-if value="{{ canUserConfirmPickup }}" hint-placeholder-val="{{ false }}">
+              <div
+                style="margin-top:20px;padding:16px 20px;border:1px solid #16a34a;background:#f0fdf4;border-radius:14px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;box-shadow:0 4px 14px rgba(22,163,74,.08)">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="font-size:32px;line-height:1">🟢</span>
+                  <div>
+                    <div style="font-weight:800;font-size:16px;color:#166534">{{ trackReadyTitle }}</div>
+                    <div style="font-size:13px;color:#15803d;margin-top:2px">{{ trackReadyDesc }}</div>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-primary" onClick="{{ openCurrentConfirmPickup }}"
+                  style="min-height:44px;padding:0 22px;font-size:14px;font-weight:700;background:#16a34a;border-color:#16a34a;display:inline-flex;align-items:center;gap:6px">
+                  <span>🤝</span><span>{{ confirmPickupBtnLabel }}</span>
+                </button>
+              </div>
+            </sc-if>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px;margin-top:26px">
               <div>
                 <h2 style="font-size:17px;font-weight:800;margin:0 0 14px">{{ t.timeline }}</h2>
@@ -1477,6 +1527,12 @@
                       <div style="font-size:13px;color:var(--color-neutral-700);margin-top:3px">{{ e.at }} · {{ e.by }}
                       </div>
                       <div style="font-size:13.5px;margin-top:5px">{{ e.note }}</div>
+                      <sc-if value="{{ e.showPickupBtn }}" hint-placeholder-val="{{ false }}">
+                        <button type="button" class="btn btn-primary" onClick="{{ openCurrentConfirmPickup }}"
+                          style="margin-top:10px;min-height:38px;padding:0 18px;font-size:13px;font-weight:700;background:#16a34a;border-color:#16a34a;display:inline-flex;align-items:center;gap:6px">
+                          <span>🤝</span><span>{{ confirmPickupBtnLabel }}</span>
+                        </button>
+                      </sc-if>
                     </div>
                   </div>
                 </sc-for>
@@ -1521,14 +1577,95 @@
         </sc-if>
 
 
+        <!-- Confirm Pickup Modal: ยืนยันว่ารับงานกลับเรียบร้อยแล้ว -->
+        <sc-if value="{{ confirmPickupModalOpen }}" hint-placeholder-val="{{ false }}">
+          <div role="dialog" aria-modal="true" aria-label="{{ confirmPickupTitle }}"
+            style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px)">
+            <div
+              style="background:#fff;border-radius:18px;box-shadow:0 24px 64px rgba(0,0,0,.22);max-width:420px;width:100%;padding:32px 28px;text-align:center">
+              <div style="font-size:48px;margin-bottom:12px">🤝</div>
+              <h2 style="font-size:20px;font-weight:800;color:var(--color-text);margin:0 0 8px">{{ confirmPickupTitle }}
+              </h2>
+              <p style="font-size:14px;color:var(--color-neutral-600);margin:0 0 6px;line-height:1.6">
+                {{ confirmPickupJobNoText }}: <strong style="color:var(--color-accent);font-size:15px">{{
+                  confirmPickupJobNo }}</strong>
+              </p>
+              <p style="font-size:13.5px;color:var(--color-neutral-600);margin:0 0 24px;line-height:1.6">
+                {{ confirmPickupBody }}
+              </p>
+              <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+                <button type="button" class="btn btn-primary" onClick="{{ doConfirmPickup }}"
+                  disabled="{{ confirmPickupBusy }}"
+                  style="min-width:140px;height:44px;font-size:14px;font-weight:700;background:#16a34a;border-color:#16a34a">
+                  {{ confirmPickupActionBtnText }}
+                </button>
+                <button type="button" class="btn btn-ghost" onClick="{{ closeConfirmPickupModal }}"
+                  disabled="{{ confirmPickupBusy }}" style="min-width:90px;height:44px;font-size:14px;font-weight:600">
+                  {{ confirmPickupCancelBtnText }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- Submit Loading Modal: แสดง loader ตอนกำลังส่งคำขอ -->
+        <sc-if value="{{ submitBusy }}" hint-placeholder-val="{{ false }}">
+          <div role="dialog" aria-modal="true" aria-label="{{ submitLoadingTitle }}"
+            style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px)">
+            <div
+              style="background:#fff;border-radius:18px;box-shadow:0 24px 64px rgba(0,0,0,.22);max-width:380px;width:100%;padding:38px 28px;text-align:center">
+              <div class="loader" style="margin:0 auto 20px"></div>
+              <h2 style="font-size:18px;font-weight:800;color:var(--color-text);margin:0 0 8px">{{ submitLoadingTitle }}
+              </h2>
+              <p style="font-size:13.5px;color:var(--color-neutral-600);margin:0;line-height:1.5">{{
+                submitLoadingSubtitle }}</p>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- Submit Success Popup: แสดงเครื่องหมายถูกและแจ้งส่งคำขอสำเร็จ -->
+        <sc-if value="{{ submitSuccessPopup }}" hint-placeholder-val="{{ false }}">
+          <div role="dialog" aria-modal="true" aria-label="{{ submitSuccessTitle }}"
+            style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px)">
+            <div
+              style="background:#fff;border-radius:18px;box-shadow:0 24px 64px rgba(0,0,0,.22);max-width:400px;width:100%;padding:36px 30px;text-align:center">
+              <div
+                style="width:68px;height:68px;margin:0 auto 16px;border-radius:50%;background:#eaf8ef;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(34,197,94,.18)">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3.2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <h2 style="font-size:22px;font-weight:800;color:var(--color-text);margin:0 0 8px">{{ submitSuccessTitle }}
+              </h2>
+              <p style="font-size:14px;color:var(--color-neutral-600);margin:0 0 6px">
+                {{ submitSuccessJobLabel }}: <strong style="color:var(--color-accent);font-size:16px">{{ newJobNo
+                  }}</strong>
+              </p>
+              <p style="font-size:13px;color:var(--color-neutral-500);margin:0 0 24px;line-height:1.5">{{
+                submitSuccessSub }}</p>
+              <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+                <button type="button" class="btn btn-primary" onClick="{{ closeSubmitSuccessAndTrack }}"
+                  style="min-width:140px;height:44px;font-size:14px;font-weight:700">{{ submitSuccessTrackBtn
+                  }}</button>
+                <button type="button" class="btn btn-ghost" onClick="{{ closeSubmitSuccessPopup }}"
+                  style="min-width:90px;height:44px;font-size:14px;font-weight:600">{{ submitSuccessCloseBtn }}</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
         <!-- SERVICE_DONE popup: แจ้งเตือนเมื่องานที่กำลังแชทถูกปิดการสนทนา -->
         <sc-if value="{{ chatServiceDonePopup }}" hint-placeholder-val="{{ false }}">
           <div role="dialog" aria-modal="true" aria-label="{{ chatDonePopupTitle }}"
             style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px">
-            <div style="background:#fff;border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.22);max-width:420px;width:100%;padding:36px 32px;text-align:center">
+            <div
+              style="background:#fff;border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.22);max-width:420px;width:100%;padding:36px 32px;text-align:center">
               <div style="font-size:48px;margin-bottom:12px">✅</div>
-              <h2 style="font-size:20px;font-weight:800;margin:0 0 8px;color:var(--color-text)">{{ chatDonePopupTitle }}</h2>
-              <p style="font-size:14px;color:var(--color-neutral-600);margin:0 0 24px;line-height:1.6">{{ chatDonePopupBody }}</p>
+              <h2 style="font-size:20px;font-weight:800;margin:0 0 8px;color:var(--color-text)">{{ chatDonePopupTitle }}
+              </h2>
+              <p style="font-size:14px;color:var(--color-neutral-600);margin:0 0 24px;line-height:1.6">{{
+                chatDonePopupBody }}</p>
               <button type="button" class="btn btn-primary" onClick="{{ closeChatDonePopup }}"
                 style="min-width:140px;height:42px;font-size:14px;font-weight:700">{{ chatDonePopupBtn }}</button>
             </div>
@@ -1546,8 +1683,9 @@
                   {{ chatPageTitle }}</h1>
                 <div style="font-size:13px;color:var(--color-neutral-700);margin-top:4px">{{ chatPageSubtitle }}</div>
               </div>
-              <button type="button" class="btn btn-ghost" onClick="{{ refreshChat }}" disabled="{{ chatRefreshDisabled }}"
-                style="min-height:40px;font-size:13px">{{ chatRefreshLabel }}</button>
+              <button type="button" class="btn btn-ghost" onClick="{{ refreshChat }}"
+                disabled="{{ chatRefreshDisabled }}" style="min-height:40px;font-size:13px">{{ chatRefreshLabel
+                }}</button>
             </div>
 
             <sc-if value="{{ hasChatError }}" hint-placeholder-val="{{ false }}">
@@ -1571,7 +1709,8 @@
                 </div>
                 <div class="job-chat-thread-list" style="flex:1;padding:7px">
                   <sc-if value="{{ hasNoChatThreads }}" hint-placeholder-val="{{ false }}">
-                    <div style="padding:34px 14px;text-align:center;color:var(--color-neutral-600);font-size:13px;line-height:1.6">
+                    <div
+                      style="padding:34px 14px;text-align:center;color:var(--color-neutral-600);font-size:13px;line-height:1.6">
                       {{ chatNoThreadsLabel }}</div>
                   </sc-if>
                   <sc-for list="{{ chatThreadRows }}" as="th" hint-placeholder-count="4">
@@ -1579,10 +1718,13 @@
                       disabled="{{ chatInteractionLocked }}"
                       style="display:block;width:100%;border:1px solid {{ th.border }};border-radius:var(--radius-input);background:{{ th.bg }};padding:12px 11px;margin-bottom:5px;text-align:left;color:var(--color-text)">
                       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-                        <span style="font-size:11.5px;font-weight:800;color:var(--color-accent-700)">{{ th.jobNo }}</span>
-                        <span style="font-size:9.5px;color:var(--color-neutral-600);white-space:nowrap">{{ th.lastAt }}</span>
+                        <span style="font-size:11.5px;font-weight:800;color:var(--color-accent-700)">{{ th.jobNo
+                          }}</span>
+                        <span style="font-size:9.5px;color:var(--color-neutral-600);white-space:nowrap">{{ th.lastAt
+                          }}</span>
                       </div>
-                      <div style="font-size:12.5px;font-weight:700;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                      <div
+                        style="font-size:12.5px;font-weight:700;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
                         {{ th.title }}</div>
                       <div style="display:flex;align-items:center;gap:7px;margin-top:4px">
                         <span
@@ -1603,9 +1745,12 @@
                 <sc-if value="{{ hasNoSelectedChat }}" hint-placeholder-val="{{ false }}">
                   <div
                     style="flex:1;display:grid;place-items:center;text-align:center;padding:40px 24px;color:var(--color-neutral-600)">
-                    <div><div style="font-size:40px;margin-bottom:10px">💬</div><strong style="color:var(--color-text)">{{
-                        chatSelectThreadTitle }}</strong><div style="font-size:13px;margin-top:6px">{{ chatSelectThreadSubtitle
-                        }}</div></div>
+                    <div>
+                      <div style="font-size:40px;margin-bottom:10px">💬</div><strong style="color:var(--color-text)">{{
+                        chatSelectThreadTitle }}</strong>
+                      <div style="font-size:13px;margin-top:6px">{{ chatSelectThreadSubtitle
+                        }}</div>
+                    </div>
                   </div>
                 </sc-if>
 
@@ -1613,7 +1758,9 @@
                   <div
                     style="padding:14px 17px;border-bottom:1px solid var(--color-line);display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff">
                     <div style="min-width:0">
-                      <div style="font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{
+                      <div
+                        style="font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                        {{
                         chatSelectedJobNo }}</div>
                       <div
                         style="font-size:11.5px;color:var(--color-neutral-600);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
@@ -1628,7 +1775,8 @@
                     <sc-if value="{{ chatHasOlder }}" hint-placeholder-val="{{ false }}">
                       <div style="display:flex;justify-content:center;margin:2px 0 14px">
                         <button type="button" class="btn btn-ghost" onClick="{{ loadOlderChat }}"
-                          disabled="{{ chatOlderDisabled }}" style="min-height:34px;font-size:11.5px;border:1px solid var(--color-line)">{{
+                          disabled="{{ chatOlderDisabled }}"
+                          style="min-height:34px;font-size:11.5px;border:1px solid var(--color-line)">{{
                           chatOlderLabel }}</button>
                       </div>
                     </sc-if>
@@ -1638,32 +1786,38 @@
                     </sc-if>
                     <sc-if value="{{ hasNoChatMessages }}" hint-placeholder-val="{{ false }}">
                       <div style="text-align:center;color:var(--color-neutral-600);font-size:12.5px;padding:42px 18px">
-                        <div style="font-size:34px;margin-bottom:8px">💬</div>{{ chatEmptyMessagesLabel }}</div>
+                        <div style="font-size:34px;margin-bottom:8px">💬</div>{{ chatEmptyMessagesLabel }}
+                      </div>
                     </sc-if>
                     <sc-for list="{{ chatMessageRows }}" as="m" hint-placeholder-count="5">
                       <sc-if value="{{ m.isSystem }}" hint-placeholder-val="{{ false }}">
                         <div
                           style="display:flex;align-items:center;justify-content:center;gap:7px;color:var(--color-neutral-600);font-size:10.5px;text-align:center;margin:14px 0 18px">
-                          <span style="width:28px;height:1px;background:var(--color-divider)"></span><span>{{ m.text }} · {{
+                          <span style="width:28px;height:1px;background:var(--color-divider)"></span><span>{{ m.text }}
+                            · {{
                             m.time }}</span><span style="width:28px;height:1px;background:var(--color-divider)"></span>
                         </div>
                       </sc-if>
                       <sc-if value="{{ !m.isSystem }}" hint-placeholder-val="{{ true }}">
                         <div style="display:flex;justify-content:{{ m.justify }};margin-bottom:17px">
                           <div style="max-width:min(84%,620px);min-width:0;text-align:{{ m.align }}">
-                            <div style="font-size:9.5px;color:var(--color-neutral-600);margin:0 4px 4px">{{ m.sender }}</div>
+                            <div style="font-size:9.5px;color:var(--color-neutral-600);margin:0 4px 4px">{{ m.sender }}
+                            </div>
                             <div
-                              style="display:inline-block;max-width:100%;text-align:left;padding:10px 13px;border:1px solid {{ m.border }};border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.fg }};font-size:12.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere">{{
+                              style="display:inline-block;max-width:100%;text-align:left;padding:10px 13px;border:1px solid {{ m.border }};border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.fg }};font-size:12.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere">
+                              {{
                               m.text }}
                               <sc-for list="{{ m.attachments }}" as="a" hint-placeholder-count="1">
                                 <a href="{{ a.link }}" target="_blank" rel="noopener"
                                   style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 9px;border-radius:var(--radius-input);border:1px solid {{ m.attachmentBorder }};background:{{ m.attachmentBg }};color:{{ m.attachmentFg }};text-decoration:none">
-                                  <span>📎</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis">{{ a.name
+                                  <span>📎</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis">{{
+                                    a.name
                                     }}</span><small style="opacity:.75;white-space:nowrap">{{ a.size }}</small>
                                 </a>
                               </sc-for>
                             </div>
-                            <div style="font-size:9.5px;color:var(--color-neutral-600);margin:4px 4px 0">{{ m.time }}</div>
+                            <div style="font-size:9.5px;color:var(--color-neutral-600);margin:4px 4px 0">{{ m.time }}
+                            </div>
                           </div>
                         </div>
                       </sc-if>
@@ -1683,7 +1837,8 @@
                         <sc-for list="{{ chatDraftFileRows }}" as="f" hint-placeholder-count="2">
                           <span
                             style="display:flex;align-items:center;gap:6px;max-width:100%;border:1px solid var(--color-accent-200);background:var(--color-accent-100);color:var(--color-accent-700);border-radius:var(--radius-input);padding:5px 7px;font-size:10.5px">
-                            <span>📎</span><span style="max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{
+                            <span>📎</span><span
+                              style="max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{
                               f.name }}</span><button type="button" onClick="{{ f.remove }}" aria-label="remove"
                               disabled="{{ chatInteractionLocked }}"
                               style="border:0;background:transparent;color:inherit;padding:0;font-size:15px;line-height:1">×</button>
@@ -1692,20 +1847,23 @@
                       </div>
                     </sc-if>
                     <input id="spu-chat-file-input" type="file" multiple
-                      accept="image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.docx,.xlsx" onChange="{{ onChatFileChange }}"
-                      style="display:none">
+                      accept="image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.docx,.xlsx"
+                      onChange="{{ onChatFileChange }}" style="display:none">
                     <div
                       style="display:flex;align-items:flex-end;gap:8px;border:1px solid var(--color-line);border-radius:var(--radius-input);padding:8px 9px;background:#fcfcfe">
                       <button type="button" onClick="{{ chooseChatFiles }}" disabled="{{ chatInteractionLocked }}"
                         aria-label="{{ chatAttachLabel }}" title="{{ chatAttachLabel }}"
                         style="width:36px;height:36px;flex:none;border:0;border-radius:var(--radius-input);background:transparent;color:var(--color-accent-700);font-size:18px">📎</button>
-                      <textarea value="{{ chatDraft }}" onChange="{{ setChatDraft }}" onKeyDown="{{ onChatComposerKeyDown }}"
-                        maxlength="5000" rows="1" placeholder="{{ chatComposerPlaceholder }}" disabled="{{ chatInteractionLocked }}"
+                      <textarea value="{{ chatDraft }}" onChange="{{ setChatDraft }}"
+                        onKeyDown="{{ onChatComposerKeyDown }}" maxlength="5000" rows="1"
+                        placeholder="{{ chatComposerPlaceholder }}" disabled="{{ chatInteractionLocked }}"
                         style="flex:1;min-width:0;min-height:38px;max-height:110px;resize:vertical;border:0!important;outline:0;padding:7px 3px;font-size:13px;background:transparent!important"></textarea>
-                      <button type="button" class="btn btn-primary" onClick="{{ sendChat }}" disabled="{{ chatSendDisabled }}"
+                      <button type="button" class="btn btn-primary" onClick="{{ sendChat }}"
+                        disabled="{{ chatSendDisabled }}"
                         style="min-width:42px;height:38px;padding:0 12px;font-size:13px">{{ chatSendLabel }}</button>
                     </div>
-                    <div style="display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-size:9.5px;color:var(--color-neutral-600)">
+                    <div
+                      style="display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-size:9.5px;color:var(--color-neutral-600)">
                       <span>{{ chatComposerHint }}</span><span>{{ chatFileLimitLabel }}</span>
                     </div>
                     <sc-if value="{{ hasChatWarning }}" hint-placeholder-val="{{ false }}">
@@ -1724,9 +1882,12 @@
                   chatSelectedService }}</div>
                 <div style="border-top:1px solid var(--color-line);margin-top:17px;padding-top:15px">
                   <sc-for list="{{ chatDetailRows }}" as="d" hint-placeholder-count="4">
-                    <div style="margin-bottom:12px"><div style="font-size:10px;color:var(--color-neutral-600)">{{ d.k
-                        }}</div><div style="font-size:12px;font-weight:600;margin-top:2px;overflow-wrap:anywhere">{{ d.v
-                        }}</div></div>
+                    <div style="margin-bottom:12px">
+                      <div style="font-size:10px;color:var(--color-neutral-600)">{{ d.k
+                        }}</div>
+                      <div style="font-size:12px;font-weight:600;margin-top:2px;overflow-wrap:anywhere">{{ d.v
+                        }}</div>
+                    </div>
                   </sc-for>
                 </div>
                 <sc-if value="{{ hasSelectedChat }}" hint-placeholder-val="{{ true }}">
@@ -2609,7 +2770,7 @@
         <div
           style="max-width:1440px;margin:0 auto;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--color-neutral-700)">
           <div>{{ t.org }} · {{ t.tel }}</div>
-          <div>{{ t.footNote }}</div>
+          <!-- <div>{{ t.footNote }}</div> -->
         </div>
       </footer>
 
@@ -2848,12 +3009,12 @@ class Component extends DCLogic {
     calcExpr:"", calcDisplay:"0", curNo:null,
     calcOpen:false, calcX:null, calcY:96, calcW:320, calcH:420,
     form:{ name:"", pos:"", unit:"", phone:"", needBy:"", purpose:"", note:"" },
-    q:"", submitted:false, submitBusy:false, submitError:null, newJobNo:"", tab:0, mf:0, reportSent:false, pdpaConsent:false,
+    q:"", submitted:false, submitBusy:false, submitSuccessPopup:false, submitError:null, newJobNo:"", tab:0, mf:0, reportSent:false, pdpaConsent:false, confirmPickupModalOpen:false, confirmPickupJobNo:"", confirmPickupBusy:false,
     reportEmailOpen:false, reportEmailTo:"", reportEmailErr:null, reportEmailBusy:false,
     dpOpen:null, dpMonthNeed:null, dpMonthRange:null, needByISO:null, rgStart:null, rgEnd:null,
     repMode:"month", repYear:"", repMonth:"",
     dashYearMode:"be", dashYear:String(new Date().getFullYear()+543), dashMonth:"8", dashUnit:"",
-    gasUrl:"https://script.google.com/macros/s/AKfycby1LrZb8lhPA3_1sh8jCfntRmkH3tCFCO8n66vXw7Sy7bUNTivj6lzaKy-vPpKjZpKh/exec",
+    gasUrl:"https://script.google.com/macros/s/AKfycbwMaKP05JB0QK8zR4t0_7BcaxVzc7h4l0g3fGhaL-yyUfVt2pAtoDAL3GTaRsvXUj66/exec",
     gasToken:"6552b83f-9a7a-4dd1-8169-05193c6744e3",
     spreadsheetId:"1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
     folderId:"1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L",
@@ -2967,9 +3128,9 @@ class Component extends DCLogic {
   }
 
   componentDidMount() {
-    import("./spu-data.js?v=20261007_chat").then(d => this.setState({ d }));
+    import("./spu-data.js?v=20261008_landing").then(d => this.setState({ d }));
     const defaultGas = {
-      gasUrl: "https://script.google.com/macros/s/AKfycby1LrZb8lhPA3_1sh8jCfntRmkH3tCFCO8n66vXw7Sy7bUNTivj6lzaKy-vPpKjZpKh/exec",
+      gasUrl: "https://script.google.com/macros/s/AKfycbwMaKP05JB0QK8zR4t0_7BcaxVzc7h4l0g3fGhaL-yyUfVt2pAtoDAL3GTaRsvXUj66/exec",
       gasToken: "6552b83f-9a7a-4dd1-8169-05193c6744e3",
       spreadsheetId: "1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
       folderId: "1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L"
@@ -2990,6 +3151,7 @@ class Component extends DCLogic {
       // Always enforce the latest spreadsheet and token (SPU-Printing-Service-DB)
       patch.gasToken = defaultGas.gasToken;
       patch.spreadsheetId = defaultGas.spreadsheetId;
+      patch.folderId = defaultGas.folderId;
       const savedConn = JSON.parse(localStorage.getItem("spuGasConnResults") || "null");
       patch.connResults = (savedConn && savedConn.sheet && savedConn.drive && savedConn.access) ? savedConn : defaultConnResults;
       this.setState(patch, () => { this._loadLiveJobs(); this._loadPriceRules(); });
@@ -3632,6 +3794,31 @@ class Component extends DCLogic {
       await this._loadLiveJobs();
     }catch(e){}
   }
+  async _userConfirmServiceDone(jobNo){
+    const targetNo=String(jobNo||this.state.confirmPickupJobNo||this.state.curNo||"").trim();
+    if(!targetNo||this.state.confirmPickupBusy) return;
+    this.setState({ confirmPickupBusy:true });
+    this.setState(st=>({
+      liveJobs:st.liveJobs.map(j=>j.no===targetNo?{ ...j, status:"SERVICE_DONE" }:j)
+    }));
+    try{
+      const actor=this._chatActor();
+      const byName=actor.name||actor.email||(this.state.lang==="th"?"ผู้ขอรับบริการ":"Requester");
+      await this._gasCall("updateStatus",{
+        jobNo:targetNo,
+        status:"SERVICE_DONE",
+        by:byName,
+        channel:"web",
+        note:this.state.lang==="th"?"ผู้ขอรับบริการกดยืนยันรับงานกลับเรียบร้อย":"Requester confirmed pickup"
+      });
+      await this._loadLiveJobs();
+      this._loadChatThreads(true);
+    }catch(e){
+      console.error("userConfirmServiceDone error:", e);
+    }finally{
+      this.setState({ confirmPickupBusy:false, confirmPickupModalOpen:false, confirmPickupJobNo:"" });
+    }
+  }
 
   P(s){ if(typeof s!=="string") return s; const p=s.split("|"); return this.state.lang==="th"?p[0]:(p[1]||p[0]); }
   L(o,k){ return this.state.lang==="th"?o[k+"Th"]!==undefined?o[k+"Th"]:o.th:o[k+"En"]!==undefined?o[k+"En"]:o.en; }
@@ -3710,7 +3897,7 @@ class Component extends DCLogic {
         let r = await this._gasCall("checkAdminUser", { email, password: pass });
         // Fallback: If unknown_action occurs, it means the browser contacted an older deployment URL.
         // Force retry directly using the updated active Web App URL:
-        const activeUrl = "https://script.google.com/macros/s/AKfycby1LrZb8lhPA3_1sh8jCfntRmkH3tCFCO8n66vXw7Sy7bUNTivj6lzaKy-vPpKjZpKh/exec";
+        const activeUrl = "https://script.google.com/macros/s/AKfycbwMaKP05JB0QK8zR4t0_7BcaxVzc7h4l0g3fGhaL-yyUfVt2pAtoDAL3GTaRsvXUj66/exec";
         if (r && (r.error === "unknown_action" || r.error === "missing_url")) {
           this.setState({ gasUrl: activeUrl });
           try {
@@ -4218,8 +4405,12 @@ class Component extends DCLogic {
       const unread=Object.prototype.hasOwnProperty.call(unreadMap,unreadKey)
         ?(Number(unreadMap[unreadKey])||0)
         :(Number(thread&&(thread.unread_count||thread.unreadCount))||0);
+      const canConfirmPickup = j.code === "PROD_DONE";
       return { ...j, hue: p.fg, mediaBg: p.grad, initials: (j.requester || "").trim().slice(0, 1) || "P",
-        unread, hasUnread:unread>0 };
+        unread, hasUnread:unread>0,
+        canConfirmPickup,
+        confirmPickup: () => this.setState({ confirmPickupModalOpen:true, confirmPickupJobNo:String(j.no), confirmPickupBusy:false })
+      };
     });
 
     // — chat view models —
@@ -4410,13 +4601,22 @@ class Component extends DCLogic {
     const timeline = d.FLOW.map((code, i) => {
       const done = i <= curIdx, active = i === curIdx && curIdx < d.FLOW.length - 1, m = TL_META[code];
       const pendingText = S.lang === "th" ? "ยังไม่ถึงขั้นตอนนี้" : "Not reached yet";
+      const showPickupBtn = code === "SERVICE_DONE" && cur.code === "PROD_DONE";
       return {
         label: this.status(code),
         at: done ? m.at : "—", by: done ? m.by : pendingText, note: done ? m.note : "",
         dot: i === curIdx ? AC : (done ? INK : N2), line: i >= curIdx ? N2 : INK,
-        dotClass: active ? "tl-pulse-dot" : "", lineClass: active ? "tl-loading-line" : ""
+        dotClass: active ? "tl-pulse-dot" : "", lineClass: active ? "tl-loading-line" : "",
+        showPickupBtn
       };
     });
+    const formatBaht = v => {
+      if (v === null || v === undefined || v === "" || v === "—") return "—";
+      const str = String(v).trim();
+      if (str === "รอประเมิน" || str === "pending" || str === "—") return str;
+      if (str.endsWith("บาท") || str.endsWith("THB")) return str;
+      return str + (S.lang === "th" ? " บาท" : " THB");
+    };
     const jobDetailRows = cur ? [
       [t.jobNo, cur.no],
       [t.colService, cur.service],
@@ -4425,8 +4625,8 @@ class Component extends DCLogic {
       [t.sent, cur.sent || "—"],
       [t.needBy, cur.need || "—"],
       [t.status, cur.statusLabel || this.status(cur.code)],
-      [t.est, cur.est || "—"],
-      [t.confirmed, cur.conf || "—"]
+      [t.est, formatBaht(cur.est)],
+      [t.confirmed, formatBaht(cur.conf)]
     ].map(([k, v]) => ({ k, v })) : [];
 
     // ตารางราคา — อ่าน/เขียนแท็บ PRICE_RULES ใน Google Sheet จริงแล้ว (ปุ่มเปิด/ปิดมีผลจริงในชีต ไม่ใช่แค่ state ในเบราว์เซอร์)
@@ -5196,7 +5396,7 @@ class Component extends DCLogic {
         }
         this.setState({
           // ส่งสำเร็จแล้ว — เคลียร์ฟอร์มกลับไปเป็นค่าเริ่มต้นเหมือนตอนเข้าหน้านี้ครั้งแรก ก่อนกรอกข้อมูลใด ๆ
-          submitBusy:false, submitted:true, newJobNo:jobNo, submitError:null,
+          submitBusy:false, submitted:true, submitSuccessPopup:true, newJobNo:jobNo, submitError:null,
           uploadedFiles:[], uploadProgressText:"", lastUploadedCount:uploadedCount,
           paymentSlipFiles:[], paymentSlipWarnMsg:"",
           mineSelectedEmail:(S.gateEmail||"").trim().toLowerCase(),
@@ -5218,7 +5418,7 @@ class Component extends DCLogic {
         });
         this._loadLiveJobs();
       }
-      else this.setState({ submitBusy:false, submitError:(r&&r.error)||"unknown_error", uploadProgressText:"" });
+      else this.setState({ submitBusy:false, submitSuccessPopup:false, submitError:(r&&r.error)||"unknown_error", uploadProgressText:"" });
     };
     const submitLabel = S.uploadProgressText
       ? S.uploadProgressText
@@ -5302,6 +5502,22 @@ class Component extends DCLogic {
       driveTree, reviewRows:reviewRowsOut,
       pdpaConsent:S.pdpaConsent, togglePdpaConsent:e=>this.setState({ pdpaConsent:e.target.checked }),
       submitDisabled:!S.pdpaConsent||S.submitBusy,
+      submitBusy:S.submitBusy,
+      submitLoadingTitle:S.lang==="th"?"กำลังส่งคำขอรับบริการ…":"Submitting service request…",
+      submitLoadingSubtitle:S.uploadProgressText||(S.lang==="th"?"กรุณารอสักครู่ ระบบกำลังบันทึกข้อมูลและอัปโหลดไฟล์…":"Please wait, saving data and uploading files…"),
+      submitSuccessPopup:S.submitSuccessPopup,
+      submitSuccessTitle:S.lang==="th"?"ส่งคำขอสำเร็จ":"Request Submitted Successfully",
+      submitSuccessJobLabel:S.lang==="th"?"เลขที่งาน":"Job No.",
+      submitSuccessSub:S.lang==="th"
+        ?("ระบบได้บันทึกคำขอและส่งข้อมูลเรียบร้อยแล้ว"+(S.lastUploadedCount>0?" (อัปโหลดไฟล์ "+S.lastUploadedCount+" ไฟล์)":""))
+        :("Your request has been recorded successfully"+(S.lastUploadedCount>0?" ("+S.lastUploadedCount+" files uploaded)":"")),
+      submitSuccessTrackBtn:S.lang==="th"?"ติดตามสถานะงาน":"Track Status",
+      submitSuccessCloseBtn:S.lang==="th"?"ปิด":"Close",
+      closeSubmitSuccessPopup:()=>this.setState({ submitSuccessPopup:false }),
+      closeSubmitSuccessAndTrack:()=>{
+        const targetNo=this.state.newJobNo;
+        this.setState({ submitSuccessPopup:false, page:"track", curNo:targetNo });
+      },
       submitJob:doSubmitJob, submitLabel, submitError:S.submitError, submitted:S.submitted, newJobNo:S.newJobNo,
       activeMineEmail, hasSelectedMineEmail, hasNoSelectedEmail, hasSelectedEmailNoJobs, mineCanBrowseAll,
       requesterEmailOptions, hasRequesterEmailOptions, hasNoRequesterEmails,
@@ -5412,6 +5628,25 @@ class Component extends DCLogic {
         :("Job "+String(S.chatServiceDoneJobNo||"")+" has been completed (SERVICE DONE). This conversation has been closed automatically."),
       chatDonePopupBtn:S.lang==="th"?"รับทราบ":"Understood",
       closeChatDonePopup:()=>this.setState({ chatServiceDonePopup:false, chatServiceDoneJobNo:"" }),
+      canUserConfirmPickup: cur && cur.code === "PROD_DONE",
+      openCurrentConfirmPickup: () => this.setState({ confirmPickupModalOpen:true, confirmPickupJobNo:cur ? String(cur.no) : "", confirmPickupBusy:false }),
+      trackReadyTitle: S.lang === "th" ? "ชิ้นงานเสร็จแล้ว พร้อมรับได้เลย!" : "Production completed, ready for pickup!",
+      trackReadyDesc: S.lang === "th" ? "เมื่อท่านเดินทางมารับชิ้นงานที่โรงพิมพ์แล้ว สามารถกดยืนยันการรับงานได้ที่นี่" : "When you pick up your prints at the print shop, click here to confirm receipt.",
+      confirmPickupBtnLabel: S.lang === "th" ? "รับกลับเรียบร้อย" : "Confirm Receipt",
+      confirmPickupModalOpen: S.confirmPickupModalOpen,
+      confirmPickupTitle: S.lang === "th" ? "ยืนยันการรับชิ้นงาน" : "Confirm Job Pickup",
+      confirmPickupJobNoText: S.lang === "th" ? "เลขที่งาน" : "Job No.",
+      confirmPickupJobNo: S.confirmPickupJobNo || (cur && cur.no) || "",
+      confirmPickupBody: S.lang === "th"
+        ? "คุณได้รับชิ้นงานพิมพ์ที่โรงพิมพ์เรียบร้อยแล้วใช่หรือไม่? เมื่อยืนยันแล้ว สถานะจะเปลี่ยนเป็น \"รับกลับเรียบร้อย\" และปิดงานโดยสมบูรณ์"
+        : "Have you received your printed materials? Confirming will update the status to \"Picked up\" and complete the service.",
+      confirmPickupBusy: S.confirmPickupBusy,
+      confirmPickupActionBtnText: S.confirmPickupBusy
+        ? (S.lang === "th" ? "กำลังบันทึก…" : "Saving…")
+        : (S.lang === "th" ? "ยืนยันรับงาน" : "Confirm Pickup"),
+      confirmPickupCancelBtnText: S.lang === "th" ? "ยกเลิก" : "Cancel",
+      doConfirmPickup: () => this._userConfirmServiceDone(S.confirmPickupJobNo || (cur && cur.no)),
+      closeConfirmPickupModal: () => this.setState({ confirmPickupModalOpen: false, confirmPickupJobNo: "", confirmPickupBusy: false }),
       jobDetailOpen:S.jobDetailOpen,
       canConfirmPrice, confRows, confTotalText:this.N(Math.round(confTotal*100)/100),
       confReason:S.confReason, setConfReason, saveConfirmedAmount, confBusy:S.confBusy,

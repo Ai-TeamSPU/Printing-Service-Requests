@@ -344,10 +344,10 @@ function submitJob_(p) {
   if (p.folderId) {
     try {
       var folder = openFolder_(p);
-      var jobFolder = folder.createFolder(jobNo);
+      var jobFolder = findOrCreateFolder_(folder, jobNo);
       // สร้างแค่ "requester-files" ล่วงหน้า (โฟลเดอร์เดียวที่ใช้จริงตอนส่งคำขอ) — admin-files/proof/final/payment-slip
       // ยังไม่สร้างตอนนี้ จะสร้างเองอัตโนมัติทีหลังตอนมีการอัปโหลดไฟล์เข้าหมวดนั้นจริง ๆ ผ่าน findOrCreateFolder_ กันโฟลเดอร์เปล่าคาอยู่ใน Drive
-      jobFolder.createFolder("requester-files");
+      findOrCreateFolder_(jobFolder, "requester-files");
       var createdFolderId = jobFolder.getId();
       jobsSh.getRange(jobRow, 14).setValue(createdFolderId); // column N = drive_folder_id
       jobFolderId = createdFolderId;

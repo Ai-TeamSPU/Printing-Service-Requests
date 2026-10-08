@@ -7,12 +7,12 @@ export const TH = {
   tabSheet: "โครงสร้างชีต", tabSettings: "ตั้งค่าเชื่อมต่อ", tabDash: "แดชบอร์ด", tabReport: "เอกสารสรุปรายงาน",
   kicker: "โรงพิมพ์ให้บริการ งานผลิต งานพิมพ์และออกแบบ",
   landH1: "โรงพิมพ์ มหาวิทยาลัยศรีปทุม ยินดีให้บริการ",
-  landSub: "ฟอร์มเดียวสำหรับทุกงานพิมพ์ เลือกบริการที่ต้องการ ระบบถามเฉพาะคำถามที่เกี่ยวข้อง คำนวณราคาประมาณการ และให้ติดตามสถานะได้จนรับงาน",
+  landSub: "ให้บริการ งานผลิต งานพิมพ์และออกแบบ ครบจบในที่เดียว ครอบคลุมทุกบริการงานพิมพ์! โปรแกรมอัจฉริยะประเมินราคางาน และติดตามสถานะได้เรียลไทม์จนถึงมือคุณ",
   ctaNew: "เริ่มใช้บริการ", ctaTrack: "ติดตามงานของฉัน",
   pickService: "บริการทั้งหมด", pickServiceSub: "ราคาที่แสดงมาจากตารางราคาปัจจุบัน รายการที่ยังไม่มีราคาจะขึ้นสถานะรอประเมินราคา ไม่แสดงเป็น 0 บาท",
   chooseThis: "เลือกกลุ่มนี้",
   statReq: "คำขอเดือนนี้", statUser: "ผู้ใช้บริการไม่ซ้ำ", statUnit: "หน่วยงานที่ใช้บริการ", statValue: "มูลค่างานเดือนนี้",
-  oneForm: "บันทึกข้อมูล สะดวก รวดเร็ว ในทุกบริการ", newRequest: "แบบฟอร์มรับบริการ", stepWord: "ขั้นที่",
+  newRequest: "แบบฟอร์มรับบริการ", stepWord: "ขั้นที่",
   ws1: "เลือกบริการ", ws2: "ข้อมูลและรายละเอียด", ws3: "แนบไฟล์", ws4: "ตรวจสอบและส่ง",
   s1title: "เลือกบริการที่ต้องการ", s1sub: "เลือกได้หลายรายการในคำขอเดียว เช่น พริ้นสี + เข้าเล่ม",
   s2title: "ข้อมูลผู้ขอใช้บริการ", dynFields: "คำถามเพิ่มเติมตามบริการที่เลือก", qty: "จำนวน",
@@ -148,7 +148,7 @@ export const TH = {
   setMapTitle: "เหตุการณ์ในระบบเขียนลงที่ไหน", setMapEvent: "เหตุการณ์", setMapSheet: "แท็บในชีต", setMapDrive: "การกระทำบน Drive",
   agentStripTitle: "ผู้ช่วยที่ทำงานอยู่เบื้องหลัง", agentStripSub: "งานซ้ำ ๆ ที่เคยทำด้วยมือ ถูกยกให้ผู้ช่วยอัตโนมัติดูแล คนเหลือหน้าที่ตัดสินใจ",
   agentBadge: "ผู้ช่วย AI", autoBadge: "อัตโนมัติ", agentHere: "ตรงนี้มีผู้ช่วยทำงานให้",
-  footNote: "ต้นแบบหน้าจอ ข้อมูลตัวอย่าง ยังไม่เชื่อมต่อบริการจริง"
+  // footNote: "ต้นแบบหน้าจอ ข้อมูลตัวอย่าง ยังไม่เชื่อมต่อบริการจริง"
 };
 
 export const EN = {
@@ -159,12 +159,12 @@ export const EN = {
   tabSheet: "Sheet schema", tabSettings: "Connections", tabDash: "Dashboard", tabReport: "A4 report",
   kicker: "The printing house provides production and print & design services",
   landH1: "Sripatum University Printing House, at your service",
-  landSub: "One form for every print job. Pick a service, answer only the questions that apply, see an estimate, and follow the job through to pickup.",
+  landSub: "Comprehensive print, production, and design services, all in one place — covering all your printing needs! Our intelligent system estimates prices and lets you track your order in real-time until it's delivered to you.",
   ctaNew: "Start using the service", ctaTrack: "Track my jobs",
   pickService: "All services", pickServiceSub: "Prices come from the current price master. Items without a rule are marked awaiting quote — never shown as 0 baht.",
   chooseThis: "Choose this group",
   statReq: "Requests this month", statUser: "Unique requesters", statUnit: "Units served", statValue: "Value this month",
-  oneForm: "Save your info once, use it for every service", newRequest: "Service request form", stepWord: "Step",
+  newRequest: "Service request form", stepWord: "Step",
   ws1: "Pick services", ws2: "Details", ws3: "Attach files", ws4: "Review & submit",
   s1title: "Choose the services you need", s1sub: "One request can hold several items, e.g. colour print + binding.",
   s2title: "Requester information", dynFields: "Extra questions for the services you picked", qty: "Quantity",
@@ -592,8 +592,8 @@ export const SAMPLE_USERS = {
 };
 
 export const PAGE_AGENT = {
-  wizard: { key: "price", th: "ผู้ช่วยประเมินราคากำลังคิดยอดให้ระหว่างคุณกรอก", en: "The quoting assistant totals the estimate as you type." },
-  queue: { key: "triage", th: "ผู้ช่วยจัดคิวเรียงงานตามวันที่ต้องการรับ และชูงานที่เสี่ยงเกินกำหนดขึ้นบน", en: "The triage assistant orders the queue by due date and floats at-risk jobs to the top." },
+  wizard: { key: "price", th: "AI ประเมินราคาและสร้างสถานะติดตามให้อัตโนมัติ ระหว่างคุณกรอกข้อมูล สะดวก รวดเร็ว พร้อมตรวจสอบความถูกต้องก่อนรับงานพิมพ์คุณภาพ", en: "AI automatically estimates prices and creates tracking status as you enter data. Fast, convenient, and ensures accuracy before accepting print jobs." },
+  queue: { key: "triage", th: "ผู้ช่วยจัดคิวเรียงงานตามวันที่ต้องการรับ", en: "The triage assistant orders the queue by due date." },
   mobile: { key: "notify", th: "กดปุ่มเดียว ผู้ช่วยเขียนลงชีต ส่งอีเมล และบันทึกล็อกให้ครบ", en: "One tap and the assistant writes the sheet, sends the email and logs it." },
   report: { key: "report", th: "รายงานฉบับนี้ผู้ช่วยร่างจากข้อมูลจริง คนแค่ตรวจและเซ็น", en: "The assistant drafts this from live data; a person reviews and signs." },
   dash: { key: "report", th: "ผู้ด้านการบริหารข้อมูลด้านงบประมาณ", en: "Every figure recomputes from the one sheet — nothing is tallied by hand." },
