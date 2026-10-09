@@ -687,9 +687,6 @@
                             <label style="font-size:12.5px;font-weight:600;display:block;margin-bottom:6px">{{
                               t.prodColor }}</label>
                             <div style="display:flex;border:1px solid var(--color-line)">
-                              <button onClick="{{ setColor.color }}"
-                                style="flex:1;padding:10px;border:0;border-right:1px solid var(--color-line);background:{{ colorBg.color }};color:{{ colorFg.color }};font-weight:700;min-height:44px">{{
-                                t.prodColorColor }}</button>
                               <button onClick="{{ setColor.bw }}"
                                 style="flex:1;padding:10px;border:0;background:{{ colorBg.bw }};color:{{ colorFg.bw }};font-weight:700;min-height:44px">{{
                                 t.prodColorBw }}</button>
@@ -2996,7 +2993,7 @@ class Component extends DCLogic {
   state = { d:null, lang:this.props.defaultLang==="en"?"en":"th", role:"REQ", page:"landing",
     isAdminLoggedIn:false, adminLoginOpen:false, adminEmailInput:"", adminPassInput:"", adminLoginBusy:false, adminLoginError:"", adminUserObj:null,
     gateOpen:false, gateEmail:"", gateErr:false, gateMsg:"", gateVerified:false, gateBusy:false,
-    svcGroup:null, sel:{}, prodColor:"", prodSize:"", prodPaperType:"", prodSides:"", prodOwnPaper:false,
+    svcGroup:null, sel:{}, prodColor:"bw", prodSize:"", prodPaperType:"", prodSides:"", prodOwnPaper:false,
     prodQtyOrig:"", prodQtySets:"", staple:"",
     examType:"", examSubject:"", budget:"", budgetAcct:"",
     dupHasCover:false,
@@ -4066,7 +4063,7 @@ class Component extends DCLogic {
     const groupItems=S.svcGroup==="PROD" ? d.CATS[0].items : (S.svcGroup==="DESIGN" ? [...d.CATS[1].items, ...d.CATS[2].items] : []);
     const svcGroups=[["PROD",t.svcGroupProd],["DESIGN",t.svcGroupDesign]].map(([k,label])=>({ label,
       bg:S.svcGroup===k?INK:"transparent", fg:S.svcGroup===k?BG:INK,
-      go:()=>this.setState({ svcGroup:k, sel:{} }) }));
+      go:()=>this.setState({ svcGroup:k, sel:{}, ...(k==="PROD"?{ prodColor:"bw" }:{} ) }) }));
     const hasGroup=!!S.svcGroup;
     // ยังไม่เลือก = ขึ้นกรอบเน้นให้สังเกตเห็น พอเลือกแล้วกรอบจางลงเป็นเส้นปกติ ขนาดกล่องคงที่ไม่กระโดด
     const svcPickBd=hasGroup?"1px solid var(--color-line)":"1px dashed var(--color-accent)";
@@ -4594,7 +4591,7 @@ class Component extends DCLogic {
       IN_PRODUCTION: { at: "—", by: S.lang === "th" ? "เจ้าหน้าที่หน้าเครื่อง" : "Floor staff",
         note: S.lang === "th" ? "อยู่ระหว่างจัดพิมพ์ / ดำเนินการผลิต" : "Currently printing / in production" },
       PROD_DONE: { at: "—", by: S.lang === "th" ? "เจ้าหน้าที่หน้าเครื่อง" : "Floor staff",
-        note: S.lang === "th" ? "งานเสร็จแล้ว พร้อมรับได้ที่โรงพิมพ์ อาคาร 11 ชั้น 1" : "Production completed, ready for pickup" },
+        note: S.lang === "th" ? "งานเสร็จแล้ว พร้อมรับได้ที่โรงพิมพ์ อาคาร 1 ชั้น L" : "Production completed, ready for pickup" },
       SERVICE_DONE: { at: "—", by: S.lang === "th" ? "โรงพิมพ์" : "Print shop",
         note: S.lang === "th" ? "ผู้ขอรับงานกลับแล้ว ปิดงานเรียบร้อย" : "Picked up by requester, job closed" }
     };
@@ -5402,7 +5399,7 @@ class Component extends DCLogic {
           mineSelectedEmail:(S.gateEmail||"").trim().toLowerCase(),
           mineEmailInput:(S.gateEmail||"").trim().toLowerCase(),
           svcGroup:null, sel:{},
-          prodColor:"", prodSize:"", prodPaperType:"", prodSides:"", prodOwnPaper:false,
+          prodColor:"bw", prodSize:"", prodPaperType:"", prodSides:"", prodOwnPaper:false,
           prodQtyOrig:"", prodQtySets:"", staple:"",
           examType:"", examSubject:"", budget:"", budgetAcct:"",
           dupHasCover:false,
