@@ -406,6 +406,480 @@
             inset: 0
           }
         }
+
+        /* --- Styles for "งานของฉัน" (My Requests) from returned-completed-cards-design.html --- */
+        .filter-panel {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+          flex-wrap: wrap;
+          margin-bottom: 24px;
+          padding: 16px 18px;
+          border: 1px solid var(--color-line);
+          border-radius: var(--radius-card);
+          background: var(--color-band);
+        }
+
+        .filter-controls {
+          flex: 1;
+          min-width: 280px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .filter-label {
+          color: var(--color-text);
+          font-size: 13.5px;
+          font-weight: 700;
+          white-space: nowrap;
+        }
+
+        .input-email {
+          width: 220px;
+        }
+
+        .section {
+          margin-top: 30px;
+        }
+
+        .section+.section {
+          margin-top: 34px;
+          padding-top: 26px;
+          border-top: 1px solid var(--color-line);
+        }
+
+        .section-heading,
+        .section-mine-heading {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 14px;
+          flex-wrap: wrap;
+          margin-bottom: 14px;
+        }
+
+        .section-title-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .section-title,
+        .section-mine-title {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 800;
+          letter-spacing: -0.01em;
+          color: var(--color-text);
+        }
+
+        .section-caption,
+        .section-mine-caption {
+          margin: 4px 0 0;
+          color: var(--color-neutral-700);
+          font-size: 13px;
+        }
+
+        .section-count,
+        .section-count-badge {
+          padding: 4px 10px;
+          border-radius: var(--radius-pill);
+          background: var(--color-band);
+          color: var(--color-neutral-700);
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        .section-completed,
+        .section-completed-box {
+          margin-top: 10px;
+          margin-bottom: 30px;
+          padding: 22px;
+          border: 1px solid #e4d7ff;
+          border-radius: var(--radius-card);
+          background: #faf7ff;
+        }
+
+        .section-completed .section-count,
+        .section-completed-box .section-count,
+        .section-completed-box .section-completed-count {
+          background: #efe7ff;
+          color: #6a3fc7;
+        }
+
+        .card-grid,
+        .card-grid-mine {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 18px;
+        }
+
+        .pagination,
+        .pagination-mine {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          margin-top: 22px;
+        }
+
+        .pagination-summary,
+        .pagination-summary-mine {
+          margin: 0 10px;
+          color: var(--color-neutral-700);
+          font-size: 12.5px;
+          white-space: nowrap;
+        }
+
+        .page-button,
+        .page-button-mine {
+          min-width: 36px;
+          min-height: 36px;
+          padding: 6px 10px;
+          border: 1px solid var(--color-line);
+          border-radius: var(--radius-pill);
+          background: #fff;
+          color: var(--color-accent-700);
+          font-size: 12.5px;
+          font-weight: 700;
+          cursor: pointer;
+          font-family: inherit;
+        }
+
+        .page-button:hover:not(:disabled),
+        .page-button-mine:hover:not(:disabled) {
+          background: var(--color-band);
+        }
+
+        .page-button.is-active,
+        .page-button-mine.is-active {
+          border-color: #6a3fc7;
+          background: #6a3fc7;
+          color: #fff;
+        }
+
+        .page-button:disabled,
+        .page-button-mine:disabled {
+          opacity: .45;
+          cursor: not-allowed;
+        }
+
+        .job-card,
+        .job-card-mine {
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          min-height: 330px;
+          border: 1px solid var(--color-line);
+          border-radius: var(--radius-card);
+          background: #fff;
+          box-shadow: 0 2px 4px rgba(16, 24, 40, .05), 0 16px 34px -22px rgba(16, 24, 40, .28);
+          transition: transform .15s ease, box-shadow .15s ease;
+        }
+
+        .job-card:hover,
+        .job-card-mine:hover {
+          box-shadow: 0 4px 12px rgba(16, 24, 40, .08), 0 20px 40px -20px rgba(16, 24, 40, .32);
+        }
+
+        .card-media,
+        .card-media-mine {
+          min-height: 96px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 14px 18px;
+        }
+
+        .card-media.is-blue,
+        .card-media-mine.is-blue {
+          background: linear-gradient(135deg, #e7edff 0%, #eef5ff 100%);
+        }
+
+        .card-media.is-amber,
+        .card-media-mine.is-amber {
+          background: linear-gradient(135deg, #fff1cf 0%, #ffe4f0 100%);
+        }
+
+        .card-media.is-green,
+        .card-media-mine.is-green {
+          background: linear-gradient(135deg, #dcf6e9 0%, #eef9dc 100%);
+        }
+
+        .card-media.is-purple,
+        .card-media-mine.is-purple {
+          background: linear-gradient(135deg, #efe7ff 0%, #f7eefc 100%);
+        }
+
+        .printer-box,
+        .printer-box-mine {
+          width: 46px;
+          height: 46px;
+          display: grid;
+          place-items: center;
+          flex: none;
+          border-radius: var(--radius-card);
+          background: #fff;
+        }
+
+        .printer-box svg,
+        .printer-box-mine svg {
+          width: 24px;
+          height: 24px;
+        }
+
+        .is-blue .printer-box,
+        .is-blue .printer-box-mine {
+          color: #2f56c6;
+        }
+
+        .is-amber .printer-box,
+        .is-amber .printer-box-mine {
+          color: #a15a00;
+        }
+
+        .is-green .printer-box,
+        .is-green .printer-box-mine {
+          color: #0f7a4c;
+        }
+
+        .is-purple .printer-box,
+        .is-purple .printer-box-mine {
+          color: #6a3fc7;
+        }
+
+        .status-badge,
+        .status-badge-mine {
+          padding: 5px 12px;
+          border-radius: var(--radius-pill);
+          background: #fff;
+          font-size: 12px;
+          font-weight: 700;
+          line-height: 1.4;
+          white-space: nowrap;
+        }
+
+        .status-received {
+          color: #2f56c6;
+        }
+
+        .status-production {
+          color: #a15a00;
+        }
+
+        .status-ready {
+          color: #0f7a4c;
+        }
+
+        .status-picked {
+          color: #6a3fc7;
+        }
+
+        .card-body,
+        .job-card-body-mine {
+          padding: 16px 18px 4px;
+        }
+
+        .job-kicker,
+        .job-kicker-mine {
+          color: var(--color-accent-700);
+          font-size: 10.5px;
+          font-weight: 800;
+          letter-spacing: .14em;
+          text-transform: uppercase;
+        }
+
+        .job-no,
+        .job-no-mine {
+          margin-top: 5px;
+          font-size: 19px;
+          font-weight: 800;
+          letter-spacing: -.01em;
+          line-height: 1.2;
+          color: var(--color-text);
+        }
+
+        .job-service,
+        .job-service-mine {
+          margin-top: 4px;
+          color: var(--color-neutral-800);
+          font-size: 14.5px;
+          line-height: 1.35;
+        }
+
+        .card-details,
+        .card-details-mine {
+          display: flex;
+          flex-direction: column;
+          gap: 7px;
+          padding: 12px 18px 0;
+        }
+
+        .detail-row,
+        .detail-row-mine {
+          display: flex;
+          justify-content: space-between;
+          gap: 14px;
+          font-size: 13.5px;
+          line-height: 1.5;
+        }
+
+        .detail-row span:first-child,
+        .detail-row-mine span:first-child {
+          color: var(--color-neutral-700);
+          white-space: nowrap;
+        }
+
+        .detail-row span:last-child,
+        .detail-row-mine span:last-child {
+          font-weight: 700;
+          text-align: right;
+        }
+
+        .card-viewed,
+        .card-viewed-mine {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          padding: 16px 18px 0;
+          color: var(--color-neutral-600);
+          font-size: 12px;
+          line-height: 1.5;
+        }
+
+        .avatar,
+        .avatar-mine {
+          width: 22px;
+          height: 22px;
+          display: grid;
+          place-items: center;
+          border-radius: var(--radius-pill);
+          background: #efe7ff;
+          color: #6a3fc7;
+          font-size: 10px;
+          font-weight: 800;
+        }
+
+        .card-actions,
+        .card-actions-mine {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+          margin-top: auto;
+          padding: 14px 18px;
+          border-top: 1px solid var(--color-line);
+        }
+
+        .action-button,
+        .action-button-mine {
+          width: 100%;
+          min-height: 44px;
+          border-radius: var(--radius-pill);
+          font-size: 12.5px;
+          font-weight: 700;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          font-family: inherit;
+          transition: background .15s ease, border-color .15s ease;
+        }
+
+        .action-track {
+          border: 1px solid var(--color-line);
+          background: #fff;
+          color: var(--color-accent-700);
+        }
+
+        .action-track:hover {
+          background: var(--color-band);
+        }
+
+        .action-chat {
+          border: 0;
+          background: #6a3fc7;
+          color: #fff;
+        }
+
+        .action-chat:hover {
+          opacity: .92;
+          background: #5c35b0;
+        }
+
+        .completed-note,
+        .completed-note-box {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin: 0 0 14px;
+          padding: 10px 12px;
+          border: 1px solid #e4d7ff;
+          border-radius: var(--radius-input);
+          background: #fbf9ff;
+          color: #6a3fc7;
+          font-size: 13px;
+          font-weight: 600;
+        }
+
+        .completed-top-action {
+          display: flex;
+          justify-content: flex-end;
+          margin: 0 0 18px;
+        }
+
+        .completed-top-button {
+          min-height: 42px;
+          padding: 9px 18px;
+          border: 1px solid #6a3fc7;
+          border-radius: var(--radius-pill);
+          background: #6a3fc7;
+          color: #fff;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-family: inherit;
+          transition: all .2s ease;
+        }
+
+        .completed-top-button:hover {
+          background: #5931aa;
+          border-color: #5931aa;
+        }
+
+        .completed-top-button.is-open {
+          background: #fff;
+          color: #6a3fc7;
+        }
+
+        .completed-top-button.is-open:hover {
+          background: #fbf9ff;
+        }
+
+        .empty-state,
+        .empty-state-mine {
+          padding: 24px 18px;
+          border: 1px dashed var(--color-line);
+          border-radius: var(--radius-card);
+          color: var(--color-neutral-700);
+          font-size: 13px;
+          text-align: center;
+          background: #fff;
+        }
+
+        @media (max-width: 720px) {
+          .input-email {
+            width: min(100%, 220px);
+          }
+        }
       </style>
     </helmet>
 
@@ -1386,74 +1860,180 @@
               </div>
             </sc-if>
 
-            <!-- แสดงการ์ดงานของอีเมลที่เลือก -->
-            <sc-if value="{{ hasSelectedMineEmail }}" hint-placeholder-val="{{ false }}">
-              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px">
-                <sc-for list="{{ myCards }}" as="j" hint-placeholder-count="5">
-                  <div
-                    style="display:flex;flex-direction:column;background:#fff;border:1px solid var(--color-line);border-radius:var(--radius-card);box-shadow:0 2px 4px rgba(16,24,40,.05),0 16px 34px -22px rgba(16,24,40,.28);overflow:hidden">
-                    <div
-                      style="min-height:96px;background:{{ j.mediaBg }};display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 18px">
-                      <div
-                        style="width:46px;height:46px;border-radius:var(--radius-card);background:#fff;display:grid;place-items:center;color:{{ j.hue }};flex:none">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                          <path
-                            d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2">
-                          </path>
-                          <rect x="6" y="14" width="12" height="8" rx="1"></rect>
-                        </svg>
+            <!-- แสดงรายการคำขอเมื่อเลือกอีเมลแล้วและมีประวัติงาน -->
+            <sc-if value="{{ hasMineJobCards }}" hint-placeholder-val="{{ false }}">
+              <!-- ปุ่มเปิด/ปิด หมวดงานที่รับกลับเรียบร้อยแล้ว -->
+              <div class="completed-top-action">
+                <button class="{{ mineCompletedBtnClass }}" type="button" onClick="{{ toggleMineCompleted }}"
+                  aria-expanded="{{ mineCompletedOpen }}">
+                  {{ mineCompletedToggleLabel }}
+                </button>
+              </div>
+
+              <!-- หมวดรับกลับเรียบร้อย (ซ่อน/แสดงตามปุ่มด้านบน) -->
+              <sc-if value="{{ mineCompletedOpen }}" hint-placeholder-val="{{ false }}">
+                <section class="section-completed-box" aria-labelledby="completed-heading">
+                  <div class="section-mine-heading">
+                    <div>
+                      <div class="section-title-row">
+                        <h2 class="section-mine-title" id="completed-heading">รับกลับเรียบร้อย</h2>
+                        <span class="section-count-badge section-completed-count">{{ mineCompletedCountText }}</span>
                       </div>
-                      <span
-                        style="padding:5px 12px;border-radius:var(--radius-pill);font-size:12px;font-weight:700;background:#fff;color:{{ j.hue }};text-align:right;line-height:1.4">{{
-                        j.statusLabel }}</span>
-                    </div>
-                    <div style="padding:16px 18px 4px">
-                      <div
-                        style="font-size:10.5px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:{{ j.hue }}">
-                        {{ t.jobNo }}</div>
-                      <div style="font-size:19px;font-weight:800;letter-spacing:-0.01em;margin-top:5px;line-height:1.2">
-                        {{ j.no }}</div>
-                      <div style="font-size:14.5px;color:var(--color-neutral-800);margin-top:4px;line-height:1.35">{{
-                        j.service }}</div>
-                    </div>
-                    <div style="padding:12px 18px 0;display:flex;flex-direction:column;gap:7px">
-                      <div style="display:flex;justify-content:space-between;gap:14px;font-size:13.5px;line-height:1.5">
-                        <span style="color:var(--color-neutral-700);white-space:nowrap">{{ t.status }}</span>
-                        <span style="font-weight:700;text-align:right">{{ j.statusLabel }}</span>
-                      </div>
-                      <div style="display:flex;justify-content:space-between;gap:14px;font-size:13.5px;line-height:1.5">
-                        <span style="color:var(--color-neutral-700);white-space:nowrap">{{ t.sent }}</span>
-                        <span style="font-weight:700;white-space:nowrap">{{ j.sent }}</span>
-                      </div>
-                    </div>
-                    <div
-                      style="display:flex;align-items:center;gap:8px;padding:16px 18px 0;font-size:12px;line-height:1.5;flex-wrap:wrap;color:var(--color-neutral-600)">
-                      <span
-                        style="width:22px;height:22px;border-radius:var(--radius-pill);background:{{ j.mediaBg }};color:{{ j.hue }};display:grid;place-items:center;font-size:10px;font-weight:800">{{
-                        j.initials }}</span>
-                      <span>{{ viewedLabel }}</span>
-                      <time style="font-weight:600">{{ viewedDate }}</time>
-                    </div>
-                    <div
-                      style="margin-top:14px;padding:14px 18px;border-top:1px solid var(--color-line);display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                      <sc-if value="{{ j.canConfirmPickup }}" hint-placeholder-val="{{ false }}">
-                        <button type="button" onClick="{{ j.confirmPickup }}"
-                          style="grid-column:1/-1;min-height:42px;border:1px solid #16a34a;border-radius:var(--radius-pill);background:#f0fdf4;color:#15803d;font-size:13px;font-weight:700;font-family:inherit;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer">
-                          <span>🤝</span><span>รับกลับเรียบร้อย</span>
-                        </button>
-                      </sc-if>
-                      <button type="button" onClick="{{ j.open }}"
-                        style="width:100%;min-height:44px;border:1px solid var(--color-line);border-radius:var(--radius-pill);background:#fff;color:{{ j.hue }};font-size:12.5px;font-weight:700;font-family:inherit">{{
-                        t.tabTrack }}</button>
-                      <button type="button" onClick="{{ j.openChat }}"
-                        style="width:100%;min-height:44px;border:0;border-radius:var(--radius-pill);background:{{ j.hue }};color:#fff;font-size:12.5px;font-weight:700;font-family:inherit">💬
-                        {{ t.tabChat }}<sc-if value="{{ j.hasUnread }}" hint-placeholder-val="{{ false }}"> ({{ j.unread
-                          }})</sc-if></button>
+                      <p class="section-mine-caption">แสดงเฉพาะคำขอที่มีสถานะ “รับกลับเรียบร้อย” เท่านั้น</p>
                     </div>
                   </div>
-                </sc-for>
-              </div>
+                  <p class="completed-note-box">
+                    <span>🤝</span><span>ส่วนนี้แสดงเฉพาะรายการที่ปิดงานสมบูรณ์แล้ว ไม่รวมสถานะอื่น</span>
+                  </p>
+                  <sc-if value="{{ hasCompletedCards }}" hint-placeholder-val="{{ true }}">
+                    <div class="card-grid-mine">
+                      <sc-for list="{{ myCompletedCardsPaged }}" as="j" hint-placeholder-count="4">
+                        <article class="job-card-mine">
+                          <div class="card-media-mine {{ j.mediaClass }}">
+                            <div class="printer-box-mine">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path
+                                  d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2">
+                                </path>
+                                <rect x="6" y="14" width="12" height="8" rx="1"></rect>
+                              </svg>
+                            </div>
+                            <span class="status-badge-mine {{ j.statusClass }}">{{ j.statusLabel }}</span>
+                          </div>
+                          <div class="job-card-body-mine">
+                            <div class="job-kicker-mine">{{ t.jobNo }}</div>
+                            <div class="job-no-mine">{{ j.no }}</div>
+                            <div class="job-service-mine">{{ j.service }}</div>
+                          </div>
+                          <div class="card-details-mine">
+                            <div class="detail-row-mine">
+                              <span>{{ t.status }}</span>
+                              <span>{{ j.statusLabel }}</span>
+                            </div>
+                            <div class="detail-row-mine">
+                              <span>{{ t.sent }}</span>
+                              <span>{{ j.sent }}</span>
+                            </div>
+                          </div>
+                          <div class="card-viewed-mine">
+                            <span class="avatar-mine">{{ j.initials }}</span>
+                            <span>{{ viewedLabel }}</span>
+                            <time style="font-weight:600">{{ viewedDate }}</time>
+                          </div>
+                          <div class="card-actions-mine">
+                            <button type="button" class="action-button-mine action-track" onClick="{{ j.open }}">{{
+                              t.tabTrack }}</button>
+                            <button type="button" class="action-button-mine action-chat" onClick="{{ j.openChat }}">
+                              💬 {{ t.tabChat }}<sc-if value="{{ j.hasUnread }}" hint-placeholder-val="{{ false }}"> ({{
+                                j.unread }})</sc-if>
+                            </button>
+                          </div>
+                        </article>
+                      </sc-for>
+                    </div>
+                    <!-- ส่วนแบ่งหน้า Pagination หมวดรับกลับเรียบร้อย (แสดง 4 รายการต่อหน้า) -->
+                    <sc-if value="{{ hasMineCompletedPagination }}" hint-placeholder-val="{{ false }}">
+                      <nav class="pagination-mine" aria-label="หน้ารายการรับกลับเรียบร้อย">
+                        <button class="page-button-mine" type="button" onClick="{{ goToMineCompletedPrev }}"
+                          disabled="{{ mineCompletedPrevDisabled }}">ก่อนหน้า</button>
+                        <sc-for list="{{ mineCompletedPageButtons }}" as="pb">
+                          <button class="{{ pb.btnClass }}" type="button" onClick="{{ pb.goTo }}">{{ pb.page }}</button>
+                        </sc-for>
+                        <span class="pagination-summary-mine">{{ mineCompletedPaginationSummary }}</span>
+                        <button class="page-button-mine" type="button" onClick="{{ goToMineCompletedNext }}"
+                          disabled="{{ mineCompletedNextDisabled }}">ถัดไป</button>
+                      </nav>
+                    </sc-if>
+                  </sc-if>
+                  <sc-if value="{{ hasNoCompletedCards }}" hint-placeholder-val="{{ false }}">
+                    <div class="empty-state-mine">{{ noCompletedJobsText }}</div>
+                  </sc-if>
+                </section>
+              </sc-if>
+
+              <!-- หมวดรายการคำขอของฉัน (ที่ยังดำเนินการอยู่ หรือพร้อมรับงาน) -->
+              <section style="margin-top:20px" aria-labelledby="active-heading">
+                <div class="section-mine-heading">
+                  <div>
+                    <div class="section-title-row">
+                      <h2 class="section-mine-title" id="active-heading">รายการคำขอของฉัน</h2>
+                      <span class="section-count-badge">{{ mineActiveCountText }}</span>
+                    </div>
+                    <p class="section-mine-caption">รายการที่ยังอยู่ระหว่างดำเนินการ หรือพร้อมให้รับงาน</p>
+                  </div>
+                </div>
+                <sc-if value="{{ hasActiveCards }}" hint-placeholder-val="{{ true }}">
+                  <div class="card-grid-mine">
+                    <sc-for list="{{ myActiveCardsPaged }}" as="j" hint-placeholder-count="4">
+                      <article class="job-card-mine">
+                        <div class="card-media-mine {{ j.mediaClass }}">
+                          <div class="printer-box-mine">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <path
+                                d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2">
+                              </path>
+                              <rect x="6" y="14" width="12" height="8" rx="1"></rect>
+                            </svg>
+                          </div>
+                          <span class="status-badge-mine {{ j.statusClass }}">{{ j.statusLabel }}</span>
+                        </div>
+                        <div class="job-card-body-mine">
+                          <div class="job-kicker-mine">{{ t.jobNo }}</div>
+                          <div class="job-no-mine">{{ j.no }}</div>
+                          <div class="job-service-mine">{{ j.service }}</div>
+                        </div>
+                        <div class="card-details-mine">
+                          <div class="detail-row-mine">
+                            <span>{{ t.status }}</span>
+                            <span>{{ j.statusLabel }}</span>
+                          </div>
+                          <div class="detail-row-mine">
+                            <span>{{ t.sent }}</span>
+                            <span>{{ j.sent }}</span>
+                          </div>
+                        </div>
+                        <div class="card-viewed-mine">
+                          <span class="avatar-mine">{{ j.initials }}</span>
+                          <span>{{ viewedLabel }}</span>
+                          <time style="font-weight:600">{{ viewedDate }}</time>
+                        </div>
+                        <div class="card-actions-mine">
+                          <sc-if value="{{ j.canConfirmPickup }}" hint-placeholder-val="{{ false }}">
+                            <button type="button" onClick="{{ j.confirmPickup }}"
+                              style="grid-column:1/-1;min-height:42px;border:1px solid #16a34a;border-radius:var(--radius-pill);background:#f0fdf4;color:#15803d;font-size:13px;font-weight:700;font-family:inherit;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer">
+                              <span>🤝</span><span>{{ confirmPickupBtnLabel }}</span>
+                            </button>
+                          </sc-if>
+                          <button type="button" class="action-button-mine action-track" onClick="{{ j.open }}">{{
+                            t.tabTrack }}</button>
+                          <button type="button" class="action-button-mine action-chat" onClick="{{ j.openChat }}">
+                            💬 {{ t.tabChat }}<sc-if value="{{ j.hasUnread }}" hint-placeholder-val="{{ false }}"> ({{
+                              j.unread }})</sc-if>
+                          </button>
+                        </div>
+                      </article>
+                    </sc-for>
+                  </div>
+                  <!-- ส่วนแบ่งหน้า Pagination -->
+                  <sc-if value="{{ hasMineActivePagination }}" hint-placeholder-val="{{ false }}">
+                    <nav class="pagination-mine" aria-label="หน้ารายการคำขอ">
+                      <button class="page-button-mine" type="button" onClick="{{ goToMineActivePrev }}"
+                        disabled="{{ mineActivePrevDisabled }}">ก่อนหน้า</button>
+                      <sc-for list="{{ mineActivePageButtons }}" as="pb">
+                        <button class="{{ pb.btnClass }}" type="button" onClick="{{ pb.goTo }}">{{ pb.page }}</button>
+                      </sc-for>
+                      <span class="pagination-summary-mine">{{ mineActivePaginationSummary }}</span>
+                      <button class="page-button-mine" type="button" onClick="{{ goToMineActiveNext }}"
+                        disabled="{{ mineActiveNextDisabled }}">ถัดไป</button>
+                    </nav>
+                  </sc-if>
+                </sc-if>
+                <sc-if value="{{ hasNoActiveCards }}" hint-placeholder-val="{{ false }}">
+                  <div class="empty-state-mine">{{ noActiveJobsText }}</div>
+                </sc-if>
+              </section>
             </sc-if>
             <div style="font-size:13px;color:var(--color-neutral-700);margin-top:12px">{{ t.mineNote }}</div>
           </section>
@@ -1789,31 +2369,32 @@
                     <sc-for list="{{ chatMessageRows }}" as="m" hint-placeholder-count="5">
                       <sc-if value="{{ m.isSystem }}" hint-placeholder-val="{{ false }}">
                         <div
-                          style="display:flex;align-items:center;justify-content:center;gap:7px;color:var(--color-neutral-600);font-size:10.5px;text-align:center;margin:14px 0 18px">
+                          style="display:flex;align-items:center;justify-content:center;gap:7px;color:var(--color-neutral-600);font-size:10.5px;text-align:center;margin:12px 0 16px">
                           <span style="width:28px;height:1px;background:var(--color-divider)"></span><span>{{ m.text }}
-                            · {{
-                            m.time }}</span><span style="width:28px;height:1px;background:var(--color-divider)"></span>
+                            · {{ m.time }}</span><span
+                            style="width:28px;height:1px;background:var(--color-divider)"></span>
                         </div>
                       </sc-if>
                       <sc-if value="{{ !m.isSystem }}" hint-placeholder-val="{{ true }}">
-                        <div style="display:flex;justify-content:{{ m.justify }};margin-bottom:17px">
-                          <div style="max-width:min(84%,620px);min-width:0;text-align:{{ m.align }}">
-                            <div style="font-size:9.5px;color:var(--color-neutral-600);margin:0 4px 4px">{{ m.sender }}
+                        <div style="display:flex;justify-content:{{ m.justify }};margin-bottom:12px">
+                          <div style="max-width:min(78%,560px);min-width:0;text-align:{{ m.align }}">
+                            <div style="font-size:10.5px;color:var(--color-neutral-600);margin:0 4px 3px">{{ m.sender }}
                             </div>
                             <div
-                              style="display:inline-block;max-width:100%;text-align:left;padding:10px 13px;border:1px solid {{ m.border }};border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.fg }};font-size:12.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere">
-                              {{
-                              m.text }}
+                              style="display:inline-block;max-width:100%;text-align:left;padding:8px 12px;border:1px solid {{ m.border }};border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.fg }};font-size:13px;line-height:1.45;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+                              <sc-if value="{{ m.hasText }}" hint-placeholder-val="{{ true }}">
+                                <div style="white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere">{{ m.text
+                                  }}</div>
+                              </sc-if>
                               <sc-for list="{{ m.attachments }}" as="a" hint-placeholder-count="1">
                                 <a href="{{ a.link }}" target="_blank" rel="noopener"
-                                  style="display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 9px;border-radius:var(--radius-input);border:1px solid {{ m.attachmentBorder }};background:{{ m.attachmentBg }};color:{{ m.attachmentFg }};text-decoration:none">
+                                  style="display:flex;align-items:center;gap:8px;margin-top:{{ m.attachmentMarginTop }};padding:6px 9px;border-radius:var(--radius-input);border:1px solid {{ m.attachmentBorder }};background:{{ m.attachmentBg }};color:{{ m.attachmentFg }};text-decoration:none;font-size:11.5px">
                                   <span>📎</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis">{{
-                                    a.name
-                                    }}</span><small style="opacity:.75;white-space:nowrap">{{ a.size }}</small>
+                                    a.name }}</span><small style="opacity:.75;white-space:nowrap">{{ a.size }}</small>
                                 </a>
                               </sc-for>
                             </div>
-                            <div style="font-size:9.5px;color:var(--color-neutral-600);margin:4px 4px 0">{{ m.time }}
+                            <div style="font-size:10px;color:var(--color-neutral-400);margin:3px 4px 0">{{ m.time }}
                             </div>
                           </div>
                         </div>
@@ -3022,6 +3603,7 @@ class Component extends DCLogic {
     jobDetailOpen:false, jobDetailJobNo:null, jobDetailFiles:[], jobDetailFilesLoading:false, slipImgErrors:{},
     confAmt:{}, confReason:"", confBusy:false, confMsg:"", confErr:"",
     mineEmailInput:"", mineSelectedEmail:"", mineSearchError:"",
+    mineActivePage:1, mineCompletedOpen:false, mineCompletedPage:1,
     chatThreads:[], chatServiceDonePopup:false, chatServiceDoneJobNo:"", chatMessages:[], chatSelectedJobNo:"", chatDraft:"", chatDraftFiles:[],
     chatQuery:"", chatLoading:false, chatMessagesLoading:false, chatSending:false,
     chatError:"", chatWarning:"", chatLastSequence:0, chatTotalUnread:0, chatUnreadByJob:{},
@@ -4378,7 +4960,7 @@ class Component extends DCLogic {
     const requesterEmailOptions = uniqueRequesterEmails.map(em => ({
       email: em,
       label: em + " (" + emailCounts[em] + (S.lang === "th" ? " รายการ)" : " requests)"),
-      selectMe: () => this.setState({ mineSelectedEmail: em, mineEmailInput: em })
+      selectMe: () => this.setState({ mineSelectedEmail: em, mineEmailInput: em, mineActivePage: 1, mineCompletedPage: 1 })
     }));
     // ผู้ใช้ทั่วไปดูได้เฉพาะอีเมลที่ตัวเองกรอกตอนผ่านประตู ส่วนแอดมิน/ผู้บริหารที่ล็อกอินแล้วยังค้นของทุกคนได้
     // ข้อจำกัด: ประตูอีเมลยังไม่ยืนยันตัวตน (ข้อ 3 ในแผนพัฒนา ตัดสินใจว่ายังไม่ทำ) คนที่ตั้งใจจะดู
@@ -4395,20 +4977,110 @@ class Component extends DCLogic {
         }).sort((a, b) => (b.no || "").localeCompare(a.no || ""))
       : [];
 
-    const myCards = userMatchedJobs.map(j => {
+    const mapCard = j => {
       const p = PAL[j.code] || PAL.RECEIVED;
-      const thread=(S.chatThreads||[]).find(row=>String(row.job_no||row.jobNo)===String(j.no));
-      const unreadMap=S.chatUnreadByJob||{}, unreadKey=String(j.no);
-      const unread=Object.prototype.hasOwnProperty.call(unreadMap,unreadKey)
-        ?(Number(unreadMap[unreadKey])||0)
-        :(Number(thread&&(thread.unread_count||thread.unreadCount))||0);
+      const thread = (S.chatThreads || []).find(row => String(row.job_no || row.jobNo) === String(j.no));
+      const unreadMap = S.chatUnreadByJob || {}, unreadKey = String(j.no);
+      const unread = Object.prototype.hasOwnProperty.call(unreadMap, unreadKey)
+        ? (Number(unreadMap[unreadKey]) || 0)
+        : (Number(thread && (thread.unread_count || thread.unreadCount)) || 0);
       const canConfirmPickup = j.code === "PROD_DONE";
-      return { ...j, hue: p.fg, mediaBg: p.grad, initials: (j.requester || "").trim().slice(0, 1) || "P",
-        unread, hasUnread:unread>0,
+      const mediaClass = j.code === "RECEIVED" ? "is-blue" : (j.code === "IN_PRODUCTION" ? "is-amber" : (j.code === "PROD_DONE" ? "is-green" : "is-purple"));
+      const statusClass = j.code === "RECEIVED" ? "status-received" : (j.code === "IN_PRODUCTION" ? "status-production" : (j.code === "PROD_DONE" ? "status-ready" : "status-picked"));
+      return {
+        ...j,
+        hue: p.fg,
+        mediaBg: p.grad,
+        mediaClass,
+        statusClass,
+        initials: (j.requester || "").trim().slice(0, 1) || "P",
+        unread,
+        hasUnread: unread > 0,
         canConfirmPickup,
-        confirmPickup: () => this.setState({ confirmPickupModalOpen:true, confirmPickupJobNo:String(j.no), confirmPickupBusy:false })
+        confirmPickup: () => this.setState({ confirmPickupModalOpen: true, confirmPickupJobNo: String(j.no), confirmPickupBusy: false })
+      };
+    };
+
+    const myActiveCards = userMatchedJobs.filter(j => j.code !== "SERVICE_DONE").map(mapCard);
+    const myCompletedCards = userMatchedJobs.filter(j => j.code === "SERVICE_DONE").map(mapCard);
+    const myCards = userMatchedJobs.map(mapCard);
+
+    const activePageSize = 8;
+    const totalActiveCount = myActiveCards.length;
+    const mineActiveTotalPages = Math.max(1, Math.ceil(totalActiveCount / activePageSize));
+    const currentMineActivePage = Math.min(Math.max(1, S.mineActivePage || 1), mineActiveTotalPages);
+    const myActiveCardsPaged = myActiveCards.slice((currentMineActivePage - 1) * activePageSize, currentMineActivePage * activePageSize);
+
+    const mineActivePageButtons = Array.from({ length: mineActiveTotalPages }, (_, i) => {
+      const pageNum = i + 1;
+      const isCurrent = pageNum === currentMineActivePage;
+      return {
+        page: pageNum,
+        isCurrent,
+        btnClass: isCurrent ? "page-button-mine is-active" : "page-button-mine",
+        goTo: () => this.setState({ mineActivePage: pageNum })
       };
     });
+
+    const completedPageSize = 4;
+    const totalCompletedCount = myCompletedCards.length;
+    const mineCompletedTotalPages = Math.max(1, Math.ceil(totalCompletedCount / completedPageSize));
+    const currentMineCompletedPage = Math.min(Math.max(1, S.mineCompletedPage || 1), mineCompletedTotalPages);
+    const myCompletedCardsPaged = myCompletedCards.slice((currentMineCompletedPage - 1) * completedPageSize, currentMineCompletedPage * completedPageSize);
+
+    const mineCompletedPageButtons = Array.from({ length: mineCompletedTotalPages }, (_, i) => {
+      const pageNum = i + 1;
+      const isCurrent = pageNum === currentMineCompletedPage;
+      return {
+        page: pageNum,
+        isCurrent,
+        btnClass: isCurrent ? "page-button page-button-mine is-active" : "page-button page-button-mine",
+        goTo: () => this.setState({ mineCompletedPage: pageNum })
+      };
+    });
+
+    const hasActiveCards = myActiveCards.length > 0;
+    const hasNoActiveCards = hasSelectedMineEmail && myCards.length > 0 && myActiveCards.length === 0;
+    const hasCompletedCards = myCompletedCards.length > 0;
+    const hasNoCompletedCards = hasSelectedMineEmail && myCards.length > 0 && myCompletedCards.length === 0;
+
+    const hasMineActivePagination = totalActiveCount > activePageSize;
+    const mineActiveHasPrev = currentMineActivePage > 1;
+    const mineActiveHasNext = currentMineActivePage < mineActiveTotalPages;
+    const goToMineActivePrev = () => {
+      if (mineActiveHasPrev) this.setState({ mineActivePage: currentMineActivePage - 1 });
+    };
+    const goToMineActiveNext = () => {
+      if (mineActiveHasNext) this.setState({ mineActivePage: currentMineActivePage + 1 });
+    };
+    const mineActivePaginationSummary = S.lang === "th"
+      ? `หน้า ${currentMineActivePage} จาก ${mineActiveTotalPages}`
+      : `Page ${currentMineActivePage} of ${mineActiveTotalPages}`;
+
+    const hasMineCompletedPagination = totalCompletedCount > completedPageSize;
+    const mineCompletedHasPrev = currentMineCompletedPage > 1;
+    const mineCompletedHasNext = currentMineCompletedPage < mineCompletedTotalPages;
+    const goToMineCompletedPrev = () => {
+      if (mineCompletedHasPrev) this.setState({ mineCompletedPage: currentMineCompletedPage - 1 });
+    };
+    const goToMineCompletedNext = () => {
+      if (mineCompletedHasNext) this.setState({ mineCompletedPage: currentMineCompletedPage + 1 });
+    };
+    const mineCompletedPaginationSummary = S.lang === "th"
+      ? `หน้า ${currentMineCompletedPage} จาก ${mineCompletedTotalPages}`
+      : `Page ${currentMineCompletedPage} of ${mineCompletedTotalPages}`;
+
+    const mineCompletedOpen = !!S.mineCompletedOpen;
+    const toggleMineCompleted = () => this.setState({ mineCompletedOpen: !this.state.mineCompletedOpen });
+    const mineCompletedToggleLabel = mineCompletedOpen
+      ? (S.lang === "th" ? "ซ่อนรายการคำขอที่รับกลับเรียบร้อยแล้ว" : "Hide Completed Requests")
+      : (S.lang === "th" ? "แสดงรายการคำขอที่รับกลับเรียบร้อยแล้ว" : "Show Completed Requests");
+    const mineCompletedBtnClass = "completed-top-button" + (mineCompletedOpen ? " is-open" : "");
+    const mineActiveCountText = S.lang === "th" ? `${myActiveCards.length} รายการ` : `${myActiveCards.length} items`;
+    const mineCompletedCountText = S.lang === "th" ? `${myCompletedCards.length} รายการ` : `${myCompletedCards.length} items`;
+    const noActiveJobsText = S.lang === "th" ? "ไม่พบรายการที่ยังดำเนินการอยู่" : "No active requests found";
+    const noCompletedJobsText = S.lang === "th" ? "ไม่พบรายการที่มีสถานะ “รับกลับเรียบร้อย”" : "No completed requests found";
+    const hasMineJobCards = hasSelectedMineEmail && myCards.length > 0;
 
     // — chat view models —
     const chatActor=this._chatActor();
@@ -4461,13 +5133,16 @@ class Component extends DCLogic {
       const senderEmail=String(row.sender_email||row.senderEmail||"").trim().toLowerCase();
       const isSystem=role==="SYSTEM"||String(row.message_type||row.messageType||"").toLowerCase()==="system";
       const own=!isSystem&&senderEmail&&senderEmail===String(chatActor.email||"").toLowerCase();
-      const text=String(row.message_text!==undefined?row.message_text:(row.text!==undefined?row.text:(row.body||"")));
+      const rawText=String(row.message_text!==undefined?row.message_text:(row.text!==undefined?row.text:(row.body||"")));
+      const text=rawText.replace(/^[\r\n]+|[\r\n]+$/g,"");
+      const hasText=text.trim().length>0;
       const rawAttachments=Array.isArray(row.attachments)?row.attachments:[];
       const attachments=rawAttachments.map(file=>({
         name:file.file_name||file.fileName||file.name||"file",
         link:file.web_view_link||file.webViewLink||file.link||"#",
         size:this._formatFileSize(Number(file.file_size||file.fileSize||file.size)||0)
       }));
+      const hasAttachments=attachments.length>0;
       const senderName=row.sender_name||row.senderName||"";
       const sender=senderName||(
         role==="ADMIN"?(S.lang==="th"?"เจ้าหน้าที่โรงพิมพ์":"Print shop staff"):
@@ -4475,8 +5150,9 @@ class Component extends DCLogic {
         (S.lang==="th"?"ผู้ขอรับบริการ":"Requester")
       );
       return {
-        raw:row, isSystem, own, text, sender,
-        time:chatDateTime(row.created_at||row.createdAt||""), attachments,
+        raw:row, isSystem, own, text, hasText, sender,
+        time:chatDateTime(row.created_at||row.createdAt||""), attachments, hasAttachments,
+        attachmentMarginTop:hasText?"7px":"0",
         justify:own?"flex-end":"flex-start", align:own?"right":"left",
         bg:own?"var(--color-accent)":"#fff", fg:own?"#fff":"var(--color-neutral-800)",
         border:own?"var(--color-accent)":"var(--color-line)",
@@ -4533,7 +5209,7 @@ class Component extends DCLogic {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { this.setState({ mineSearchError: t.mineSearchIncomplete }); return; }
       // ครบรูปแล้วแต่ไม่มีคิวงานในระบบ -> แจ้งแล้วคงผลค้นหาเดิมไว้ ไม่ล้างหน้าจอทิ้ง
       if (!knownMineEmails.has(em)) { this.setState({ mineSearchError: t.mineSearchNotFound }); return; }
-      this.setState({ mineSelectedEmail: em, mineEmailInput: em, mineSearchError: "" });
+      this.setState({ mineSelectedEmail: em, mineEmailInput: em, mineSearchError: "", mineActivePage: 1, mineCompletedPage: 1 });
     };
 
     const hasNoSelectedEmail = !hasSelectedMineEmail;
@@ -5525,9 +6201,9 @@ class Component extends DCLogic {
       applyMineEmailSearch:runMineSearch,
       onSelectMineEmail:e=>{
         const em=(e.target.value||"").trim().toLowerCase();
-        this.setState({ mineSelectedEmail:em, mineEmailInput:em, mineSearchError:"" });
+        this.setState({ mineSelectedEmail:em, mineEmailInput:em, mineSearchError:"", mineActivePage:1, mineCompletedPage:1 });
       },
-      clearMineEmail:()=>this.setState({ mineSelectedEmail:"", mineEmailInput:"", mineSearchError:"" }),
+      clearMineEmail:()=>this.setState({ mineSelectedEmail:"", mineEmailInput:"", mineSearchError:"", mineActivePage:1, mineCompletedPage:1 }),
       mineSearchError:S.mineSearchError,
       isAdminLoggedIn:S.isAdminLoggedIn,
       isNormalUser:!S.isAdminLoggedIn,
@@ -5574,6 +6250,17 @@ class Component extends DCLogic {
       noRequestsInSheetSub:S.lang==="th"?"ยังไม่มีประวัติคำขอใดๆ ในระบบ Google Sheet เลย เมื่อมีการยื่นคำขอแรก ข้อมูลจะปรากฏที่นี่":"No requests exist in Google Sheet yet. When requests are submitted, they will appear here.",
       notFoundMineTitle:S.lang==="th"?("ไม่พบประวัติคำขอสำหรับ "+activeMineEmail):("No requests found for "+activeMineEmail),
       notFoundMineSub:S.lang==="th"?"อีเมลนี้ยังไม่มีการบันทึกคำขอในชีต JOBS สามารถกดยื่นคำขอรับบริการพิมพ์งานได้ทันที":"This email has no requests in the JOBS sheet yet. You can submit a new printing request now.",
+      hasMineJobCards,
+      myActiveCards, myActiveCardsPaged, myCompletedCards, myCompletedCardsPaged,
+      hasActiveCards, hasNoActiveCards, hasCompletedCards, hasNoCompletedCards,
+      hasMineActivePagination, mineActivePageButtons,
+      mineActivePrevDisabled: !mineActiveHasPrev, mineActiveNextDisabled: !mineActiveHasNext,
+      goToMineActivePrev, goToMineActiveNext, mineActivePaginationSummary,
+      hasMineCompletedPagination, mineCompletedPageButtons,
+      mineCompletedPrevDisabled: !mineCompletedHasPrev, mineCompletedNextDisabled: !mineCompletedHasNext,
+      goToMineCompletedPrev, goToMineCompletedNext, mineCompletedPaginationSummary,
+      mineCompletedOpen, toggleMineCompleted, mineCompletedToggleLabel, mineCompletedBtnClass,
+      mineActiveCountText, mineCompletedCountText, noActiveJobsText, noCompletedJobsText,
       myJobs:jobsAll.slice(0,5), myCards:myCards, filteredJobs, queueKpis,
       chatPageTitle:S.lang==="th"?"แชทติดตามงาน":"Job conversation",
       chatPageSubtitle:S.lang==="th"?"หนึ่งงานต่อหนึ่งบทสนทนา ข้อความและไฟล์แนบเชื่อมกับเลขที่งานโดยตรง":"One conversation per job, linked directly to its job number.",
