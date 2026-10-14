@@ -3592,10 +3592,10 @@ class Component extends DCLogic {
     dpOpen:null, dpMonthNeed:null, dpMonthRange:null, needByISO:null, rgStart:null, rgEnd:null,
     repMode:"month", repYear:"", repMonth:"",
     dashYearMode:"be", dashYear:String(new Date().getFullYear()+543), dashMonth:"8", dashUnit:"",
-    gasUrl:"https://script.google.com/macros/s/AKfycbwMaKP05JB0QK8zR4t0_7BcaxVzc7h4l0g3fGhaL-yyUfVt2pAtoDAL3GTaRsvXUj66/exec",
+    gasUrl:"https://script.google.com/macros/s/AKfycbyDJkm0wF4ZZlvZzJ__HWCKIdLgwSR3yCVfR6LKa2p6OWKe3LOgTsKIJHPSj9aiuDCY/exec",
     gasToken:"6552b83f-9a7a-4dd1-8169-05193c6744e3",
-    spreadsheetId:"1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
-    folderId:"1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L",
+    spreadsheetId:"1g9ONmVUFDshwFFvqyktq-suYeIhKiW0vaER96dWs0Jk",
+    folderId:"1BeffHqNuomg8032AQF2S-WZGMamFac0V",
     liveJobs:[], liveItems:[], jobsLoaded:false, jobsLoading:false, liveSyncError:null,
     livePriceRules:[], priceRulesLoaded:false, priceRulesLoading:false, priceRulesError:null,
     uploadedFiles:[], uploadProgressText:"", isDragOver:false, fileWarnMsg:"", lastUploadedCount:0,
@@ -3610,9 +3610,9 @@ class Component extends DCLogic {
     chatPendingClientId:"", chatUploadedFileIds:[], chatFilesReading:0,
     chatHistoryCursor:null, chatHasOlder:false, chatOlderLoading:false,
     connResults:{
-      sheet:{ ok:true, name:"SPU-Printing-Service-DB", at:new Date().toISOString() },
+      sheet:{ ok:true, name:"สำเนาของ SPU-Printing-Service-DB", at:new Date().toISOString() },
       drive:{ ok:true, name:"Printing-Service", at:new Date().toISOString() },
-      access:{ ok:true, connectedAs:"mmatha11637@gmail.com", at:new Date().toISOString() }
+      access:{ ok:true, connectedAs:"chaweewan.sa@spu.ac.th", at:new Date().toISOString() }
     },
     connBusy:{ sheet:false, drive:false, access:false } };
 
@@ -3709,15 +3709,15 @@ class Component extends DCLogic {
   componentDidMount() {
     import("./spu-data.js?v=20261008_landing").then(d => this.setState({ d }));
     const defaultGas = {
-      gasUrl: "https://script.google.com/macros/s/AKfycbwMaKP05JB0QK8zR4t0_7BcaxVzc7h4l0g3fGhaL-yyUfVt2pAtoDAL3GTaRsvXUj66/exec",
+      gasUrl: "https://script.google.com/macros/s/AKfycbyDJkm0wF4ZZlvZzJ__HWCKIdLgwSR3yCVfR6LKa2p6OWKe3LOgTsKIJHPSj9aiuDCY/exec",
       gasToken: "6552b83f-9a7a-4dd1-8169-05193c6744e3",
-      spreadsheetId: "1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
-      folderId: "1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L"
+      spreadsheetId: "1g9ONmVUFDshwFFvqyktq-suYeIhKiW0vaER96dWs0Jk",
+      folderId: "1BeffHqNuomg8032AQF2S-WZGMamFac0V"
     };
     const defaultConnResults = {
-      sheet: { ok: true, name: "SPU-Printing-Service-DB", at: new Date().toISOString() },
+      sheet: { ok: true, name: "สำเนาของ SPU-Printing-Service-DB", at: new Date().toISOString() },
       drive: { ok: true, name: "Printing-Service", at: new Date().toISOString() },
-      access: { ok: true, connectedAs: "mmatha11637@gmail.com", at: new Date().toISOString() }
+      access: { ok: true, connectedAs: "chaweewan.sa@spu.ac.th", at: new Date().toISOString() }
     };
     try {
       const saved = JSON.parse(localStorage.getItem("spuGasConfig") || "{}");
@@ -3732,7 +3732,7 @@ class Component extends DCLogic {
       patch.spreadsheetId = defaultGas.spreadsheetId;
       patch.folderId = defaultGas.folderId;
       const savedConn = JSON.parse(localStorage.getItem("spuGasConnResults") || "null");
-      patch.connResults = (savedConn && savedConn.sheet && savedConn.drive && savedConn.access) ? savedConn : defaultConnResults;
+      patch.connResults = (savedConn && savedConn.sheet && savedConn.drive && savedConn.access && savedConn.access.connectedAs === defaultConnResults.access.connectedAs) ? savedConn : defaultConnResults;
       this.setState(patch, () => { this._loadLiveJobs(); this._loadPriceRules(); });
       localStorage.setItem("spuGasConfig", JSON.stringify({ gasUrl: patch.gasUrl, gasToken: patch.gasToken, spreadsheetId: patch.spreadsheetId, folderId: patch.folderId }));
       localStorage.setItem("spuGasConnResults", JSON.stringify(patch.connResults));
@@ -4476,7 +4476,7 @@ class Component extends DCLogic {
         let r = await this._gasCall("checkAdminUser", { email, password: pass });
         // Fallback: If unknown_action occurs, it means the browser contacted an older deployment URL.
         // Force retry directly using the updated active Web App URL:
-        const activeUrl = "https://script.google.com/macros/s/AKfycbwMaKP05JB0QK8zR4t0_7BcaxVzc7h4l0g3fGhaL-yyUfVt2pAtoDAL3GTaRsvXUj66/exec";
+        const activeUrl = "https://script.google.com/macros/s/AKfycbyDJkm0wF4ZZlvZzJ__HWCKIdLgwSR3yCVfR6LKa2p6OWKe3LOgTsKIJHPSj9aiuDCY/exec";
         if (r && (r.error === "unknown_action" || r.error === "missing_url")) {
           this.setState({ gasUrl: activeUrl });
           try {
@@ -4490,8 +4490,8 @@ class Component extends DCLogic {
             body: JSON.stringify({
               action: "checkAdminUser",
               token: S.gasToken || "6552b83f-9a7a-4dd1-8169-05193c6744e3",
-              spreadsheetId: S.spreadsheetId || "1F0px7LbcoyRsH-p2O29PeNdk013KfE2tkjHN219ze68",
-              folderId: S.folderId || "1CUZ2LWOjdSYvJQMvehx1aNx2b_Cqaj1L",
+              spreadsheetId: S.spreadsheetId || "1g9ONmVUFDshwFFvqyktq-suYeIhKiW0vaER96dWs0Jk",
+              folderId: S.folderId || "1BeffHqNuomg8032AQF2S-WZGMamFac0V",
               email,
               password: pass
             })
