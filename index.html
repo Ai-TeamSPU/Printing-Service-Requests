@@ -972,6 +972,7 @@
             </div>
           </div>
         </div>
+        <!-- [แถบตัววิ่งแสดงสถานะงาน — ปิดไว้ชั่วคราว เผื่อเปิดใช้ในอนาคต]
         <sc-if value="{{ showMarquee }}" hint-placeholder-val="{{ true }}">
           <div class="mq-strip"
             style="border-top:1px solid var(--color-line);background:var(--color-accent-100);overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 7%,#000 93%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0%,#000 7%,#000 93%,transparent 100%)">
@@ -991,6 +992,7 @@
             </div>
           </div>
         </sc-if>
+        -->
         <div style="border-top:1px solid var(--color-divider);overflow-x:auto">
           <div style="max-width:1440px;margin:0 auto;padding:0 20px;display:flex;align-items:stretch">
             <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="6">
@@ -6427,7 +6429,9 @@ class Component extends DCLogic {
       yearModeAcBg:S.dashYearMode==="academic"?AC:"transparent", yearModeAcFg:S.dashYearMode==="academic"?"#fff":INK,
       setYearModeBe:()=>{ this._dashTouched=true; this.setState({dashYearMode:"be"}); }, setYearModeAcademic:()=>{ this._dashTouched=true; this.setState({dashYearMode:"academic"}); },
       periodText, topRequesters, topUnitsByValue,
-      showMarquee:S.role==="REQ"||S.role==="ADMIN", mqItems,
+      // [แถบตัววิ่งแสดงสถานะงาน — ปิดไว้ชั่วคราว เผื่อเปิดใช้ในอนาคต]:
+      // showMarquee:S.role==="REQ"||S.role==="ADMIN", mqItems,
+      showMarquee:false, mqItems:[],
       calNeed:this.buildCal("need"), calRange:this.buildCal("range"),
       needByLabel:S.lang==="th"?"วันที่ต้องการรับงาน":"Needed by",
       needByHint:S.lang==="th"?"ต้องไม่ก่อนวันนี้":"Cannot be earlier than today",
