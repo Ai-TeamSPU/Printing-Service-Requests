@@ -152,8 +152,8 @@ test("backend exposes the required chat schemas, routes, and functions", () => {
   const testSheet = functionSource(backend, "testSheet_");
   assert.match(
     testSheet,
-    /\[\s*["']FILES["']\s*,\s*["']JOB_MESSAGES["']\s*,\s*["']CHAT_READS["']\s*\]\.forEach/,
-    "testSheet_ must validate FILES and both chat tab schemas before reporting a healthy connection",
+    /\[\s*["']JOBS["']\s*,\s*["']FILES["']\s*,\s*["']JOB_MESSAGES["']\s*,\s*["']CHAT_READS["']\s*\]\.forEach/,
+    "testSheet_ must validate JOBS, FILES and both chat tab schemas before reporting a healthy connection",
   );
 
   const displayTabs = new Map(evaluateDataModule().map((tab) => [tab.name, tab.cols.map((col) => col[1])]));
@@ -202,7 +202,7 @@ test("server-side chat authorization, validation, and sheet-text guards remain i
   const authorize = functionSource(backend, "authorizeChat_");
   assert.match(authorize, /job_not_found/);
   assert.match(authorize, /duplicate_job_no/);
-  assert.match(authorize, /job\.requesterEmail\s*!==\s*email/);
+  assert.match(authorize, /actorOwnsJob_\(trustedActor, job\)/);
   assert.match(authorize, /findActiveChatStaff_\(ss, email\)/);
   assert.match(authorize, /staff_forbidden/);
 

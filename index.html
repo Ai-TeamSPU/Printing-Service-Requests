@@ -4,6 +4,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Public authentication config only. Secrets stay in auth-gateway environment variables. -->
+  <script src="./auth-config.js?v=20261016_03"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="./support.js"></script>
   <!-- ใช้สร้างไฟล์ Excel (.xlsx) จริงตอนกดปุ่ม "Export XLSX" ในหน้ารายการคำขอรับบริการ -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -910,6 +913,19 @@
               </button>
             </sc-if>
 
+            <!-- Authenticated requester: identity comes from Google, never from a typed email. -->
+            <sc-if value="{{ isRequesterLoggedIn }}" hint-placeholder-val="{{ false }}">
+              <span
+                style="font-size:12px;font-weight:700;color:#0f7a4c;background:#dcf6e9;padding:6px 12px;border-radius:var(--radius-pill);white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis">
+                {{ requesterIdentityLabel }}
+              </span>
+              <button type="button" onClick="{{ requesterLogout }}" class="btn btn-ghost"
+                style="display:flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border:1px solid var(--color-line);background:#fff;font-size:12.5px;font-weight:700;color:var(--color-accent-700);cursor:pointer">
+                <span>🚪</span>
+                <span>{{ requesterLogoutLabel }}</span>
+              </button>
+            </sc-if>
+
             <!-- Admin User: Show active badge, role switchers, and logout button -->
             <sc-if value="{{ isAdminLoggedIn }}" hint-placeholder-val="{{ false }}">
               <span
@@ -1035,17 +1051,18 @@
               <sc-if value="{{ gateOpen }}" hint-placeholder-val="{{ false }}">
                 <div
                   style="margin-top:28px;border:1px solid var(--color-line);background:var(--color-band);padding:22px;max-width:480px">
-                  <div style="font-weight:800;font-size:16px">{{ t.emailGateTitle }}</div>
-                  <label style="font-size:13px;font-weight:600;display:block;margin:16px 0 6px">{{ t.emailGateLabel
-                    }}</label>
-                  <input class="input" value="{{ gateEmail }}" onChange="{{ setGateEmail }}"
-                    placeholder="{{ t.emailGatePh }}" style="width:100%;min-height:48px;font-size:16px">
+                  <div style="font-weight:800;font-size:16px">{{ googleGateTitle }}</div>
+                  <div style="font-size:13.5px;color:var(--color-neutral-700);line-height:1.55;margin-top:8px">{{
+                    googleGateSub }}</div>
+                  <div id="spu-google-signin" style="min-height:44px;margin-top:16px"></div>
                   <sc-if value="{{ gateErr }}" hint-placeholder-val="{{ false }}">
                     <div style="font-size:13px;color:var(--color-accent-700);margin-top:8px;font-weight:600">{{
-                      t.emailGateErr }}</div>
+                      gateErrorText }}</div>
                   </sc-if>
-                  <button class="btn btn-primary btn-block" onClick="{{ submitGate }}" disabled="{{ gateBusy }}"
-                    style="margin-top:16px;min-height:48px">{{ emailGateBtnLabel }}</button>
+                  <sc-if value="{{ gateBusy }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:13px;color:var(--color-neutral-700);margin-top:10px;font-weight:600">{{
+                      googleGateBusyText }}</div>
+                  </sc-if>
                 </div>
               </sc-if>
             </div>
@@ -3573,6 +3590,7 @@
 class Component extends DCLogic {
   state = { d:null, lang:this.props.defaultLang==="en"?"en":"th", role:"REQ", page:"landing",
     isAdminLoggedIn:false, adminLoginOpen:false, adminEmailInput:"", adminPassInput:"", adminLoginBusy:false, adminLoginError:"", adminUserObj:null,
+    authApiUrl:"", authStatus:"loading", authUser:null, authError:"", googleClientId:"", authDomain:"spu.ac.th",
     gateOpen:false, gateEmail:"", gateErr:false, gateMsg:"", gateVerified:false, gateBusy:false,
     svcGroup:null, sel:{}, prodColor:"bw", prodSize:"", prodPaperType:"", prodSides:"", prodOwnPaper:false,
     prodQtyOrig:"", prodQtySets:"", staple:"",
@@ -3592,10 +3610,6 @@ class Component extends DCLogic {
     dpOpen:null, dpMonthNeed:null, dpMonthRange:null, needByISO:null, rgStart:null, rgEnd:null,
     repMode:"month", repYear:"", repMonth:"",
     dashYearMode:"be", dashYear:String(new Date().getFullYear()+543), dashMonth:"8", dashUnit:"",
-    gasUrl:"https://script.google.com/macros/s/AKfycbyDJkm0wF4ZZlvZzJ__HWCKIdLgwSR3yCVfR6LKa2p6OWKe3LOgTsKIJHPSj9aiuDCY/exec",
-    gasToken:"6552b83f-9a7a-4dd1-8169-05193c6744e3",
-    spreadsheetId:"1g9ONmVUFDshwFFvqyktq-suYeIhKiW0vaER96dWs0Jk",
-    folderId:"1BeffHqNuomg8032AQF2S-WZGMamFac0V",
     liveJobs:[], liveItems:[], jobsLoaded:false, jobsLoading:false, liveSyncError:null,
     livePriceRules:[], priceRulesLoaded:false, priceRulesLoading:false, priceRulesError:null,
     uploadedFiles:[], uploadProgressText:"", isDragOver:false, fileWarnMsg:"", lastUploadedCount:0,
@@ -3708,37 +3722,15 @@ class Component extends DCLogic {
 
   componentDidMount() {
     import("./spu-data.js?v=20261008_landing").then(d => this.setState({ d }));
-    const defaultGas = {
-      gasUrl: "https://script.google.com/macros/s/AKfycbyDJkm0wF4ZZlvZzJ__HWCKIdLgwSR3yCVfR6LKa2p6OWKe3LOgTsKIJHPSj9aiuDCY/exec",
-      gasToken: "6552b83f-9a7a-4dd1-8169-05193c6744e3",
-      spreadsheetId: "1g9ONmVUFDshwFFvqyktq-suYeIhKiW0vaER96dWs0Jk",
-      folderId: "1BeffHqNuomg8032AQF2S-WZGMamFac0V"
-    };
-    const defaultConnResults = {
-      sheet: { ok: true, name: "สำเนาของ SPU-Printing-Service-DB", at: new Date().toISOString() },
-      drive: { ok: true, name: "Printing-Service", at: new Date().toISOString() },
-      access: { ok: true, connectedAs: "chaweewan.sa@spu.ac.th", at: new Date().toISOString() }
-    };
-    try {
-      const saved = JSON.parse(localStorage.getItem("spuGasConfig") || "{}");
-      const patch = {};
-      ["gasUrl", "gasToken", "spreadsheetId", "folderId"].forEach(k => {
-        patch[k] = (saved && typeof saved[k] === "string" && saved[k].trim()) ? saved[k].trim() : defaultGas[k];
-      });
-      // Always enforce the latest active Apps Script Web App URL
-      patch.gasUrl = defaultGas.gasUrl;
-      // Always enforce the latest spreadsheet and token (SPU-Printing-Service-DB)
-      patch.gasToken = defaultGas.gasToken;
-      patch.spreadsheetId = defaultGas.spreadsheetId;
-      patch.folderId = defaultGas.folderId;
-      const savedConn = JSON.parse(localStorage.getItem("spuGasConnResults") || "null");
-      patch.connResults = (savedConn && savedConn.sheet && savedConn.drive && savedConn.access && savedConn.access.connectedAs === defaultConnResults.access.connectedAs) ? savedConn : defaultConnResults;
-      this.setState(patch, () => { this._loadLiveJobs(); this._loadPriceRules(); });
-      localStorage.setItem("spuGasConfig", JSON.stringify({ gasUrl: patch.gasUrl, gasToken: patch.gasToken, spreadsheetId: patch.spreadsheetId, folderId: patch.folderId }));
-      localStorage.setItem("spuGasConnResults", JSON.stringify(patch.connResults));
-    } catch (e) {
-      this.setState({ ...defaultGas, connResults: defaultConnResults }, () => { this._loadLiveJobs(); this._loadPriceRules(); });
+    const publicConfig=(window.SPU_AUTH_CONFIG&&typeof window.SPU_AUTH_CONFIG==="object")?window.SPU_AUTH_CONFIG:{};
+    let authApiUrl=String(publicConfig.apiBaseUrl||"").trim().replace(/\/$/,"");
+    if(!authApiUrl && typeof window !== "undefined" && window.location){
+      const h=window.location.hostname;
+      if((h==="localhost"||h==="127.0.0.1") && window.location.port!=="8080"){
+        authApiUrl="http://localhost:8080";
+      }
     }
+    this.setState({ authApiUrl, connResults:{ sheet:null, drive:null, access:null } },()=>this._bootstrapAuth());
     this._chatVisibility = async () => {
       if (document.visibilityState === "hidden") {
         this._stopChatPolling();
@@ -3785,11 +3777,20 @@ class Component extends DCLogic {
     document.addEventListener("keydown", this._calcKey);
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if(this.state.gateOpen && !this.state.gateVerified &&
+      (!prevState.gateOpen || prevState.googleClientId!==this.state.googleClientId || prevState.lang!==this.state.lang || prevState.authStatus!==this.state.authStatus)){
+      this._renderGoogleButton();
+    }
+  }
+
   componentWillUnmount() {
     if (this._calcKey) document.removeEventListener("keydown", this._calcKey);
     if (this._chatVisibility) document.removeEventListener("visibilitychange", this._chatVisibility);
+    clearTimeout(this._googleButtonTimer);
     this._stopChatPolling();
     this._bumpChatEpoch();
+    if(window.google&&window.google.accounts&&window.google.accounts.id) window.google.accounts.id.cancel();
   }
 
   calcApply(k) {
@@ -3807,22 +3808,171 @@ class Component extends DCLogic {
     });
   }
 
-  // — Google Apps Script connection (Settings page) —
-  _saveGasConfig(patch){
-    this.setState(st=>{
-      const next={ gasUrl:st.gasUrl, gasToken:st.gasToken, spreadsheetId:st.spreadsheetId, folderId:st.folderId, ...patch };
-      try{ localStorage.setItem("spuGasConfig", JSON.stringify(next)); }catch(e){}
-      return patch;
+  _authBaseUrl(){
+    if (this.state.authApiUrl) return String(this.state.authApiUrl).replace(/\/$/, "");
+    if (window.SPU_AUTH_CONFIG && window.SPU_AUTH_CONFIG.apiBaseUrl) {
+      return String(window.SPU_AUTH_CONFIG.apiBaseUrl).replace(/\/$/, "");
+    }
+    if (typeof window !== "undefined" && window.location) {
+      const h = window.location.hostname;
+      if ((h === "localhost" || h === "127.0.0.1") && window.location.port !== "8080") {
+        return "http://localhost:8080";
+      }
+    }
+    return "";
+  }
+  async _authFetch(path, options){
+    const opts={ credentials:"include", ...(options||{}) };
+    opts.headers={ Accept:"application/json", ...(opts.headers||{}) };
+    if(opts.body && !opts.headers["Content-Type"]) opts.headers["Content-Type"]="application/json";
+    if(!opts.headers["Authorization"]){
+      const token = this._authToken || (typeof sessionStorage !== "undefined" && sessionStorage.getItem("spu_auth_token"));
+      if(token){
+        this._authToken = token;
+        opts.headers["Authorization"] = "Bearer " + token;
+      }
+    }
+    const controller = new AbortController();
+    const timeoutTimer = setTimeout(() => controller.abort(), (options && options.timeout) || 15000);
+    opts.signal = controller.signal;
+    try{
+      const res=await fetch(this._authBaseUrl()+path,opts);
+      clearTimeout(timeoutTimer);
+      const text=await res.text();
+      let data={};
+      try{ data=text?JSON.parse(text):{}; }catch(e){ data={ ok:false, error:"invalid_server_response" }; }
+      return { ...data, httpStatus:res.status, ok:res.ok&&data.ok!==false };
+    }catch(e){
+      clearTimeout(timeoutTimer);
+      const isTimeout = e && (e.name === "AbortError" || /abort/i.test(e.message));
+      return {
+        ok:false,
+        httpStatus:0,
+        error: isTimeout ? "gateway_timeout" : "gateway_unreachable",
+        message: isTimeout ? "การเชื่อมต่อไปยัง Auth Gateway หมดเวลา (Timeout 15s)" : String((e&&e.message)||e)
+      };
+    }
+  }
+  async _bootstrapAuth(){
+    this.setState({ authStatus:"loading", authError:"" });
+    const config=await this._authFetch("/auth/config",{ method:"GET" });
+    if(!config.ok||!config.googleClientId){
+      this.setState({ authStatus:"error", authError:(config&&config.message)||(config&&config.error)||"auth_gateway_not_configured", gateErr:true });
+      return;
+    }
+    this.setState({ googleClientId:String(config.googleClientId), authDomain:String(config.allowedDomain||"spu.ac.th") });
+    const session=await this._authFetch("/auth/session",{ method:"GET" });
+    if(session.ok&&session.authenticated&&session.user){
+      if(session.token){
+        this._authToken = session.token;
+        try{ sessionStorage.setItem("spu_auth_token", session.token); }catch(e){}
+      }
+      this._applyAuthenticatedSession(session.user,session.personnel||null,false,session.token);
+      return;
+    }
+    this.setState({ authStatus:"anonymous", authUser:null, gateVerified:false, gateEmail:"", gateBusy:false },()=>this._renderGoogleButton());
+  }
+  _applyAuthenticatedSession(user, personnel, openWizard, token){
+    if(token){
+      this._authToken = token;
+      try{ sessionStorage.setItem("spu_auth_token", token); }catch(e){}
+    }
+    const email=String((user&&user.email)||"").trim().toLowerCase();
+    const role=String((user&&user.role)||"REQUESTER").toUpperCase();
+    const isAdmin=role==="ADMIN"||role==="EXECUTIVE";
+    const profile=personnel&&personnel.found!==false?personnel:{};
+    const name=String(profile.name||(user&&user.name)||"");
+    const unit=String(profile.unit||"");
+    this._bumpChatEpoch();
+    this.setState({
+      authStatus:"authenticated", authUser:{ ...(user||{}), email, role }, authError:"", gateBusy:false, gateErr:false, gateMsg:"",
+      gateVerified:!isAdmin, gateEmail:email, gateOpen:false,
+      isAdminLoggedIn:isAdmin,
+      adminUserObj:isAdmin?{ name:name||email, email, role }:null,
+      role:isAdmin?(role==="EXECUTIVE"?"EXEC":"ADMIN"):"REQ",
+      page:isAdmin?(role==="EXECUTIVE"?"dash":"queue"):(openWizard?"wizard":"landing"),
+      form:isAdmin?this.state.form:{ ...this.state.form, name, unit },
+      mineSelectedEmail:isAdmin?this.state.mineSelectedEmail:email,
+      mineEmailInput:isAdmin?this.state.mineEmailInput:email,
+      chatThreads:[], chatMessages:[], chatSelectedJobNo:"", chatTotalUnread:0, chatUnreadByJob:{},
+      chatDraft:"", chatDraftFiles:[], chatPendingClientId:"", chatUploadedFileIds:[],
+      chatLoading:false, chatMessagesLoading:false, chatSending:false, chatFilesReading:0, chatHistoryCursor:null, chatHasOlder:false, chatOlderLoading:false
+    },()=>{ this._loadLiveJobs(); this._loadPriceRules(); this._loadChatUnreadCounts(true); });
+  }
+  _renderGoogleButton(){
+    if(this.state.gateVerified||!this.state.gateOpen||!this.state.googleClientId) return;
+    const idApi=window.google&&window.google.accounts&&window.google.accounts.id;
+    const el=document.getElementById("spu-google-signin");
+    if(!idApi||!el){
+      clearTimeout(this._googleButtonTimer);
+      this._googleButtonTimer=setTimeout(()=>this._renderGoogleButton(),150);
+      return;
+    }
+    if(!this._googleCredentialCallback) this._googleCredentialCallback=response=>this._signInWithGoogle(response&&response.credential);
+    idApi.initialize({ client_id:this.state.googleClientId, callback:this._googleCredentialCallback, hd:this.state.authDomain, auto_select:false, cancel_on_tap_outside:true });
+    el.innerHTML="";
+    idApi.renderButton(el,{ theme:"outline", size:"large", type:"standard", shape:"pill", text:"continue_with", locale:this.state.lang==="th"?"th":"en", width:Math.min(360,Math.max(240,el.clientWidth||320)) });
+  }
+  async _signInWithGoogle(credential){
+    if(!credential||this.state.gateBusy) return;
+    this.setState({ gateBusy:true, gateErr:false, gateMsg:"", authError:"" });
+    const r=await this._authFetch("/auth/google",{ method:"POST", body:JSON.stringify({ credential }) });
+    if(r.ok&&r.user){
+      if(r.token){
+        this._authToken = r.token;
+        try{ sessionStorage.setItem("spu_auth_token", r.token); }catch(e){}
+      }
+      this._applyAuthenticatedSession(r.user,r.personnel||null,true,r.token);
+      return;
+    }
+    this.setState({ gateBusy:false, gateErr:true, gateMsg:(r&&r.message)||(r&&r.error)||"google_sign_in_failed", authStatus:"anonymous" },()=>this._renderGoogleButton());
+  }
+  _clearAuthenticatedState(){
+    this._authToken = null;
+    try{ sessionStorage.removeItem("spu_auth_token"); }catch(e){}
+    this._stopChatPolling();
+    this._bumpChatEpoch();
+    this.setState({
+      authStatus:"anonymous", authUser:null, authError:"", gateVerified:false, gateEmail:"", gateOpen:false, gateBusy:false, gateErr:false, gateMsg:"",
+      isAdminLoggedIn:false, adminLoginOpen:false, adminLoginBusy:false, adminLoginError:"", adminUserObj:null, role:"REQ", page:"landing",
+      adminEmailInput:"", adminPassInput:"",
+      svcGroup:null, sel:{}, prodColor:"bw", prodSize:"", prodPaperType:"", prodSides:"", prodOwnPaper:false,
+      prodQtyOrig:"", prodQtySets:"", staple:"", examType:"", examSubject:"", budget:"", budgetAcct:"", dupHasCover:false,
+      cardSides:"", cardQty:"", certLogo:"", certTrim:false, certQty:"", layoutColor:"", layoutPages:"",
+      a4PaperType:"", a4Qty:"", a3PaperType:"", a3Qty:"", a5Qty:"",
+      form:{ name:"", pos:"", unit:"", phone:"", needBy:"", purpose:"", note:"" },
+      submitted:false, submitBusy:false, submitSuccessPopup:false, submitError:null, newJobNo:"", tab:0, mf:0, pdpaConsent:false,
+      dpOpen:null, dpMonthNeed:null, needByISO:null, confirmPickupModalOpen:false, confirmPickupJobNo:"", confirmPickupBusy:false,
+      liveJobs:[], liveItems:[], jobsLoaded:false, jobsLoading:false, liveSyncError:null,
+      livePriceRules:[], priceRulesLoaded:false, priceRulesLoading:false, priceRulesError:null,
+      jobDetailOpen:false, jobDetailJobNo:null, jobDetailFiles:[], uploadedFiles:[], paymentSlipFiles:[],
+      mineEmailInput:"", mineSelectedEmail:"", mineSearchError:"", curNo:null,
+      chatThreads:[], chatMessages:[], chatSelectedJobNo:"", chatTotalUnread:0, chatUnreadByJob:{}, chatDraft:"", chatDraftFiles:[],
+      chatPendingClientId:"", chatUploadedFileIds:[], chatLoading:false, chatMessagesLoading:false, chatSending:false,
+      chatFilesReading:0, chatHistoryCursor:null, chatHasOlder:false, chatOlderLoading:false
     });
   }
+  async _signOut(){
+    const result=await this._authFetch("/auth/logout",{ method:"POST", body:"{}" });
+    if(!result.ok){
+      const message=this.state.lang==="th"
+        ?"ยังออกจากระบบไม่สำเร็จ เซสชันยังคงใช้งานอยู่ กรุณาตรวจการเชื่อมต่อแล้วลองอีกครั้ง"
+        :"Sign-out did not complete. Your session is still active. Check the connection and try again.";
+      this.setState({ authError:message });
+      alert(message);
+      return false;
+    }
+    if(window.google&&window.google.accounts&&window.google.accounts.id) window.google.accounts.id.disableAutoSelect();
+    this._clearAuthenticatedState();
+    return true;
+  }
+
+  // — Authenticated gateway to Google Apps Script —
   async _gasCall(action, extra){
-    const S=this.state;
-    if(!S.gasUrl) return { ok:false, error:"missing_url" };
-    try{
-      const res=await fetch(S.gasUrl,{ method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" },
-        body:JSON.stringify({ action, token:S.gasToken, spreadsheetId:S.spreadsheetId, folderId:S.folderId, ...extra }) });
-      return await res.json();
-    }catch(e){ return { ok:false, error:String((e&&e.message)||e) }; }
+    if(this.state.authStatus!=="authenticated") return { ok:false, error:"auth_required", httpStatus:401 };
+    const r=await this._authFetch("/api",{ method:"POST", body:JSON.stringify({ action, ...(extra||{}) }) });
+    if(r.httpStatus===401){ this._clearAuthenticatedState(); }
+    return r;
   }
 
   // — แชทติดตามงาน: หนึ่งห้องต่อหนึ่ง job_no —
@@ -3835,9 +3985,9 @@ class Component extends DCLogic {
       return { email:String(S.adminUserObj.email||"").trim().toLowerCase(), role:"EXECUTIVE", name:S.adminUserObj.name||"" };
     }
     return {
-      email:String(S.gateEmail||S.mineSelectedEmail||"").trim().toLowerCase(),
+      email:String((S.authUser&&S.authUser.email)||S.gateEmail||"").trim().toLowerCase(),
       role:"REQUESTER",
-      name:(S.form&&S.form.name)||""
+      name:(S.authUser&&S.authUser.name)||(S.form&&S.form.name)||""
     };
   }
   _chatClientId(){
@@ -3870,7 +4020,7 @@ class Component extends DCLogic {
     const actor=this._chatActor();
     if(!actor.email) return false;
     const epoch=this._chatEpoch||0, actorKey=this._chatActorKey(actor);
-    const r=await this._gasCall("getUnreadCounts", { email:actor.email, role:actor.role });
+    const r=await this._gasCall("getUnreadCounts");
     if(!this._isCurrentChatRequest(epoch,actorKey)) return false;
     if(!r||!r.ok){
       if(!silent) this.setState({ chatError:(r&&(r.message||r.error))||"chat_unread_load_failed" });
@@ -3892,7 +4042,7 @@ class Component extends DCLogic {
     const epoch=this._chatEpoch||0, actorKey=this._chatActorKey(actor);
     const requestId=(this._chatThreadRequestId||0)+1;
     this._chatThreadRequestId=requestId;
-    const r=await this._gasCall("listChatThreads", { email:actor.email, role:actor.role });
+    const r=await this._gasCall("listChatThreads");
     if(!this._isCurrentChatRequest(epoch,actorKey)||requestId!==this._chatThreadRequestId) return this.state.chatSelectedJobNo||"";
     if(!r||!r.ok||!Array.isArray(r.threads)){
       if(!silent) this.setState({ chatLoading:false, chatError:(r&&(r.message||r.error))||"chat_threads_load_failed" });
@@ -3950,7 +4100,7 @@ class Component extends DCLogic {
     const messageList=document.getElementById("spu-chat-message-list");
     const stickToBottom=!incremental||!messageList||(messageList.scrollHeight-messageList.scrollTop-messageList.clientHeight<72);
     if(!incremental) this.setState({ chatMessagesLoading:true, chatError:"" });
-    const payload={ jobNo:target, email:actor.email, role:actor.role, limit:100 };
+    const payload={ jobNo:target, limit:100 };
     if(incremental&&target===this.state.chatSelectedJobNo) payload.afterSequence=Number(this.state.chatLastSequence||0);
     const r=await this._gasCall("listMessages", payload);
     if(!this._isCurrentChatRequest(epoch,actorKey)||requestId!==this._chatMessageRequestId||target!==this.state.chatSelectedJobNo) return false;
@@ -3994,7 +4144,7 @@ class Component extends DCLogic {
     if(merged.length&&(unreadBeforeRead>0||hasNewMessageFromOther)&&(!incremental||stickToBottom)&&this.state.page==="chat"&&document.visibilityState!=="hidden"){
       const last=merged[merged.length-1];
       const marked=await this._gasCall("markChatRead", {
-        jobNo:target, email:actor.email, role:actor.role,
+        jobNo:target,
         lastReadMessageId:last.message_id||last.messageId||"",
         lastSequence
       });
@@ -4023,7 +4173,7 @@ class Component extends DCLogic {
     const before=document.getElementById("spu-chat-message-list");
     const oldHeight=before?before.scrollHeight:0, oldTop=before?before.scrollTop:0;
     this.setState({ chatOlderLoading:true });
-    const r=await this._gasCall("listMessages", { jobNo:target, email:actor.email, role:actor.role, cursor, limit:100 });
+    const r=await this._gasCall("listMessages", { jobNo:target, cursor, limit:100 });
     if(!this._isCurrentChatRequest(epoch,actorKey)||historyRequestId!==this._chatHistoryRequestId||target!==this.state.chatSelectedJobNo||cursor!==this.state.chatHistoryCursor) return false;
     if(!r||!r.ok||!Array.isArray(r.messages)){
       this.setState({ chatOlderLoading:false, chatError:(r&&(r.message||r.error))||"chat_history_load_failed" });
@@ -4163,7 +4313,7 @@ class Component extends DCLogic {
           this.setState({ chatWarning:(this.state.lang==="th"?"กำลังอัปโหลดไฟล์ ":"Uploading file ")+(i+1)+"/"+files.length+"…" });
           const uploaded=await this._gasCall("uploadFile", {
             jobNo, fileName:file.name, mimeType:file.mimeType, base64:file.base64,
-            category:"chat-attachments", email:actor.email, role:actor.role,
+            category:"chat-attachments",
             clientUploadId:file.id
           });
           if(!this._isCurrentChatRequest(epoch,actorKey)||jobNo!==String(this.state.chatSelectedJobNo||"")) return false;
@@ -4177,7 +4327,7 @@ class Component extends DCLogic {
         attachmentFileIds.push(fileId);
       }
       const r=await this._gasCall("sendMessage", {
-        jobNo, email:actor.email, role:actor.role, senderName:actor.name,
+        jobNo, senderName:actor.name,
         messageText:text, text, messageType:attachmentFileIds.length?(text?"text_with_attachments":"attachments"):"text",
         clientMessageId, attachmentFileIds
       });
@@ -4267,7 +4417,7 @@ class Component extends DCLogic {
   }
   async _loadLiveJobs(){
     const S=this.state;
-    if(!S.gasUrl||!S.spreadsheetId) return;
+    if(S.authStatus!=="authenticated") return;
     this.setState({ jobsLoading:true, liveSyncError:null });
     try{
       const r=await this._gasCall("listJobs");
@@ -4321,7 +4471,7 @@ class Component extends DCLogic {
   }
   async _loadPriceRules(){
     const S=this.state;
-    if(!S.gasUrl||!S.spreadsheetId) return;
+    if(S.authStatus!=="authenticated") return;
     this.setState({ priceRulesLoading:true, priceRulesError:null });
     try{
       const r=await this._gasCall("listPriceRules");
@@ -4365,13 +4515,10 @@ class Component extends DCLogic {
       liveJobs:st.liveJobs.map(j=>j.no===jobNo?{ ...j, status:nextStatus }:j)
     }));
     try{
-      await this._gasCall("updateStatus",{
-        jobNo, status:nextStatus,
-        by:this.state.lang==="th"?"เจ้าหน้าที่โรงพิมพ์":"Print shop staff",
-        channel:"web"
-      });
+      const r=await this._gasCall("updateStatus",{ jobNo, status:nextStatus });
+      if(!r||!r.ok) throw new Error((r&&(r.message||r.error))||"status_update_failed");
       await this._loadLiveJobs();
-    }catch(e){}
+    }catch(e){ await this._loadLiveJobs(); }
   }
   async _userConfirmServiceDone(jobNo){
     const targetNo=String(jobNo||this.state.confirmPickupJobNo||this.state.curNo||"").trim();
@@ -4381,15 +4528,8 @@ class Component extends DCLogic {
       liveJobs:st.liveJobs.map(j=>j.no===targetNo?{ ...j, status:"SERVICE_DONE" }:j)
     }));
     try{
-      const actor=this._chatActor();
-      const byName=actor.name||actor.email||(this.state.lang==="th"?"ผู้ขอรับบริการ":"Requester");
-      await this._gasCall("updateStatus",{
-        jobNo:targetNo,
-        status:"SERVICE_DONE",
-        by:byName,
-        channel:"web",
-        note:this.state.lang==="th"?"ผู้ขอรับบริการกดยืนยันรับงานกลับเรียบร้อย":"Requester confirmed pickup"
-      });
+      const r=await this._gasCall("updateStatus",{ jobNo:targetNo, status:"SERVICE_DONE" });
+      if(!r||!r.ok) throw new Error((r&&(r.message||r.error))||"pickup_confirmation_failed");
       await this._loadLiveJobs();
       this._loadChatThreads(true);
     }catch(e){
@@ -4419,6 +4559,11 @@ class Component extends DCLogic {
   go(page){
     return () => {
       const isExecUser = this.state.adminUserObj && this.state.adminUserObj.role === "EXECUTIVE";
+      const requesterPages = ["wizard", "mine", "track", "chat"];
+      if(requesterPages.includes(page) && !this.state.isAdminLoggedIn && !this.state.gateVerified){
+        this.setState({ page:"landing", gateOpen:true, gateErr:false, gateMsg:"" },()=>this._renderGoogleButton());
+        return;
+      }
       const adminOnlyPages = ["queue", "mobile", "price", "sheet", "settings"];
       if (isExecUser && adminOnlyPages.includes(page)) {
         return;
@@ -4473,60 +4618,35 @@ class Component extends DCLogic {
       this.setState({ adminLoginBusy: true, adminLoginError: "" });
 
       try {
-        let r = await this._gasCall("checkAdminUser", { email, password: pass });
-        // Fallback: If unknown_action occurs, it means the browser contacted an older deployment URL.
-        // Force retry directly using the updated active Web App URL:
-        const activeUrl = "https://script.google.com/macros/s/AKfycbyDJkm0wF4ZZlvZzJ__HWCKIdLgwSR3yCVfR6LKa2p6OWKe3LOgTsKIJHPSj9aiuDCY/exec";
-        if (r && (r.error === "unknown_action" || r.error === "missing_url")) {
-          this.setState({ gasUrl: activeUrl });
-          try {
-            const conf = JSON.parse(localStorage.getItem("spuGasConfig") || "{}");
-            conf.gasUrl = activeUrl;
-            localStorage.setItem("spuGasConfig", JSON.stringify(conf));
-          } catch(e){}
-          const res = await fetch(activeUrl, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({
-              action: "checkAdminUser",
-              token: S.gasToken || "6552b83f-9a7a-4dd1-8169-05193c6744e3",
-              spreadsheetId: S.spreadsheetId || "1g9ONmVUFDshwFFvqyktq-suYeIhKiW0vaER96dWs0Jk",
-              folderId: S.folderId || "1BeffHqNuomg8032AQF2S-WZGMamFac0V",
-              email,
-              password: pass
-            })
-          });
-          r = await res.json();
-        }
-
-        if (r && r.ok && r.isAdmin) {
-          const userRole = r.role || "ADMIN";
+        const r = await this._authFetch("/auth/admin", { method:"POST", body:JSON.stringify({ email, password:pass }) });
+        const signedInUser=(r&&r.user)||r||{};
+        if (r && r.ok && (signedInUser.role === "ADMIN" || signedInUser.role === "EXECUTIVE" || r.isAdmin)) {
+          if(r.token){
+            this._authToken = r.token;
+            try{ sessionStorage.setItem("spu_auth_token", r.token); }catch(e){}
+          }
+          const userRole = signedInUser.role || r.role || "ADMIN";
           const isExec = userRole === "EXECUTIVE";
           this._bumpChatEpoch();
           this.setState({
+            authStatus:"authenticated",
+            authUser:{ ...signedInUser, email:signedInUser.email||email, role:userRole },
             isAdminLoggedIn: true,
             adminLoginOpen: false,
             adminLoginBusy: false,
             adminEmailInput: "",
             adminPassInput: "",
             adminLoginError: "",
-            adminUserObj: { name: r.name || email, email: r.email || email, role: userRole },
+            adminUserObj: { name: signedInUser.name || email, email: signedInUser.email || email, role: userRole },
             role: isExec ? "EXEC" : "ADMIN",
             page: isExec ? "dash" : "queue",
             chatThreads:[], chatMessages:[], chatSelectedJobNo:"", chatTotalUnread:0, chatUnreadByJob:{},
             chatDraft:"", chatDraftFiles:[], chatPendingClientId:"", chatUploadedFileIds:[],
             chatLoading:false, chatMessagesLoading:false, chatSending:false, chatFilesReading:0, chatHistoryCursor:null, chatHasOlder:false, chatOlderLoading:false
-          },()=>this._loadChatUnreadCounts(true));
+          },()=>{ this._loadLiveJobs(); this._loadPriceRules(); this._loadChatUnreadCounts(true); });
           return;
         } else {
-          let errMsg = (r && r.message) || "";
-          if (r && r.error === "unknown_action") {
-            errMsg = S.lang === "th"
-              ? "URL Apps Script ปัจจุบันยังไม่รองรับระบบตรวจสอบสิทธิ์ (กรุณารีเฟรชหน้าเว็บ หรือนำ Code.gs ไป Deploy เวอร์ชันใหม่)"
-              : "Apps Script lacks checkAdminUser action (Please refresh or deploy a new version in Apps Script).";
-          } else if (!errMsg) {
-            errMsg = (r && r.error) || (S.lang === "th" ? "รหัสผ่านไม่ถูกต้อง หรือไม่พบสิทธิ์แอดมินใน Google Sheet" : "Invalid password or lacks admin role in Google Sheet");
-          }
+          const errMsg = (r && (r.message||r.error)) || (S.lang === "th" ? "รหัสผ่านไม่ถูกต้อง หรือไม่พบสิทธิ์แอดมินใน Google Sheet" : "Invalid password or lacks admin role in Google Sheet");
           this.setState({ adminLoginBusy: false, adminLoginError: errMsg });
           return;
         }
@@ -4538,24 +4658,7 @@ class Component extends DCLogic {
       }
     };
 
-    const adminLogout = () => {
-      this._stopChatPolling();
-      this._bumpChatEpoch();
-      this.setState({
-        isAdminLoggedIn: false,
-        adminLoginOpen: false,
-        adminEmailInput: "",
-        adminPassInput: "",
-        adminLoginError: "",
-        adminLoginBusy: false,
-        adminUserObj: null,
-        role: "REQ",
-        page: "landing",
-        chatThreads:[], chatMessages:[], chatSelectedJobNo:"", chatTotalUnread:0, chatUnreadByJob:{},
-        chatDraft:"", chatDraftFiles:[], chatPendingClientId:"", chatUploadedFileIds:[],
-        chatLoading:false, chatMessagesLoading:false, chatSending:false, chatFilesReading:0, chatHistoryCursor:null, chatHasOlder:false, chatOlderLoading:false
-      });
-    };
+    const adminLogout = () => this._signOut();
 
     // Role buttons: Only accessible when logged in
     const isExecUser = S.adminUserObj && S.adminUserObj.role === "EXECUTIVE";
@@ -4595,7 +4698,7 @@ class Component extends DCLogic {
     }
     // แสดง 3 เมนู แบบฟอร์มบริการ/งานของฉัน/ติดตามสถานะ ก็ต่อเมื่อกด "ขอรับบริการ" ผ่านด้วยอีเมล @spu.ac.th สำเร็จแล้วเท่านั้น
     // (เช็คจาก flag ที่ตั้งตอนกดปุ่มสำเร็จ ไม่ใช่เช็คจากค่าที่พิมพ์ในช่องอีเมลสด ๆ — กันเมนูโผล่ก่อนกดปุ่ม)
-    const gateVerified = !!S.gateVerified;
+    const gateVerified = !!(S.gateVerified||S.isAdminLoggedIn);
     const chatTabLabel=((t&&t.tabChat)||(S.lang==="th"?"แชทติดตาม":"Job chat"))+(S.chatTotalUnread>0?" ("+S.chatTotalUnread+")":"");
     const tabDefs = {
       REQ: gateVerified
@@ -4609,35 +4712,10 @@ class Component extends DCLogic {
       bd: S.page === k ? AC : "transparent", fg: S.page === k ? "var(--color-accent-700)" : N7, fw: S.page === k ? "700" : "500"
     }));
 
-    // — email gate (landing) —
-    const openGate=()=>this.setState({ gateOpen:true, gateErr:false, gateMsg:"" });
-    const setGateEmail=e=>this.setState({ gateEmail:e.target.value, gateErr:false });
-    const submitGate=async()=>{
-      const email=S.gateEmail.trim().toLowerCase();
-      if(!email.endsWith("@spu.ac.th")){ this.setState({ gateErr:true, gateMsg:"" }); return; }
-      if(S.gateBusy) return;
-      this.setState({ gateBusy:true, gateErr:false, gateMsg:"" });
-
-      // 1) ลองเทียบกับทะเบียนบุคลากรจริงใน Google Sheet (แท็บ Personnel_Information) ก่อน
-      let name="", pos="", unit="", phone="";
-      if(S.gasUrl && S.gasToken && S.spreadsheetId){
-        const r=await this._gasCall("lookupPersonnel", { email });
-        if(r && r.ok && r.found){ name=r.name||""; unit=r.unit||""; }
-      }
-      // 2) ถ้ายังไม่เจอ (หรือยังไม่ได้ตั้งค่าเชื่อมต่อ) ใช้รายชื่อตัวอย่างสำรองไว้ทดสอบ
-      if(!name){
-        const prof=d.SAMPLE_USERS[email];
-        if(prof){ name=S.lang==="th"?prof.nameTh:prof.nameEn; pos=S.lang==="th"?prof.posTh:prof.posEn;
-          unit=S.lang==="th"?prof.unitTh:prof.unitEn; phone=prof.phone; }
-      }
-      this._bumpChatEpoch();
-      this.setState({ form:{ name, pos, unit, phone, needBy:"", purpose:"", note:"" },
-        page:"wizard", gateOpen:false, gateErr:false, gateVerified:true, gateBusy:false,
-        mineSelectedEmail:email, mineEmailInput:email,
-        chatThreads:[], chatMessages:[], chatSelectedJobNo:"", chatTotalUnread:0, chatUnreadByJob:{},
-        chatDraft:"", chatDraftFiles:[], chatPendingClientId:"", chatUploadedFileIds:[],
-        chatLoading:false, chatMessagesLoading:false, chatSending:false, chatFilesReading:0, chatHistoryCursor:null, chatHasOlder:false, chatOlderLoading:false
-      },()=>this._loadChatUnreadCounts(true));
+    // — requester Google Workspace sign-in gate —
+    const openGate=()=>{
+      if(S.gateVerified){ this.setState({ page:"wizard" }); return; }
+      this.setState({ gateOpen:true, gateErr:S.authStatus==="error", gateMsg:S.authError||"" },()=>this._renderGoogleButton());
     };
 
     // — wizard: service group + item selection —
@@ -4923,8 +5001,7 @@ class Component extends DCLogic {
         .map(r => ({ itemId:r.itemId, amount:Number(r.value) }));
       if (!items.length) { this.setState({ confErr:S.lang==="th"?"กรุณากรอกราคายืนยันอย่างน้อย 1 รายการ":"Enter at least one confirmed amount." }); return; }
       this.setState({ confBusy:true, confErr:"", confMsg:"" });
-      const r = await this._gasCall("setConfirmedAmount", { jobNo:jobDetail.no, items,
-        reason:S.confReason||"", by:(S.adminUserObj&&S.adminUserObj.email)||"" });
+      const r = await this._gasCall("setConfirmedAmount", { jobNo:jobDetail.no, items, reason:S.confReason||"" });
       if (r && r.ok) {
         this.setState({ confBusy:false, confAmt:{}, confReason:"",
           confMsg:(S.lang==="th"?"บันทึกราคายืนยันแล้ว รวม ":"Saved. Total ")+this.N(r.jobTotal) });
@@ -5751,20 +5828,7 @@ class Component extends DCLogic {
       "Set the spreadsheet timezone to Asia/Bangkok to match what the system writes."
     ]).map(text=>({ text }));
 
-    // — Google Apps Script connection: real config + live test results —
-    // ผู้ใช้มักวาง ID มาทั้งลิงก์ หรือ "ID/edit?gid=..." ต่อท้าย — ตัดส่วนเกินออกให้อัตโนมัติ
-    const cleanGasId=(v,isFolder)=>{
-      let s=String(v||"").trim();
-      const m=isFolder?s.match(/\/folders\/([a-zA-Z0-9_-]+)/):s.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
-      if(m) return m[1];
-      s=s.split("?")[0].split("#")[0];
-      const slash=s.indexOf("/");
-      return slash===-1?s:s.slice(0,slash);
-    };
-    const setGasUrl=e=>this._saveGasConfig({ gasUrl:e.target.value.trim() });
-    const setGasToken=e=>this._saveGasConfig({ gasToken:e.target.value.trim() });
-    const setSpreadsheetId=e=>this._saveGasConfig({ spreadsheetId:cleanGasId(e.target.value,false) });
-    const setFolderId=e=>this._saveGasConfig({ folderId:cleanGasId(e.target.value,true) });
+    // — Server-side connection status. IDs and secrets are intentionally unavailable to the browser. —
     const testSheetConn=()=>this._runConnTest("sheet","testSheet");
     const testDriveConn=()=>this._runConnTest("drive","testDrive");
     const testAccessConn=()=>this._runConnTest("access","testAccess");
@@ -5777,10 +5841,10 @@ class Component extends DCLogic {
     const settingGroups=[
       { no:"01", title:t.gSheetTitle, action:S.connBusy.sheet?t.btnTesting:t.setTest, testDisabled:S.connBusy.sheet, test:testSheetConn,
         resultText:resultLine(S.connResults.sheet), resultColor:resultColor(S.connResults.sheet),
-        openDisabled:!S.spreadsheetId, openIn:()=>{ if(S.spreadsheetId) window.open("https://docs.google.com/spreadsheets/d/"+S.spreadsheetId+"/edit","_blank"); },
+        openDisabled:true, openIn:()=>{},
         fields:[
-          { label:t.gasSheetIdLabel, value:S.spreadsheetId, ro:false, bg:"#fff", onChange:setSpreadsheetId,
-            hint:S.lang==="th"?"อยู่ใน URL ของชีต ระหว่าง /d/ และ /edit":"From the sheet URL, between /d/ and /edit" },
+          { label:t.gasSheetIdLabel, value:S.lang==="th"?"จัดเก็บใน Apps Script Properties":"Stored in Apps Script Properties", ro:true, bg:N2, onChange:()=>{},
+            hint:S.lang==="th"?"ตั้งค่าคีย์ SPREADSHEET_ID ที่ฝั่งเซิร์ฟเวอร์ ไม่ส่งมายังเบราว์เซอร์":"Set SPREADSHEET_ID server-side; it is never sent to the browser" },
           { label:S.lang==="th"?"ชื่อไฟล์ชีตที่ตรวจพบ":"Detected sheet name", value:(S.connResults.sheet&&S.connResults.sheet.name)||"—", ro:true, bg:N2, onChange:()=>{},
             hint:S.lang==="th"?"อัปเดตหลังทดสอบการเชื่อมต่อสำเร็จ":"Updates after a successful test" },
           { label:S.lang==="th"?"เขตเวลาและปีปฏิทิน":"Timezone & calendar", value:"Asia/Bangkok · พ.ศ.", ro:true, bg:N2, onChange:()=>{},
@@ -5788,10 +5852,10 @@ class Component extends DCLogic {
         ]},
       { no:"02", title:t.gDriveTitle, action:S.connBusy.drive?t.btnTesting:(S.lang==="th"?"ทดสอบเขียนไฟล์":"Test file write"), testDisabled:S.connBusy.drive, test:testDriveConn,
         resultText:resultLine(S.connResults.drive), resultColor:resultColor(S.connResults.drive),
-        openDisabled:!S.folderId, openIn:()=>{ if(S.folderId) window.open("https://drive.google.com/drive/folders/"+S.folderId,"_blank"); },
+        openDisabled:true, openIn:()=>{},
         fields:[
-          { label:t.gasFolderIdLabel, value:S.folderId, ro:false, bg:"#fff", onChange:setFolderId,
-            hint:S.lang==="th"?"อยู่ใน URL ของโฟลเดอร์ หลัง /folders/":"From the folder URL, after /folders/" },
+          { label:t.gasFolderIdLabel, value:S.lang==="th"?"จัดเก็บใน Apps Script Properties":"Stored in Apps Script Properties", ro:true, bg:N2, onChange:()=>{},
+            hint:S.lang==="th"?"ตั้งค่าคีย์ FOLDER_ID ที่ฝั่งเซิร์ฟเวอร์ ไม่ส่งมายังเบราว์เซอร์":"Set FOLDER_ID server-side; it is never sent to the browser" },
           { label:S.lang==="th"?"ประเภทไดรฟ์":"Drive type", value:S.lang==="th"?"Shared Drive (แนะนำ)":"Shared Drive (recommended)", ro:true, bg:N2, onChange:()=>{},
             hint:S.lang==="th"?"เพื่อให้ไฟล์ไม่ผูกกับบัญชีบุคคล":"So files are not owned by one person" },
           { label:S.lang==="th"?"ขนาดไฟล์ที่อนุญาต":"Allowed file size", value:"10 MB × 10", ro:true, bg:N2, onChange:()=>{},
@@ -5822,13 +5886,13 @@ class Component extends DCLogic {
       ["01","สร้างสเปรดชีตเดียว","สร้างแท็บตามหน้าโครงสร้างชีต วางหัวตารางแถวที่ 1 ให้ตรงชื่อคอลัมน์"],
       ["02","สร้างโฟลเดอร์แม่บน Drive","แนะนำ Shared Drive ชื่อ Printing-Service แล้วคัดลอกรหัสจาก URL"],
       ["03","แชร์ให้บัญชีระบบ","แชร์ทั้งชีตและโฟลเดอร์ให้บัญชีเชื่อมต่อเป็นผู้แก้ไข ห้ามตั้งเป็นสาธารณะ"],
-      ["04","กรอกรหัสในหน้านี้","วาง Spreadsheet ID และ Folder ID แล้วกดทดสอบการเชื่อมต่อ"],
+      ["04","ตั้งค่าฝั่งเซิร์ฟเวอร์","เก็บ Spreadsheet ID, Folder ID และ tokens ใน Script Properties / Gateway secrets"],
       ["05","ทดสอบส่งงานจริงหนึ่งงาน","ตรวจว่ามีแถวใหม่ใน JOBS มีโฟลเดอร์ใหม่บน Drive และมีอีเมลถึงผู้ขอ"]
     ]:[
       ["01","Create one spreadsheet","Add the tabs from the schema page and paste the row-1 headers exactly"],
       ["02","Create the parent Drive folder","A Shared Drive named Printing-Service is recommended; copy the id from the URL"],
       ["03","Share with the system account","Give the connecting account Editor on both; never make either public"],
-      ["04","Paste the ids here","Enter the spreadsheet and folder ids, then run the connection test"],
+      ["04","Configure the server","Keep Spreadsheet ID, Folder ID and tokens in Script Properties / Gateway secrets"],
       ["05","Send one real job","Check a new JOBS row, a new Drive folder and the email to the requester"]
     ]).map(([no,title,body])=>({ no, title, body }));
     const setRules=(S.lang==="th"?[
@@ -5875,7 +5939,7 @@ class Component extends DCLogic {
 
     // — ส่งคำขอจริง: เขียนแถวลง Google Sheet ผ่าน Apps Script —
     // (ทางเลือก A: เลิกส่งข้อความสรุปรวม "variant" — ส่งเป็นฟิลด์แยกแต่ละอย่างแทน ให้ตรงกับคอลัมน์แยกใน JOB_ITEMS)
-    const gasReady=!!(S.gasUrl&&S.gasToken&&S.spreadsheetId);
+    const gasReady=S.authStatus==="authenticated"&&!!S.authUser;
     const buildItemDetails=svcId=>{
       const det={ colorMode:"", paperSize:"", paperType:"", sides:"", staple:"", ownPaper:"", qtyOriginal:"", qtySets:"", examType:"", examSubject:"" };
       if(isProdGroup){
@@ -6014,7 +6078,7 @@ class Component extends DCLogic {
       const allPriced=items.length>0&&items.every(it=>it.estimatedAmount!=="");
       const jobEstimatedAmount=allPriced?String(Math.round(items.reduce((sum,it)=>sum+Number(it.estimatedAmount||0),0)*100)/100):"";
       const budgetSource=budgetSkipped?"internal":(budgetNeeded?S.budget:"");
-      const r=await this._gasCall("submitJob", { email:S.gateEmail, name:S.form.name, position:S.form.pos,
+      const r=await this._gasCall("submitJob", { name:S.form.name, position:S.form.pos,
         phone:S.form.phone, unit:S.form.unit, purpose:S.form.purpose, needBy:S.needByISO||"", items,
         estimatedAmount:jobEstimatedAmount,
         budgetSource, budgetAcct:(budgetNeeded&&S.budget==="personal")?S.budgetAcct:"" });
@@ -6035,8 +6099,7 @@ class Component extends DCLogic {
                 fileName: f.name,
                 mimeType: f.mimeType,
                 base64: f.base64,
-                category: "requester-files",
-                email: S.gateEmail
+                category: "requester-files"
               });
               if(upRes && upRes.ok) uploadedCount++;
             } catch(upErr) {
@@ -6059,8 +6122,7 @@ class Component extends DCLogic {
                 fileName: f.name,
                 mimeType: f.mimeType,
                 base64: f.base64,
-                category: "payment-slip",
-                email: S.gateEmail
+                category: "payment-slip"
               });
             } catch(upErr) {
               console.warn("Upload payment slip error:", upErr);
@@ -6107,7 +6169,7 @@ class Component extends DCLogic {
         this.setState({ reportEmailErr: t.reportEmailErrInvalid });
         return;
       }
-      if (!(S.gasUrl && S.gasToken && S.spreadsheetId)) {
+      if (S.authStatus!=="authenticated") {
         this.setState({ reportEmailErr: t.reportEmailErrNoGas });
         return;
       }
@@ -6130,8 +6192,11 @@ class Component extends DCLogic {
       isReport:S.page==="report", isSheet:S.page==="sheet", isSettings:S.page==="settings",
       goLanding:this.go("landing"), goWizard:this.go("wizard"), goMine:this.go("mine"), goTrack:this.go("track"),
       gateOpen:S.gateOpen, gateEmail:S.gateEmail, gateErr:S.gateErr, gateMsg:S.gateMsg,
-      openGate, setGateEmail, submitGate, gateBusy:S.gateBusy,
-      emailGateBtnLabel:S.gateBusy?(S.lang==="th"?"กำลังตรวจสอบ…":"Checking…"):t.emailGateBtn,
+      openGate, gateBusy:S.gateBusy||S.authStatus==="loading",
+      googleGateTitle:S.lang==="th"?"เข้าสู่ระบบด้วย Google Workspace":"Sign in with Google Workspace",
+      googleGateSub:S.lang==="th"?"ใช้บัญชี Google ของมหาวิทยาลัย @spu.ac.th ระบบจะยืนยันตัวตนกับ Google โดยไม่รับหรือจัดเก็บรหัสผ่านของคุณ":"Use your university @spu.ac.th Google account. This system never receives or stores your Google password.",
+      googleGateBusyText:S.lang==="th"?"กำลังยืนยันตัวตนกับ Google…":"Verifying your Google identity…",
+      gateErrorText:S.gateMsg||(S.lang==="th"?"เข้าสู่ระบบไม่สำเร็จ กรุณาใช้บัญชี @spu.ac.th แล้วลองอีกครั้ง":"Sign-in failed. Use an @spu.ac.th account and try again."),
       svcGroups, hasGroup, svcPickBd, svcPickBg, groupItems:groupItemsOut, isProdGroup,
       colorBg, colorFg, setColor, sizeOpts, sidesBg, sidesFg, setSides,
       prodPaperType:S.prodPaperType, setProdPaperType, prodPaperOpts,
@@ -6207,6 +6272,10 @@ class Component extends DCLogic {
       mineSearchError:S.mineSearchError,
       isAdminLoggedIn:S.isAdminLoggedIn,
       isNormalUser:!S.isAdminLoggedIn,
+      isRequesterLoggedIn:!!(S.gateVerified&&S.authUser&&!S.isAdminLoggedIn),
+      requesterIdentityLabel:(S.authUser&&((S.authUser.name||S.authUser.email)))||S.gateEmail||"",
+      requesterLogout:()=>this._signOut(),
+      requesterLogoutLabel:S.lang==="th"?"ออกจากระบบ":"Sign Out",
       adminLoginOpen:S.adminLoginOpen,
       adminEmailInput:S.adminEmailInput,
       setAdminEmailInput,
@@ -6389,7 +6458,6 @@ class Component extends DCLogic {
       flowSteps, sheetTabs, sheetCols, sheetRules,
       settingGroups, setupSteps, setRules, mapRows,
       connBg:connBgLive, connBorder:connBorderLive, connColor:connColorLive, connLabel:connLabelLive, connWhen:connWhenLive,
-      gasUrl:S.gasUrl, gasToken:S.gasToken, setGasUrl, setGasToken,
       testAllConn, testAllLabel:anyBusy?t.btnTesting:t.btnTestAll, testAllDisabled:anyBusy,
       hasNoJobs:jobsAll.length===0,
       hasNoMyCards:myCards.length===0,

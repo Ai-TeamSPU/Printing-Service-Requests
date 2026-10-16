@@ -9,7 +9,7 @@
 
 // ---------- โครงสร้างแท็บที่ระบบต้องใช้ (ต้องตรงกับ spu-data.js -> SHEET_TABS) ----------
 var SHEET_SCHEMA = {
-  JOBS: ["job_no","submitted_at","requester_email","requester_name","position_type","phone","unit_code","required_date","purpose","status","estimated_amount","confirmed_amount","completed_at","drive_folder_id","budget_source","budget_acct"],
+  JOBS: ["job_no","submitted_at","requester_email","requester_name","position_type","phone","unit_code","required_date","purpose","status","estimated_amount","confirmed_amount","completed_at","drive_folder_id","budget_source","budget_acct","requester_google_sub"],
   // variant_snapshot (คอลัมน์ D): เลิกเขียนค่าใหม่แล้ว (ทางเลือก A — เก็บคอลัมน์ไว้ ไม่ลบ ข้อมูลเก่าไม่หาย) ใช้คอลัมน์แยกท้ายแถวแทน
   JOB_ITEMS: ["item_id","job_no","service_code","variant_snapshot","quantity","unit","unit_price","estimated_amount","confirmed_amount","price_rule_id","price_rule_snapshot","override_reason","color_mode","paper_size","paper_type","sides","staple","own_paper","qty_original","qty_sets","exam_type","exam_subject","service_group","note"],
   PRICE_RULES: ["rule_id","service_code","condition","price_type","price","min_price","max_price","effective_from","effective_to","active","note"],
@@ -129,6 +129,7 @@ function listPriceRules_(p) {
 
 // เปิด/ปิดใช้งานกฎราคาหนึ่งแถว (คอลัมน์ active) — ใช้โดยสวิตช์เปิด/ปิดในหน้า "ตารางราคา"
 function togglePriceRule_(p) {
+  if (actorFrom_(p).role !== "ADMIN") return { ok:false, error:"not_admin" };
   var ss = openSheet_(p);
   var sh = ss.getSheetByName("PRICE_RULES");
   if (!sh) return { ok: false, error: "price_rules_sheet_not_found" };
@@ -149,7 +150,8 @@ function togglePriceRule_(p) {
 
 // ---------- จุดเข้า HTTP ----------
 function doGet(e) {
-  return handle_((e && e.parameter) || {});
+  // Never accept credentials/tokens in a URL where proxies and browser history may record them.
+  return json_({ ok:false, error:"post_required" });
 }
 function doPost(e) {
   var params = {};
@@ -166,6 +168,10 @@ function handle_(p) {
     var token = getToken_();
     if (!token || p.token !== token) {
       return json_({ ok: false, error: "unauthorized" });
+    }
+    if (GATEWAY_REQUIRED_ACTIONS_[p.action]) {
+      var gatewayAuth = gatewayAuthorized_(p);
+      if (!gatewayAuth.ok) return json_(gatewayAuth);
     }
     if (BULK_ACTIONS_[p.action]) {
       var ba = bulkAuthorized_(p);
@@ -206,14 +212,92 @@ function json_(obj) {
 }
 
 // ---------- ตั้งค่า / ยืนยันสิทธิ์ ----------
-// รหัสลับที่หน้าเว็บต้องส่งมาด้วยทุกคำขอ ตั้งค่าใน Project Settings > Script properties คีย์ CONNECT_TOKEN
+// รหัสลับที่ Auth Gateway ส่งมาด้วยทุกคำขอ ตั้งค่าใน Project Settings > Script properties คีย์ CONNECT_TOKEN
 function getToken_() {
   return PropertiesService.getScriptProperties().getProperty("CONNECT_TOKEN") || "";
 }
 
+// User-facing HTTP actions must arrive through auth-gateway. CONNECT_TOKEN alone is not identity.
+// AUTH_GATEWAY_TOKEN is a separate server-only secret and must never be put in index.html.
+function getGatewayToken_() {
+  return PropertiesService.getScriptProperties().getProperty("AUTH_GATEWAY_TOKEN") || "";
+}
+
+var GATEWAY_REQUIRED_ACTIONS_ = {
+  testSheet:true, testDrive:true, testAccess:true, submitJob:true, updateStatus:true,
+  uploadFile:true, listJobs:true, checkAdminUser:true, listUsers:true, sendReportEmail:true,
+  lookupPersonnel:true, listPriceRules:true, togglePriceRule:true, listFilesForJob:true,
+  setConfirmedAmount:true, listChatThreads:true, listMessages:true, sendMessage:true,
+  markChatRead:true, getUnreadCounts:true
+};
+
+var ACTION_ROLES_ = {
+  testSheet:{ADMIN:true}, testDrive:{ADMIN:true}, testAccess:{ADMIN:true},
+  submitJob:{REQUESTER:true,ADMIN:true}, updateStatus:{REQUESTER:true,ADMIN:true},
+  uploadFile:{REQUESTER:true,ADMIN:true}, listJobs:{REQUESTER:true,ADMIN:true,EXECUTIVE:true},
+  listUsers:{ADMIN:true}, sendReportEmail:{ADMIN:true,EXECUTIVE:true},
+  lookupPersonnel:{REQUESTER:true,ADMIN:true}, listPriceRules:{REQUESTER:true,ADMIN:true,EXECUTIVE:true},
+  togglePriceRule:{ADMIN:true}, listFilesForJob:{REQUESTER:true,ADMIN:true,EXECUTIVE:true},
+  setConfirmedAmount:{ADMIN:true}, listChatThreads:{REQUESTER:true,ADMIN:true,EXECUTIVE:true},
+  listMessages:{REQUESTER:true,ADMIN:true,EXECUTIVE:true}, sendMessage:{REQUESTER:true,ADMIN:true,EXECUTIVE:true},
+  markChatRead:{REQUESTER:true,ADMIN:true,EXECUTIVE:true}, getUnreadCounts:{REQUESTER:true,ADMIN:true,EXECUTIVE:true}
+};
+
+function normalizeActorRole_(raw) {
+  var role = String(raw || "").trim().toUpperCase();
+  if (role === "REQ" || role === "USER") role = "REQUESTER";
+  if (role === "EXEC") role = "EXECUTIVE";
+  return role;
+}
+
+function gatewayAuthorized_(p) {
+  var expected = getGatewayToken_();
+  if (!expected) return { ok:false, error:"gateway_token_not_set" };
+  if (String(p.gatewayToken || "") !== expected) return { ok:false, error:"gateway_unauthorized" };
+  // Admin credentials are verified by checkAdminUser_ before an application session exists.
+  if (p.action === "checkAdminUser") return { ok:true };
+  var email = String(p.actorEmail || "").trim().toLowerCase();
+  var role = normalizeActorRole_(p.actorRole);
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !role) return { ok:false, error:"actor_required" };
+  var allowed = ACTION_ROLES_[p.action];
+  if (!allowed || !allowed[role]) return { ok:false, error:"action_forbidden" };
+  p.authEmail = email;
+  p.authRole = role;
+  p.authSub = String(p.actorSub || "");
+  if (role === "REQUESTER" && !p.authSub) return { ok:false, error:"actor_sub_required" };
+  if (role === "ADMIN" || role === "EXECUTIVE") {
+    var staff = findActiveChatStaff_(openSheet_(p), email);
+    if (!staff || staff.role !== role) return { ok:false, error:"staff_session_revoked" };
+  }
+  // Compatibility aliases are assigned only after the server-only gateway secret and role ACL pass.
+  p.email = email; p.senderEmail = email; p.readerEmail = email;
+  p.role = role; p.senderRole = role; p.readerRole = role; p.by = email;
+  return { ok:true, actor:{ email:email, role:role, sub:p.authSub } };
+}
+
+function actorFrom_(p) {
+  return { email:String(p.authEmail || "").trim().toLowerCase(), role:normalizeActorRole_(p.authRole), sub:String(p.authSub || "") };
+}
+
+function actorOwnsJob_(actor, job) {
+  var ownerSub = String((job && (job.requesterSub || job.requester_google_sub)) || "");
+  if (ownerSub && actor.sub) return ownerSub === actor.sub;
+  return String((job && (job.requesterEmail || job.requester_email)) || "").trim().toLowerCase() === actor.email;
+}
+
+function limitedSheetText_(value, maxLength) {
+  return safeSheetText_(String(value == null ? "" : value).slice(0, maxLength));
+}
+
+function nonNegativeNumberOrBlank_(value) {
+  if (value === "" || value === null || value === undefined) return "";
+  var n = Number(value);
+  return isFinite(n) && n >= 0 ? n : "";
+}
+
 // โทเคนตัวที่ 2 สำหรับคำสั่งที่แก้ข้อมูลทีละหลายแถว (importJobs, patchJobDates)
 // ตั้งใน Project Settings > Script properties คีย์ ADMIN_TOKEN และ "ห้าม" ใส่ไว้ในหน้าเว็บเด็ดขาด
-// เพราะ CONNECT_TOKEN ฝังอยู่ใน index.html ใครเปิด View Source ก็เห็น จึงกันคำสั่งอันตรายไม่ได้
+// แยกจาก token ของ Gateway และเก็บไว้เฉพาะระบบหลังบ้าน ห้ามใส่ใน index.html หรือ auth-config.js
 function getAdminToken_() {
   return PropertiesService.getScriptProperties().getProperty("ADMIN_TOKEN") || "";
 }
@@ -242,12 +326,14 @@ function cleanId_(raw, isFolder) {
 }
 
 function openSheet_(p) {
-  if (!p.spreadsheetId) throw new Error("missing_spreadsheetId");
-  return SpreadsheetApp.openById(cleanId_(p.spreadsheetId, false));
+  var id = PropertiesService.getScriptProperties().getProperty("SPREADSHEET_ID") || "";
+  if (!id) throw new Error("missing_script_property_SPREADSHEET_ID");
+  return SpreadsheetApp.openById(cleanId_(id, false));
 }
 function openFolder_(p) {
-  if (!p.folderId) throw new Error("missing_folderId");
-  return DriveApp.getFolderById(cleanId_(p.folderId, true));
+  var id = PropertiesService.getScriptProperties().getProperty("FOLDER_ID") || "";
+  if (!id) throw new Error("missing_script_property_FOLDER_ID");
+  return DriveApp.getFolderById(cleanId_(id, true));
 }
 
 // ---------- ทดสอบการเชื่อมต่อ (ใช้โดยหน้า "ตั้งค่าเชื่อมต่อ") ----------
@@ -256,7 +342,7 @@ function testSheet_(p) {
   var names = ss.getSheets().map(function (s) { return s.getName(); });
   var missing = Object.keys(SHEET_SCHEMA).filter(function (n) { return names.indexOf(n) === -1; });
   var schemaErrors = [];
-  ["FILES", "JOB_MESSAGES", "CHAT_READS"].forEach(function (name) {
+  ["JOBS", "FILES", "JOB_MESSAGES", "CHAT_READS"].forEach(function (name) {
     var sh = ss.getSheetByName(name);
     if (!sh) return;
     var expected = SHEET_SCHEMA[name];
@@ -316,6 +402,10 @@ function logStatus_(ss, jobNo, oldStatus, newStatus, by, channel, note) {
 }
 
 function submitJob_(p) {
+  var actor = actorFrom_(p);
+  if (!actor.email || (actor.role !== "REQUESTER" && actor.role !== "ADMIN")) return { ok:false, error:"submit_forbidden" };
+  var incomingItems = Array.isArray(p.items) ? p.items : [];
+  if (!incomingItems.length || incomingItems.length > 50) return { ok:false, error:"invalid_items" };
   var ss = openSheet_(p);
   var jobsSh = ss.getSheetByName("JOBS");
   var itemsSh = ss.getSheetByName("JOB_ITEMS");
@@ -330,9 +420,9 @@ function submitJob_(p) {
     now = new Date();
     jobRow = jobsSh.getLastRow() + 1;
     jobsSh.appendRow([
-      jobNo, now, p.email || "", p.name || "", p.position || "", p.phone || "",
-      p.unit || "", p.needBy || "", p.purpose || "", "RECEIVED",
-      p.estimatedAmount || "", "", "", "", p.budgetSource || "", p.budgetAcct || ""
+      jobNo, now, actor.email, limitedSheetText_(p.name, 200), limitedSheetText_(p.position, 100), limitedSheetText_(p.phone, 50),
+      limitedSheetText_(p.unit, 200), limitedSheetText_(p.needBy, 30), limitedSheetText_(p.purpose, 2000), "RECEIVED",
+      nonNegativeNumberOrBlank_(p.estimatedAmount), "", "", "", limitedSheetText_(p.budgetSource, 50), limitedSheetText_(p.budgetAcct, 100), actor.sub || ""
     ]);
   } finally {
     lock.releaseLock();
@@ -341,7 +431,7 @@ function submitJob_(p) {
   // สร้างโฟลเดอร์งานบน Drive แบบ "ทำได้ก็ทำ" — ถ้ายังไม่ได้ตั้งค่า Drive (ไม่มี folderId) หรือเขียนไม่ได้
   // ให้ข้ามส่วนนี้ไป ไม่ทำให้การบันทึกแถวลง Sheet ล้มเหลวตามไปด้วย
   var jobFolderId = "";
-  if (p.folderId) {
+  if (PropertiesService.getScriptProperties().getProperty("FOLDER_ID")) {
     try {
       var folder = openFolder_(p);
       var jobFolder = findOrCreateFolder_(folder, jobNo);
@@ -356,20 +446,20 @@ function submitJob_(p) {
     }
   }
 
-  (p.items || []).forEach(function (it, i) {
+  incomingItems.forEach(function (it, i) {
     itemsSh.appendRow([
-      jobNo + "-" + (i + 1), jobNo, it.serviceCode || "", "", // variant_snapshot: เลิกเขียนแล้ว (ทางเลือก A) ใช้คอลัมน์แยกด้านล่างแทน
-      it.qty || "", it.unit || "", it.unitPrice || "", it.estimatedAmount || "",
-      "", it.priceRuleId || "", it.priceRuleSnapshot || "", "",
-      it.colorMode || "", it.paperSize || "", it.paperType || "", it.sides || "",
-      it.staple || "", it.ownPaper || "", it.qtyOriginal || "", it.qtySets || "",
-      it.examType || "", it.examSubject || "", it.serviceGroup || "",
+      jobNo + "-" + (i + 1), jobNo, limitedSheetText_(it.serviceCode, 100), "", // variant_snapshot: เลิกเขียนแล้ว (ทางเลือก A) ใช้คอลัมน์แยกด้านล่างแทน
+      nonNegativeNumberOrBlank_(it.qty), limitedSheetText_(it.unit, 50), nonNegativeNumberOrBlank_(it.unitPrice), nonNegativeNumberOrBlank_(it.estimatedAmount),
+      "", limitedSheetText_(it.priceRuleId, 100), limitedSheetText_(it.priceRuleSnapshot, 1000), "",
+      limitedSheetText_(it.colorMode, 100), limitedSheetText_(it.paperSize, 50), limitedSheetText_(it.paperType, 200), limitedSheetText_(it.sides, 100),
+      limitedSheetText_(it.staple, 100), limitedSheetText_(it.ownPaper, 50), nonNegativeNumberOrBlank_(it.qtyOriginal), nonNegativeNumberOrBlank_(it.qtySets),
+      limitedSheetText_(it.examType, 100), limitedSheetText_(it.examSubject, 300), limitedSheetText_(it.serviceGroup, 100),
       // note: ประทับเวลาที่กดส่งคำขอ เฉพาะรายการที่ฝั่งเว็บสั่งมา (ตอนนี้คือข้อสอบแบบ "สอบนอกตาราง")
       // สร้างเวลาที่ฝั่งเซิร์ฟเวอร์ ไม่ใช่เอาจากเบราว์เซอร์ จะได้ตรงกับ submitted_at เสมอ
-      it.stampNote ? stampThai_(now) : (it.note || "")
+      it.stampNote ? stampThai_(now) : limitedSheetText_(it.note, 1000)
     ]);
   });
-  logStatus_(ss, jobNo, "", "RECEIVED", p.email || "system", "web", "ส่งคำขอใหม่ผ่านเว็บ");
+  logStatus_(ss, jobNo, "", "RECEIVED", actor.email, "web", "ส่งคำขอใหม่ผ่านเว็บ");
   return { ok: true, jobNo: jobNo, folderId: jobFolderId };
 }
 
@@ -385,13 +475,28 @@ function updateStatus_(p) {
       if (values[i][0] === p.jobNo) { rowIndex = i; break; }
     }
     if (rowIndex === -1) return { ok: false, error: "job_not_found" };
-    var old = values[rowIndex][9]; // column J = status
-    sh.getRange(rowIndex + 1, 10).setValue(p.status);
-    if (p.status === "SERVICE_DONE") sh.getRange(rowIndex + 1, 13).setValue(new Date()); // column M = completed_at
-    logStatus_(ss, p.jobNo, old, p.status, p.by || "", p.channel || "web", p.note || "");
+    var actor = actorFrom_(p);
+    var old = String(values[rowIndex][9] || ""); // column J = status
+    var next = String(p.status || "");
+    var headers = values[0] || [];
+    var subIndex = headers.indexOf("requester_google_sub");
+    var jobOwner = { requesterEmail:String(values[rowIndex][2] || "").trim().toLowerCase(), requesterSub:subIndex < 0 ? "" : String(values[rowIndex][subIndex] || "") };
+    var transitions = { RECEIVED:{IN_PRODUCTION:true}, IN_PRODUCTION:{PROD_DONE:true}, PROD_DONE:{SERVICE_DONE:true} };
+    if (actor.role === "REQUESTER") {
+      if (!actorOwnsJob_(actor, jobOwner)) return { ok:false, error:"job_forbidden" };
+      if (old !== "PROD_DONE" || next !== "SERVICE_DONE") return { ok:false, error:"status_transition_forbidden" };
+    } else if (actor.role === "ADMIN") {
+      if (!transitions[old] || !transitions[old][next]) return { ok:false, error:"status_transition_forbidden" };
+    } else {
+      return { ok:false, error:"status_forbidden" };
+    }
+    sh.getRange(rowIndex + 1, 10).setValue(next);
+    if (next === "SERVICE_DONE") sh.getRange(rowIndex + 1, 13).setValue(new Date()); // column M = completed_at
+    var auditNote = actor.role === "REQUESTER" ? "ผู้ขอรับบริการกดยืนยันรับงานกลับเรียบร้อย" : String(p.note || "");
+    logStatus_(ss, p.jobNo, old, next, actor.email, "web", auditNote);
     var chatMessageAppended = false, chatWarning = "";
-    if (String(old) !== String(p.status)) {
-      try { chatMessageAppended = appendStatusSystemMessage_(ss, p.jobNo, old, p.status); }
+    if (old !== next) {
+      try { chatMessageAppended = appendStatusSystemMessage_(ss, p.jobNo, old, next); }
       catch (chatErr) { chatWarning = "system_message_write_failed"; }
     }
     return { ok: true, chatMessageAppended: chatMessageAppended, chatWarning: chatWarning };
@@ -577,15 +682,16 @@ function makePasswordHash() {
 // เขียน confirmed_amount ลงทั้ง JOB_ITEMS (รายบรรทัด) และ JOBS (ยอดรวมของใบ) พร้อมเหตุผลใน override_reason
 // เงื่อนไข: ผู้บันทึกต้องเป็น ADMIN ที่ active อยู่ในแท็บ USERS และงานต้องถึงสถานะ "ผลิตเสร็จ" แล้ว
 //
-// ข้อจำกัดที่ต้องรู้: ตรวจได้แค่ว่า "อีเมลนี้เป็น ADMIN จริงหรือไม่" แต่ยืนยันไม่ได้ว่าคนส่งคำสั่งคือเจ้าของอีเมล
-// เพราะระบบยังไม่มีการยืนยันตัวตน (ข้อ 3 ในแผนพัฒนา ซึ่งตัดสินใจว่ายังไม่ทำ)
+// Auth Gateway ยืนยัน session ของเจ้าหน้าที่ก่อนส่ง actorEmail/actorRole มา และฟังก์ชันนี้ตรวจสิทธิ์ ADMIN ซ้ำกับแท็บ USERS
 function setConfirmedAmount_(p) {
   var ALLOWED_STATUS = { PROD_DONE: true, SERVICE_DONE: true };
   var lock = LockService.getScriptLock();
   lock.waitLock(30000);
   try {
     var ss = openSheet_(p);
-    var by = String(p.by || "").trim().toLowerCase();
+    var actor = actorFrom_(p);
+    if (actor.role !== "ADMIN") return { ok:false, error:"not_admin" };
+    var by = actor.email;
     if (!isActiveAdmin_(ss, by)) return { ok: false, error: "not_admin", message: "ต้องเป็นผู้ดูแลระบบ (ADMIN) เท่านั้นจึงจะยืนยันราคาได้" };
 
     // ต้องมีรายการที่ใช้ได้อย่างน้อย 1 รายการ ก่อนจะแตะข้อมูลใด ๆ
@@ -659,19 +765,56 @@ function isActiveAdmin_(ss, email) {
   return false;
 }
 
+function authorizeJobAccess_(ss, p, jobNo, allowExecutive) {
+  var actor = actorFrom_(p);
+  if (!actor.email) return { ok:false, error:"actor_required" };
+  var jobs = readChatJobs_(ss);
+  if (!jobs.ok) return jobs;
+  jobNo = String(jobNo || "").trim();
+  var job = jobs.byNo[jobNo];
+  if (!job) return { ok:false, error:"job_not_found" };
+  if (jobs.duplicates[jobNo]) return { ok:false, error:"duplicate_job_no" };
+  if (actor.role === "REQUESTER" && !actorOwnsJob_(actor, job)) return { ok:false, error:"job_forbidden" };
+  if (actor.role !== "REQUESTER" && actor.role !== "ADMIN" && !(allowExecutive && actor.role === "EXECUTIVE")) {
+    return { ok:false, error:"job_forbidden" };
+  }
+  return { ok:true, actor:actor, job:job, jobsData:jobs };
+}
+
 function uploadFile_(p) {
   if (String(p.category || "") === "chat-attachments") return uploadChatAttachment_(p);
-  var folder = openFolder_(p);
-  var jobFolder = findOrCreateFolder_(folder, p.jobNo);
-  var catFolder = findOrCreateFolder_(jobFolder, p.category || "requester-files");
-  var bytes = Utilities.base64Decode(p.base64);
-  var blob = Utilities.newBlob(bytes, p.mimeType || "application/octet-stream", p.fileName || "file");
-  var file = catFolder.createFile(blob);
   var ss = openSheet_(p);
-  ss.getSheetByName("FILES").appendRow([
-    file.getId(), p.jobNo, p.fileName || "", p.mimeType || "", bytes.length,
-    p.category || "requester-files", p.email || "", new Date(), file.getUrl()
-  ]);
+  var access = authorizeJobAccess_(ss, p, p.jobNo, false);
+  if (!access.ok) return access;
+  var category = String(p.category || "requester-files");
+  var requesterCategories = { "requester-files":true, "payment-slip":true };
+  var adminCategories = { "requester-files":true, "payment-slip":true, "admin-files":true, proof:true, final:true };
+  if (access.actor.role === "REQUESTER" ? !requesterCategories[category] : !adminCategories[category]) {
+    return { ok:false, error:"file_category_forbidden" };
+  }
+  var fileName = String(p.fileName || "file").trim();
+  if (!fileName || fileName.length > 255 || /[\\/\0]/.test(fileName)) return { ok:false, error:"invalid_file_name" };
+  var mimeType = String(p.mimeType || "application/octet-stream").split(";")[0].trim().toLowerCase();
+  if (/^(text\/html|application\/(javascript|x-javascript|x-msdownload))$/.test(mimeType)) return { ok:false, error:"unsupported_file_type" };
+  var bytes;
+  try { bytes = Utilities.base64Decode(String(p.base64 || "")); }
+  catch (err) { return { ok:false, error:"invalid_file_data" }; }
+  if (!bytes.length) return { ok:false, error:"empty_file" };
+  if (bytes.length > 20 * 1024 * 1024) return { ok:false, error:"file_too_large", maxBytes:20 * 1024 * 1024 };
+  var folder = openFolder_(p);
+  var jobFolder = findOrCreateFolder_(folder, String(p.jobNo));
+  var catFolder = findOrCreateFolder_(jobFolder, category);
+  var blob = Utilities.newBlob(bytes, mimeType, fileName);
+  var file = catFolder.createFile(blob);
+  try {
+    ss.getSheetByName("FILES").appendRow([
+      file.getId(), p.jobNo, safeSheetText_(fileName), mimeType, bytes.length,
+      category, access.actor.email, new Date(), file.getUrl(), ""
+    ]);
+  } catch (sheetErr) {
+    try { file.setTrashed(true); } catch (trashErr) {}
+    return { ok:false, error:"file_registry_write_failed" };
+  }
   return { ok: true, fileId: file.getId(), link: file.getUrl() };
 }
 
@@ -841,6 +984,7 @@ function findOrCreateFolder_(parent, name) {
 
 function listJobs_(p) {
   var ss = openSheet_(p);
+  var actor = actorFrom_(p);
   var sh = ss.getSheetByName("JOBS");
   var values = sh.getDataRange().getValues();
   var headers = values.shift();
@@ -849,6 +993,11 @@ function listJobs_(p) {
     headers.forEach(function (h, i) { o[h] = row[i]; });
     return o;
   });
+  if (actor.role === "REQUESTER") {
+    jobs = jobs.filter(function (job) {
+      return actorOwnsJob_(actor, job);
+    });
+  }
 
   // เรียงจากไอดีล่าสุดลงไปหาเก่าสุด เพื่อให้หน้า "คิวงาน" ขึ้นคำขอใหม่ล่าสุดไว้บนสุด
   // (ชีตเป็นแบบ append-only ลำดับแถวจึงเป็นเก่า->ใหม่ ถ้าไม่เรียงตรงนี้หน้าเว็บจะโชว์ใบที่เก่าที่สุดก่อน)
@@ -873,12 +1022,20 @@ function listJobs_(p) {
     });
   }
 
+  if (actor.role === "REQUESTER") {
+    var allowedJobNos = {};
+    jobs.forEach(function (job) { allowedJobNos[String(job.job_no || "")] = true; });
+    items = items.filter(function (item) { return !!allowedJobNos[String(item.job_no || "")]; });
+  }
+
   return { ok: true, jobs: jobs, items: items };
 }
 
 // อ่านไฟล์แนบทั้งหมดของงานหนึ่งใบจากแท็บ FILES (รวมสลิปการโอนเงิน category "payment-slip") — ใช้โดย popup รายละเอียดคำขอในหน้า "คิวงาน"
 function listFilesForJob_(p) {
   var ss = openSheet_(p);
+  var access = authorizeJobAccess_(ss, p, p.jobNo, true);
+  if (!access.ok) return access;
   var sh = ss.getSheetByName("FILES");
   if (!sh) return { ok: true, files: [] };
   var values = sh.getDataRange().getValues();
@@ -970,7 +1127,7 @@ function readChatJobs_(ss) {
   var values = sh.getDataRange().getValues();
   if (!values.length) return { ok: false, error: "jobs_schema_invalid" };
   var h = values[0];
-  var cNo = h.indexOf("job_no"), cEmail = h.indexOf("requester_email");
+  var cNo = h.indexOf("job_no"), cEmail = h.indexOf("requester_email"), cSub = h.indexOf("requester_google_sub");
   var cName = h.indexOf("requester_name"), cStatus = h.indexOf("status"), cSubmitted = h.indexOf("submitted_at");
   if (cNo < 0 || cEmail < 0) return { ok: false, error: "jobs_schema_invalid" };
   var rows = [], byNo = {}, duplicates = {};
@@ -980,6 +1137,7 @@ function readChatJobs_(ss) {
     var job = {
       jobNo: jobNo,
       requesterEmail: normalizeChatEmail_(values[i][cEmail]),
+      requesterSub: cSub < 0 ? "" : String(values[i][cSub] || ""),
       requesterName: cName < 0 ? "" : String(values[i][cName] || ""),
       status: cStatus < 0 ? "" : String(values[i][cStatus] || ""),
       submittedAt: cSubmitted < 0 ? "" : values[i][cSubmitted]
@@ -1011,11 +1169,12 @@ function findActiveChatStaff_(ss, email) {
 }
 
 function authorizeChat_(ss, p, jobNo, jobsData) {
-  var email = chatEmailFrom_(p);
+  var trustedActor = actorFrom_(p);
+  var email = trustedActor.email;
   if (!email) return { ok: false, error: "missing_email", message: "กรุณาระบุอีเมลผู้ใช้งาน" };
   if (!isValidChatEmail_(email)) return { ok: false, error: "invalid_email", message: "รูปแบบอีเมลไม่ถูกต้อง" };
 
-  var rawRole = p.role || p.senderRole || p.readerRole || "";
+  var rawRole = trustedActor.role;
   var roleHint = normalizeChatRole_(rawRole);
   if (rawRole && roleHint === null) return { ok: false, error: "invalid_role" };
   jobsData = jobsData || readChatJobs_(ss);
@@ -1030,10 +1189,10 @@ function authorizeChat_(ss, p, jobNo, jobsData) {
   }
 
   if (roleHint === "REQUESTER") {
-    if (job && job.requesterEmail !== email) return { ok: false, error: "job_forbidden" };
+    if (job && !actorOwnsJob_(trustedActor, job)) return { ok: false, error: "job_forbidden" };
     // A requester with no jobs may still open chat and receive an empty thread list.
     // Specific-job actions remain ownership checked above.
-    return { ok: true, actor: { email: email, role: "REQUESTER", name: job ? job.requesterName : "" }, job: job, jobsData: jobsData };
+    return { ok: true, actor: { email: email, role: "REQUESTER", sub:trustedActor.sub, name: job ? job.requesterName : "" }, job: job, jobsData: jobsData };
   }
 
   var staff = findActiveChatStaff_(ss, email);
@@ -1045,12 +1204,12 @@ function authorizeChat_(ss, p, jobNo, jobsData) {
   // If the caller omitted role, resolve it from the same existing sheets instead of trusting a client-side default.
   if (staff) return { ok: true, actor: staff, job: job, jobsData: jobsData };
   if (job) {
-    if (job.requesterEmail !== email) return { ok: false, error: "job_forbidden" };
-    return { ok: true, actor: { email: email, role: "REQUESTER", name: job.requesterName }, job: job, jobsData: jobsData };
+    if (!actorOwnsJob_(trustedActor, job)) return { ok: false, error: "job_forbidden" };
+    return { ok: true, actor: { email: email, role: "REQUESTER", sub:trustedActor.sub, name: job.requesterName }, job: job, jobsData: jobsData };
   }
   for (var j = 0; j < jobsData.rows.length; j++) {
-    if (jobsData.rows[j].requesterEmail === email) {
-      return { ok: true, actor: { email: email, role: "REQUESTER", name: "" }, job: null, jobsData: jobsData };
+    if (actorOwnsJob_(trustedActor, jobsData.rows[j])) {
+      return { ok: true, actor: { email: email, role: "REQUESTER", sub:trustedActor.sub, name: "" }, job: null, jobsData: jobsData };
     }
   }
   return { ok: false, error: "chat_forbidden" };
@@ -1266,7 +1425,7 @@ function listChatThreads_(p) {
     if (seen[job.jobNo]) continue;
     seen[job.jobNo] = true;
     if (jobsData.duplicates[job.jobNo]) return { ok: false, error: "duplicate_job_no", jobNo: job.jobNo };
-    if (actor.role === "REQUESTER" && job.requesterEmail !== actor.email) continue;
+    if (actor.role === "REQUESTER" && !actorOwnsJob_(actor, job)) continue;
     if (String(job.status || "").toUpperCase() === "SERVICE_DONE") continue;
     var messages = grouped[job.jobNo] || [];
     var latest = messages.length ? messages[messages.length - 1] : null;
@@ -1565,7 +1724,7 @@ function getUnreadCounts_(p) {
     if (seen[job.jobNo]) continue;
     seen[job.jobNo] = true;
     if (jobsData.duplicates[job.jobNo]) return { ok: false, error: "duplicate_job_no", jobNo: job.jobNo };
-    if (auth.actor.role === "REQUESTER" && job.requesterEmail !== auth.actor.email) continue;
+    if (auth.actor.role === "REQUESTER" && !actorOwnsJob_(auth.actor, job)) continue;
     if (String(job.status || "").toUpperCase() === "SERVICE_DONE") continue;
     if (wanted && !wanted[job.jobNo]) continue;
     var marker = reads.byKey[job.jobNo + "\n" + auth.actor.email] || null;
@@ -1661,15 +1820,13 @@ function checkAdminUser_(p) {
           break;
         }
       }
-      // ถ้ายังไม่มีแถว admin_password ใน SETTINGS ให้สร้างแถวเริ่มต้นให้อัตโนมัติ เพื่อให้ผู้ใช้เข้าไปดูและแก้ได้
-      if (!expectedPass) {
-        expectedPass = "admin1234";
-        settingsSh.appendRow(["admin_password", expectedPass, "system", new Date(), "รหัสผ่านสำหรับเข้าสู่ระบบแอดมินโรงพิมพ์ (สามารถเปลี่ยนรหัสได้ที่นี่)"]);
-      }
     }
   }
 
   // 5. ตรวจสอบรหัสผ่านที่ผู้ใช้ส่งมา
+  if (!expectedPass) {
+    return { ok:false, error:"password_not_configured", message:"บัญชีนี้ยังไม่ได้ตั้งรหัสผ่านในแท็บ USERS" };
+  }
   if (!expectedPass || !passwordMatches_(targetPass, expectedPass)) {
     return { ok: false, error: "invalid_password", message: "รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง" };
   }
@@ -1685,6 +1842,7 @@ function checkAdminUser_(p) {
 }
 
 function listUsers_(p) {
+  if (actorFrom_(p).role !== "ADMIN") return { ok:false, error:"not_admin" };
   var ss = openSheet_(p);
   var sh = ss.getSheetByName("USERS");
   if (!sh) return { ok: false, error: "users_sheet_not_found" };
@@ -1693,7 +1851,7 @@ function listUsers_(p) {
   var headers = values.shift();
   var users = values.map(function (row) {
     var o = {};
-    headers.forEach(function (h, i) { o[h] = row[i]; });
+    headers.forEach(function (h, i) { if (h !== "password") o[h] = row[i]; });
     return o;
   });
   return { ok: true, users: users };
@@ -1724,7 +1882,7 @@ function lookupPersonnel_(p) {
   var unitIdx = findColIdx_(headers, ["unit_name", "หน่วยงาน", "unit", "unit_code"]);
   if (emailIdx === -1) return { ok: false, error: "email_column_not_found", message: "ไม่พบคอลัมน์อีเมลในแท็บ " + PERSONNEL_SHEET_NAME };
 
-  var target = String(p.email || "").trim().toLowerCase();
+  var target = actorFrom_(p).email;
   if (!target) return { ok: true, found: false };
 
   for (var i = 0; i < values.length; i++) {
@@ -1760,6 +1918,8 @@ function authorizeMailSend() {
 }
 
 function sendReportEmail_(p) {
+  var actor = actorFrom_(p);
+  if (actor.role !== "ADMIN" && actor.role !== "EXECUTIVE") return { ok:false, error:"report_forbidden" };
   var to = String(p.to || "").trim();
   if (!to) return { ok: false, error: "missing_to", message: "กรุณากรอกอีเมลปลายทาง" };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {

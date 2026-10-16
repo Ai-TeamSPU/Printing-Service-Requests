@@ -25,3 +25,8 @@ Document/PASSWORD-AUTH-IMPLEMENTATION-PLAN.md
 Document/design-qa.md
 returned-completed-cards-design.html
 design-qa.md
+
+# Authentication gateway local/runtime secrets and dependencies
+auth-gateway/.env
+auth-gateway/node_modules/
+npm-debug.log*

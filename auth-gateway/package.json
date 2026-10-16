@@ -1,0 +1,21 @@
+{
+  "name": "spu-printing-auth-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Google Workspace authentication and authorization gateway for SPU Printing Service",
+  "main": "server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "start:local": "node --env-file=.env server.js",
+    "test": "node --test test/*.test.cjs",
+    "check": "node --check server.js && node --check lib/session.cjs && node --check lib/policy.cjs"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "google-auth-library": "^9.15.1"
+  }
+}
