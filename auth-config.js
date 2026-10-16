@@ -11,7 +11,8 @@
  */
 window.SPU_AUTH_CONFIG = Object.freeze({
   // สำหรับทดสอบในเครื่อง: ใช้ hostname เดียวกับที่หน้าเว็บเปิด (127.0.0.1 หรือ localhost) พอร์ต 8080
+  // สำหรับ Production (GitHub Pages): ชี้ไปที่ Render Gateway อัตโนมัติ
   apiBaseUrl: (typeof window !== "undefined" && window.location && (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"))
     ? "http://" + window.location.hostname + ":8080"
-    : "http://localhost:8080"
+    : "https://spu-printing-gateway.onrender.com"
 });
